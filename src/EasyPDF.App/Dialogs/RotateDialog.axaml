@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:EasyPDF.App.ViewModels"
+        xmlns:loc="using:EasyPDF.App.Localization"
+        x:Class="EasyPDF.App.Dialogs.RotateDialog" x:DataType="vm:RotateDialogViewModel"
+        Title="{loc:Tr RotateTitle}" Width="420" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" CanResize="False" ShowInTaskbar="False">
+  <StackPanel Margin="20" Spacing="14">
+    <StackPanel Spacing="6">
+      <TextBlock Text="{loc:Tr RotateDirection}" FontWeight="SemiBold" />
+      <RadioButton GroupName="Direction" Content="{loc:Tr RotateCw}" IsChecked="{Binding IsClockwise}" />
+      <RadioButton GroupName="Direction" Content="{loc:Tr RotateCcw}" IsChecked="{Binding IsCounterClockwise}" />
+      <RadioButton GroupName="Direction" Content="{loc:Tr Rotate180}" IsChecked="{Binding IsHalfTurn}" />
+    </StackPanel>
+    <StackPanel Spacing="6">
+      <TextBlock Text="{loc:Tr RotatePages}" FontWeight="SemiBold" />
+      <RadioButton GroupName="Scope" Content="{loc:Tr RotateScopeAll}" IsChecked="{Binding IsAll}" />
+      <RadioButton GroupName="Scope" Content="{Binding CurrentPageText}" IsChecked="{Binding IsCurrent}" />
+      <RadioButton GroupName="Scope" Content="{loc:Tr RotateScopeSelected}" IsChecked="{Binding IsSelected}" IsEnabled="{Binding CanSelectSelected}" />
+      <RadioButton GroupName="Scope" Content="{loc:Tr RotateScopeRange}" IsChecked="{Binding IsRangeScope}" />
+      <TextBox x:Name="RangeBox" Text="{Binding RangeText}" PlaceholderText="1-3, 5, 8-10" IsEnabled="{Binding IsRangeScope}" Margin="28,0,0,0" />
+      <TextBlock Text="{Binding ErrorText}" Foreground="Red" TextWrapping="Wrap" Margin="28,0,0,0" FontSize="12" />
+    </StackPanel>
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button x:Name="OkButton" MinWidth="80" HorizontalContentAlignment="Center" IsDefault="True" IsEnabled="{Binding IsValid}" Click="OnOk" Content="{loc:Tr Ok}" />
+      <Button MinWidth="80" HorizontalContentAlignment="Center" IsCancel="True" Click="OnCancel" Content="{loc:Tr Cancel}" />
+    </StackPanel>
+  </StackPanel>
+</Window>

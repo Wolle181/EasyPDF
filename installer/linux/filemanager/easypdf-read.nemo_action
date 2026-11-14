@@ -1,0 +1,7 @@
+[Nemo Action]
+Name=Read with @APPNAME@
+Comment=Open the PDFs in @APPNAME@, each in a window of its own
+Exec=@PACKAGE@ --read %F
+Icon-Name=@PACKAGE@
+Selection=notnone
+Extensions=pdf;

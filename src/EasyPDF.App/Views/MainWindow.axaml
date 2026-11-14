@@ -1,0 +1,325 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:EasyPDF.App.ViewModels"
+        xmlns:ctl="using:EasyPDF.App.Controls"
+        xmlns:rb="using:EasyPDF.App.Controls.Ribbon"
+        xmlns:loc="using:EasyPDF.App.Localization"
+        x:Class="EasyPDF.App.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="{Binding Title}" Width="1100" Height="700" MinWidth="700" MinHeight="400"
+        DragDrop.AllowDrop="True">
+  <DockPanel>
+    <NativeMenuBar x:Name="MenuBar" DockPanel.Dock="Top" />
+
+    <!-- Brand header: mark, product name and what it does; help and info on the right. Same primary colour as the tab band below, so both read as one block -->
+    <Border x:Name="BrandHeader" DockPanel.Dock="Top" Background="{DynamicResource Header.Background}" Padding="14,10,8,6">
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+        <Border x:Name="BrandMark" Width="42" Height="42" CornerRadius="8" BorderThickness="1.5"
+                BorderBrush="{DynamicResource Brand.Accent}" Background="{DynamicResource Header.MarkBackground}">
+          <Viewbox Width="26" Height="26">
+            <Grid Width="24" Height="24">
+              <Path Data="{StaticResource Icon.Concatenate}" Stroke="{DynamicResource Band.Foreground}" StrokeThickness="1.6"
+                    StrokeLineCap="Round" StrokeJoin="Round" />
+              <Path Data="{StaticResource Icon.Concatenate.Accent}" Stroke="{DynamicResource Brand.Accent}" StrokeThickness="1.8"
+                    StrokeLineCap="Round" />
+            </Grid>
+          </Viewbox>
+        </Border>
+        <!-- Instead of the mark when the program icon is made from a logo file (Styles/BrandLogo.cs, tools/icon/make_icon.py) -->
+        <Image x:Name="BrandLogoImage" Width="42" Height="42" IsVisible="False" RenderOptions.BitmapInterpolationMode="HighQuality" />
+        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+          <TextBlock x:Name="BrandTitle" Text="{loc:Tr AppName}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Band.Foreground}" />
+          <TextBlock x:Name="BrandSubtitle" Text="{loc:Tr BrandSubtitle}" FontSize="13" Foreground="{DynamicResource Header.Subtitle}"
+                     TextTrimming="CharacterEllipsis" />
+        </StackPanel>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Spacing="2">
+          <!-- Settings here too (not only on the View tab), so they are one click away whatever tab is open -->
+          <rb:RibbonButton x:Name="SettingsButton" Classes="band" Height="36" Width="36" IconSize="18" CircleSize="32"
+                           Icon="{StaticResource Icon.Settings}" IconAccent="{StaticResource Icon.Settings.Accent}" Command="{Binding ShowSettingsCommand}" ToolTip.Tip="{loc:Tr MenuSettings}" />
+          <!-- Only when the brand comes with an introduction video (videos/ next to the program) -->
+          <rb:RibbonButton x:Name="VideoButton" Classes="band" Height="36" Width="36" IconSize="18" CircleSize="32" IsVisible="{Binding HasIntroVideo}"
+                           Icon="{StaticResource Icon.Video}" IconAccent="{StaticResource Icon.Video.Accent}" Command="{Binding ShowIntroVideoCommand}" ToolTip.Tip="{loc:Tr MenuIntroVideo}" />
+          <rb:RibbonButton x:Name="GuideButton" Classes="band" Height="36" Width="36" IconSize="18" CircleSize="32"
+                           Icon="{StaticResource Icon.Help}" IconAccent="{StaticResource Icon.Help.Accent}" Command="{Binding ShowQuickGuideCommand}" ToolTip.Tip="{loc:Tr MenuQuickGuide}" />
+          <rb:RibbonButton x:Name="InfoButton" Classes="band" Height="36" Width="36" IconSize="18" CircleSize="32"
+                           Icon="{StaticResource Icon.Info}" IconAccent="{StaticResource Icon.Info.Accent}" Command="{Binding ShowAboutCommand}" ToolTip.Tip="{loc:Tr MenuAbout}" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- Primary band with the ribbon tabs; the white ribbon panel below it has its own background -->
+    <Grid DockPanel.Dock="Top" Background="{DynamicResource Band.Background}">
+      <rb:Ribbon x:Name="MainRibbon" IsCollapsed="{Binding IsRibbonCollapsed, Mode=TwoWay}">
+        <TabItem Classes="start" Header="{loc:Tr TabHome}">
+          <Border Classes="ribbonPanel start"><rb:RibbonGroupsPanel Height="106">
+            <rb:RibbonGroup Caption="{loc:Tr GroupFile}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton Classes="strong" IsLarge="True" Label="{loc:Tr BtnOpen}" Icon="{StaticResource Icon.Open}" IconAccent="{StaticResource Icon.Open.Accent}" Command="{Binding OpenCommand}" />
+                <rb:RibbonButton x:Name="RecentButton" Label="{loc:Tr BtnRecent}" Icon="{StaticResource Icon.Recent}" IconColor="{DynamicResource Icon.Color.Slate}" IconAccent="{StaticResource Icon.Recent.Accent}" />
+                <rb:RibbonButton Classes="signal" Label="{loc:Tr BtnSave}" Icon="{StaticResource Icon.Save}" IconAccent="{StaticResource Icon.Save.Accent}" Command="{Binding SaveCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnSaveAs}" Icon="{StaticResource Icon.SaveAs}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.SaveAs.Accent}" Command="{Binding SaveAsCommand}" />
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnPrint}" Icon="{StaticResource Icon.Print}" IconColor="{DynamicResource Icon.Color.Slate}" IconAccent="{StaticResource Icon.Print.Accent}" Command="{Binding PrintCommand}" />
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnSendByMail}" Icon="{StaticResource Icon.Mail}" IconColor="{DynamicResource Icon.Color.Amber}" IconAccent="{StaticResource Icon.Mail.Accent}" Command="{Binding SendByMailCommand}" />
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnReduceSize}" Icon="{StaticResource Icon.ReduceSize}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.ReduceSize.Accent}" Command="{Binding ReduceSizeCommand}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupCombine}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnConcatenate}" Icon="{StaticResource Icon.Concatenate}" IconColor="{DynamicResource Icon.Color.Violet}" IconAccent="{StaticResource Icon.Concatenate.Accent}" Command="{Binding ConcatenateCommand}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupPages}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton Label="{loc:Tr BtnInsertBefore}" Icon="{StaticResource Icon.InsertBefore}" IconColor="{DynamicResource Icon.Color.Green}" IconAccent="{StaticResource Icon.InsertBefore.Accent}" Command="{Binding InsertBeforeCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnInsertAfter}" Icon="{StaticResource Icon.InsertAfter}" IconColor="{DynamicResource Icon.Color.Green}" IconAccent="{StaticResource Icon.InsertAfter.Accent}" Command="{Binding InsertAfterCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnDelete}" Icon="{StaticResource Icon.Delete}" IconColor="{DynamicResource Icon.Color.Red}" IconAccent="{StaticResource Icon.Delete.Accent}" Command="{Binding DeletePagesCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnReplace}" Icon="{StaticResource Icon.Replace}" IconColor="{DynamicResource Icon.Color.Violet}" IconAccent="{StaticResource Icon.Replace.Accent}" Command="{Binding ReplacePagesCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnBlankBefore}" Icon="{StaticResource Icon.BlankPage}" IconColor="{DynamicResource Icon.Color.Green}" IconAccent="{StaticResource Icon.BlankPage.Accent}" Command="{Binding InsertBlankBeforeCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnBlankAfter}" Icon="{StaticResource Icon.BlankPage}" IconColor="{DynamicResource Icon.Color.Green}" IconAccent="{StaticResource Icon.BlankPage.Accent}" Command="{Binding InsertBlankAfterCommand}" />
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnRotate}" Icon="{StaticResource Icon.Rotate}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.Rotate.Accent}" Command="{Binding RotatePagesCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnRotateLeft}" Icon="{StaticResource Icon.RotateLeft}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.RotateLeft.Accent}" Command="{Binding RotateLeftCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnRotateRight}" Icon="{StaticResource Icon.RotateRight}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.RotateRight.Accent}" Command="{Binding RotateRightCommand}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupStamp}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton x:Name="StampButton" IsLarge="True" Label="{loc:Tr BtnStamp}" Icon="{StaticResource Icon.Stamp}" IconColor="{DynamicResource Icon.Color.Violet}" IconAccent="{StaticResource Icon.Stamp.Accent}"
+                                 IsEnabled="{Binding HasDocument}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupText}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnText}" Icon="{StaticResource Icon.Text}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.Text.Accent}" Command="{Binding SelectTextToolCommand}" IsActive="{Binding IsTextToolActive}" />
+                <rb:RibbonButton x:Name="TemplatesButton" IsLarge="True" Label="{loc:Tr BtnTemplates}" Icon="{StaticResource Icon.Templates}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.Templates.Accent}" IsEnabled="{Binding HasDocument}" />
+                <rb:RibbonButton x:Name="TextStyleButton" IsLarge="True" Label="{loc:Tr BtnTextStyle}" Icon="{StaticResource Icon.PenColor}" IconColor="{Binding TextBrush}" IconAccent="{StaticResource Icon.PenColor.Accent}" IsEnabled="{Binding HasDocument}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupRedact}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton x:Name="RedactButton" Label="{loc:Tr BtnRedact}" Icon="{StaticResource Icon.Redact}" IconColor="{DynamicResource Icon.Color.Slate}" IconAccent="{StaticResource Icon.Redact.Accent}" Command="{Binding RedactCommand}" IsActive="{Binding IsRedactToolActive}" />
+                <rb:RibbonButton x:Name="CoverButton" Label="{loc:Tr BtnCover}" Icon="{StaticResource Icon.Cover}" IconColor="{DynamicResource Icon.Color.Slate}" IconAccent="{StaticResource Icon.Cover.Accent}" Command="{Binding CoverCommand}" IsActive="{Binding IsCoverToolActive}" />
+                <rb:RibbonButton x:Name="CopyAreaButton" Label="{loc:Tr BtnCopyArea}" Icon="{StaticResource Icon.CopyArea}" IconColor="{DynamicResource Icon.Color.Violet}" IconAccent="{StaticResource Icon.CopyArea.Accent}" Command="{Binding ToggleCopyAreaToolCommand}" IsActive="{Binding IsCopyAreaToolActive}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupRecognize}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton x:Name="OcrButton" IsLarge="True" Label="{loc:Tr BtnRecognizeText}" Icon="{StaticResource Icon.Ocr}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.Ocr.Accent}" Command="{Binding RecognizeTextCommand}" />
+                <rb:RibbonButton x:Name="SelectTextButton" Label="{loc:Tr BtnSelectText}" Icon="{StaticResource Icon.SelectText}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.SelectText.Accent}" Command="{Binding ToggleSelectTextToolCommand}" IsActive="{Binding IsSelectTextToolActive}" />
+                <rb:RibbonButton Label="{loc:Tr BtnCopyText}" Icon="{StaticResource Icon.CopyText}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.CopyText.Accent}" Command="{Binding CopyTextCommand}" />
+                <rb:RibbonButton x:Name="FindButton" Label="{loc:Tr BtnFind}" Icon="{StaticResource Icon.Search}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.Search.Accent}" Command="{Binding ShowSearchCommand}" IsActive="{Binding IsSearchOpen}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupHistory}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton Label="{loc:Tr BtnUndo}" Icon="{StaticResource Icon.Undo}" IconColor="{DynamicResource Icon.Color.Slate}" IconAccent="{StaticResource Icon.Undo.Accent}" Command="{Binding UndoCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnRedo}" Icon="{StaticResource Icon.Redo}" IconColor="{DynamicResource Icon.Color.Slate}" IconAccent="{StaticResource Icon.Redo.Accent}" Command="{Binding RedoCommand}" />
+                <rb:RibbonButton x:Name="PasteAreaButton" Label="{loc:Tr BtnPasteArea}" Icon="{StaticResource Icon.PasteArea}" IconColor="{DynamicResource Icon.Color.Violet}" IconAccent="{StaticResource Icon.PasteArea.Accent}" Command="{Binding PasteAreaCommand}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+          </rb:RibbonGroupsPanel></Border>
+        </TabItem>
+        <TabItem Classes="organize" Header="{loc:Tr TabOrganize}">
+          <Border Classes="ribbonPanel organize"><rb:RibbonGroupsPanel Height="106">
+            <rb:RibbonGroup Caption="{loc:Tr GroupMode}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton Label="{loc:Tr BtnReadingMode}" Icon="{StaticResource Icon.Reading}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.Reading.Accent}" Command="{Binding ShowReadingCommand}" IsActive="{Binding IsReadingMode}" />
+                <rb:RibbonButton Label="{loc:Tr BtnOrganizeMode}" Icon="{StaticResource Icon.Organize}" IconColor="{DynamicResource Icon.Color.Green}" IconAccent="{StaticResource Icon.Organize.Accent}" Command="{Binding ShowOrganizeCommand}" IsActive="{Binding IsOrganizeMode}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupPages}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton Label="{loc:Tr BtnInsertBefore}" Icon="{StaticResource Icon.InsertBefore}" IconColor="{DynamicResource Icon.Color.Green}" IconAccent="{StaticResource Icon.InsertBefore.Accent}" Command="{Binding InsertBeforeCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnInsertAfter}" Icon="{StaticResource Icon.InsertAfter}" IconColor="{DynamicResource Icon.Color.Green}" IconAccent="{StaticResource Icon.InsertAfter.Accent}" Command="{Binding InsertAfterCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnDelete}" Icon="{StaticResource Icon.Delete}" IconColor="{DynamicResource Icon.Color.Red}" IconAccent="{StaticResource Icon.Delete.Accent}" Command="{Binding DeletePagesCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnReplace}" Icon="{StaticResource Icon.Replace}" IconColor="{DynamicResource Icon.Color.Violet}" IconAccent="{StaticResource Icon.Replace.Accent}" Command="{Binding ReplacePagesCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnBlankBefore}" Icon="{StaticResource Icon.BlankPage}" IconColor="{DynamicResource Icon.Color.Green}" IconAccent="{StaticResource Icon.BlankPage.Accent}" Command="{Binding InsertBlankBeforeCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnBlankAfter}" Icon="{StaticResource Icon.BlankPage}" IconColor="{DynamicResource Icon.Color.Green}" IconAccent="{StaticResource Icon.BlankPage.Accent}" Command="{Binding InsertBlankAfterCommand}" />
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnRotate}" Icon="{StaticResource Icon.Rotate}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.Rotate.Accent}" Command="{Binding RotatePagesCommand}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupCombine}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnConcatenate}" Icon="{StaticResource Icon.Concatenate}" IconColor="{DynamicResource Icon.Color.Violet}" IconAccent="{StaticResource Icon.Concatenate.Accent}" Command="{Binding ConcatenateCommand}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupOutput}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnExtract}" Icon="{StaticResource Icon.Extract}" IconColor="{DynamicResource Icon.Color.Amber}" IconAccent="{StaticResource Icon.Extract.Accent}" Command="{Binding ExtractPagesCommand}" />
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnSplit}" Icon="{StaticResource Icon.Split}" IconColor="{DynamicResource Icon.Color.Amber}" IconAccent="{StaticResource Icon.Split.Accent}" Command="{Binding SplitDocumentCommand}" />
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnReduceSize}" Icon="{StaticResource Icon.ReduceSize}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.ReduceSize.Accent}" Command="{Binding ReduceSizeCommand}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupRecognize}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnRecognizeText}" Icon="{StaticResource Icon.Ocr}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.Ocr.Accent}" Command="{Binding RecognizeTextCommand}" />
+                <rb:RibbonButton x:Name="CopyTextButton" Label="{loc:Tr BtnCopyText}" Icon="{StaticResource Icon.CopyText}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.CopyText.Accent}" Command="{Binding CopyTextCommand}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupSelection}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnSelectAll}" Icon="{StaticResource Icon.SelectAll}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.SelectAll.Accent}" Command="{Binding SelectAllCommand}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+          </rb:RibbonGroupsPanel></Border>
+        </TabItem>
+        <TabItem Classes="view" Header="{loc:Tr TabView}">
+          <Border Classes="ribbonPanel view"><rb:RibbonGroupsPanel Height="106">
+            <rb:RibbonGroup Caption="{loc:Tr GroupNavigation}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton Label="{loc:Tr BtnFirstPage}" Icon="{StaticResource Icon.FirstPage}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.FirstPage.Accent}" Command="{Binding GoToFirstPageCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnLastPage}" Icon="{StaticResource Icon.LastPage}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.LastPage.Accent}" Command="{Binding GoToLastPageCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnGoToPage}" Icon="{StaticResource Icon.GoToPage}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.GoToPage.Accent}" Command="{Binding ShowGoToPageCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnFind}" Icon="{StaticResource Icon.Search}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.Search.Accent}" Command="{Binding ShowSearchCommand}" IsActive="{Binding IsSearchOpen}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupZoom}">
+              <rb:RibbonGroupPanel ColumnSpacing="6">
+                <rb:RibbonButton Label="{loc:Tr BtnFitHeight}" Icon="{StaticResource Icon.FitHeight}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.FitHeight.Accent}" Command="{Binding FitHeightCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnFitWidth}" Icon="{StaticResource Icon.FitWidth}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.FitWidth.Accent}" Command="{Binding FitWidthCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnFitBest}" Icon="{StaticResource Icon.FitPage}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.FitPage.Accent}" Command="{Binding FitBestCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnZoomIn}" Icon="{StaticResource Icon.ZoomIn}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.ZoomIn.Accent}" Command="{Binding ZoomInCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnZoomOut}" Icon="{StaticResource Icon.ZoomOut}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.ZoomOut.Accent}" Command="{Binding ZoomOutCommand}" />
+                <StackPanel Orientation="Horizontal" Spacing="4" Margin="6,2">
+                  <TextBox x:Name="ZoomBox" Width="64" MinHeight="26" Padding="6,2" Text="{Binding ZoomInput, Mode=TwoWay}" HorizontalContentAlignment="Right"
+                           IsEnabled="{Binding HasDocument}">
+                    <TextBox.KeyBindings>
+                      <KeyBinding Gesture="Enter" Command="{Binding ApplyZoomInputCommand}" />
+                    </TextBox.KeyBindings>
+                  </TextBox>
+                  <TextBlock Text="%" VerticalAlignment="Center" />
+                  <rb:RibbonButton Label="{loc:Tr BtnActualSize}" Command="{Binding ActualSizeCommand}" />
+                </StackPanel>
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupPanels}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnPageSidebar}" Icon="{StaticResource Icon.Sidebar}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.Sidebar.Accent}"
+                                 Command="{Binding TogglePageSidebarCommand}" IsActive="{Binding IsPageSidebarVisible}" />
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnCollapseRibbon}" Icon="{StaticResource Icon.CollapseRibbon}" IconColor="{DynamicResource Icon.Color.Slate}" IconAccent="{StaticResource Icon.CollapseRibbon.Accent}"
+                                 Command="{Binding ToggleRibbonCommand}" IsActive="{Binding IsRibbonCollapsed}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+            <rb:RibbonGroup Caption="{loc:Tr GroupApplication}">
+              <rb:RibbonGroupPanel>
+                <rb:RibbonButton Label="{loc:Tr BtnNewWindow}" Icon="{StaticResource Icon.NewWindow}" IconColor="{DynamicResource Icon.Color.Slate}" IconAccent="{StaticResource Icon.NewWindow.Accent}" Command="{Binding NewWindowCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnCloseDocument}" Icon="{StaticResource Icon.CloseDocument}" IconColor="{DynamicResource Icon.Color.Slate}" IconAccent="{StaticResource Icon.CloseDocument.Accent}" Command="{Binding CloseDocumentCommand}" />
+                <rb:RibbonButton Label="{loc:Tr BtnExit}" Icon="{StaticResource Icon.Exit}" IconColor="{DynamicResource Icon.Color.Red}" IconAccent="{StaticResource Icon.Exit.Accent}" Command="{Binding ExitCommand}" />
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnSettings}" Icon="{StaticResource Icon.Settings}" IconColor="{DynamicResource Icon.Color.Slate}" IconAccent="{StaticResource Icon.Settings.Accent}" Command="{Binding ShowSettingsCommand}" />
+              </rb:RibbonGroupPanel>
+            </rb:RibbonGroup>
+          </rb:RibbonGroupsPanel></Border>
+        </TabItem>
+      </rb:Ribbon>
+      <!-- Fold the ribbon away / show it again; visible without the menu bar, the tooltip tells the shortcut (Reduction 2 = icon only, label in the tooltip) -->
+      <Panel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,8,0" Height="31">
+        <rb:RibbonButton x:Name="CollapseRibbonButton" Classes="band" Width="34" IconSize="18" Reduction="2"
+                         Label="{loc:Tr BtnCollapseRibbon}" Icon="{StaticResource Icon.ChevronUp}"
+                         Command="{Binding ToggleRibbonCommand}" IsVisible="{Binding !IsRibbonCollapsed}" />
+        <rb:RibbonButton x:Name="ExpandRibbonButton" Classes="band" Width="34" IconSize="18" Reduction="2"
+                         Label="{loc:Tr BtnExpandRibbon}" Icon="{StaticResource Icon.ChevronDown}"
+                         Command="{Binding ToggleRibbonCommand}" IsVisible="{Binding IsRibbonCollapsed}" />
+      </Panel>
+    </Grid>
+
+    <Border x:Name="StatusBar" DockPanel.Dock="Bottom" Padding="10,4" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource StatusBar.Border}"
+            Background="{DynamicResource StatusBar.Background}">
+      <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto" ColumnSpacing="16">
+        <!-- Current mode, visible whichever ribbon tab is open; also switches it -->
+        <Border x:Name="ModeSwitch" Classes="modeSwitch" IsVisible="{Binding HasDocument}">
+          <StackPanel Orientation="Horizontal" Spacing="2">
+            <TextBlock Text="{loc:Tr GroupMode}" Foreground="{DynamicResource Text.Muted}" VerticalAlignment="Center" Margin="0,0,6,0" />
+            <rb:RibbonButton Classes="reading" Label="{loc:Tr BtnReadingMode}" Icon="{StaticResource Icon.Reading}" IconAccent="{StaticResource Icon.Reading.Accent}" IconSize="16"
+                             Command="{Binding ShowReadingCommand}" IsActive="{Binding IsReadingMode}" />
+            <rb:RibbonButton Classes="organize" Label="{loc:Tr BtnOrganizeMode}" Icon="{StaticResource Icon.Organize}" IconAccent="{StaticResource Icon.Organize.Accent}" IconSize="16"
+                             Command="{Binding ShowOrganizeCommand}" IsActive="{Binding IsOrganizeMode}" />
+          </StackPanel>
+        </Border>
+        <!-- "Page x of y"; a click (or Ctrl/Cmd+G) opens a box to type a page number -->
+        <Button x:Name="StatusPageButton" Grid.Column="1" Classes="ribbon" Padding="6,2" VerticalAlignment="Center" Content="{Binding StatusPageText}"
+                IsEnabled="{Binding HasDocument}" ToolTip.Tip="{loc:Tr MenuGoToPage}" />
+        <TextBlock Grid.Column="2" Text="{Binding StatusDirtyText}" Foreground="{DynamicResource Text.Muted}" VerticalAlignment="Center" />
+        <TextBlock Grid.Column="3" Text="{Binding StatusMessage}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+        <!-- Running save/extract/split: what it does, progress and Cancel (the document stays usable meanwhile) -->
+        <StackPanel x:Name="BusyPanel" Grid.Column="4" Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsBusy}">
+          <TextBlock Text="{Binding BusyText}" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <ProgressBar Width="160" MinHeight="6" Minimum="0" Maximum="1" Value="{Binding Progress}" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding ProgressText}" MinWidth="36" TextAlignment="Right" VerticalAlignment="Center" />
+          <Button Padding="10,2" MinHeight="24" Command="{Binding CancelOperationCommand}" Content="{loc:Tr Cancel}" ToolTip.Tip="Esc" />
+        </StackPanel>
+        <!-- Zoom with the mouse: out, current value with a menu of steps and fit modes, in -->
+        <Border x:Name="ZoomBar" Grid.Column="5" Classes="statusZoom" IsVisible="{Binding HasDocument}">
+          <StackPanel Orientation="Horizontal" Spacing="2">
+            <rb:RibbonButton x:Name="StatusZoomOut" Icon="{StaticResource Icon.ZoomOut}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.ZoomOut.Accent}" IconSize="16"
+                             Command="{Binding ZoomOutCommand}" ToolTip.Tip="{loc:Tr BtnZoomOut}" />
+            <Button x:Name="StatusZoomMenu" Classes="ribbon" MinWidth="64" ToolTip.Tip="{loc:Tr ZoomMenuTip}" IsEnabled="{Binding HasDocument}">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <TextBlock Text="{Binding StatusZoomText}" VerticalAlignment="Center" />
+                <Path Data="M0,0 L4,4 L8,0" StrokeThickness="1.4" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+            <rb:RibbonButton x:Name="StatusZoomIn" Icon="{StaticResource Icon.ZoomIn}" IconColor="{DynamicResource Icon.Color.Teal}" IconAccent="{StaticResource Icon.ZoomIn.Accent}" IconSize="16"
+                             Command="{Binding ZoomInCommand}" ToolTip.Tip="{loc:Tr BtnZoomIn}" />
+          </StackPanel>
+        </Border>
+      </Grid>
+    </Border>
+
+    <!-- Search bar (Ctrl/Cmd+F): Enter = next hit, Shift+Enter = previous, Esc closes; the hits are highlighted in the reading view -->
+    <Border x:Name="SearchBar" DockPanel.Dock="Top" IsVisible="{Binding IsSearchOpen}" Padding="10,4" BorderThickness="0,0,0,1"
+            BorderBrush="{DynamicResource StatusBar.Border}" Background="{DynamicResource StatusBar.Background}">
+      <StackPanel Orientation="Horizontal" Spacing="4">
+        <Viewbox Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,4,0">
+          <Grid Width="24" Height="24">
+            <Path Data="{StaticResource Icon.Search}" Stroke="{DynamicResource Icon.Color.Teal}" StrokeThickness="1.8" StrokeLineCap="Round" />
+            <Path Data="{StaticResource Icon.Search.Accent}" Stroke="{DynamicResource Brand.Accent}" StrokeThickness="1.8" StrokeLineCap="Round" />
+          </Grid>
+        </Viewbox>
+        <TextBox x:Name="SearchBox" Width="280" MinHeight="26" Padding="6,2" VerticalAlignment="Center"
+                 Text="{Binding SearchText, Mode=TwoWay}" PlaceholderText="{loc:Tr SearchPlaceholder}" />
+        <rb:RibbonButton x:Name="SearchPreviousButton" Icon="{StaticResource Icon.ChevronUp}" IconSize="16"
+                         Command="{Binding FindPreviousCommand}" Reduction="2" Label="{loc:Tr SearchPrevious}" />
+        <rb:RibbonButton x:Name="SearchNextButton" Icon="{StaticResource Icon.ChevronDown}" IconSize="16"
+                         Command="{Binding FindNextCommand}" Reduction="2" Label="{loc:Tr SearchNext}" />
+        <TextBlock x:Name="SearchStatus" Text="{Binding SearchStatusText}" Foreground="{DynamicResource Text.Muted}" VerticalAlignment="Center" Margin="8,0" />
+        <rb:RibbonButton x:Name="SearchCloseButton" Icon="{StaticResource Icon.Close}" IconSize="16"
+                         Command="{Binding CloseSearchCommand}" Reduction="2" Label="{loc:Tr SearchClose}" />
+      </StackPanel>
+    </Border>
+
+    <Grid Background="{DynamicResource Content.Background}" ColumnDefinitions="Auto,*">
+      <!-- Page sidebar of the reading view: thumbnails, follows the page being read, a click jumps there; the strip on its
+           right edge changes its width, the thumbnails grow with it -->
+      <Border x:Name="PageSidebar" Width="{Binding PageSidebarWidth}" IsVisible="{Binding PageSidebarShown}" BorderThickness="0,0,1,0"
+              BorderBrush="{DynamicResource Card.Border}">
+        <Grid ColumnDefinitions="*,Auto">
+          <ctl:ThumbnailGrid x:Name="SidebarView" IsNavigator="True"
+                             Document="{Binding Document}"
+                             ActivePage="{Binding CurrentPage}" />
+          <Thumb x:Name="SidebarSplitter" Grid.Column="1" Classes="sidebarSplitter" ToolTip.Tip="{loc:Tr SidebarSplitterTip}" />
+        </Grid>
+      </Border>
+      <ctl:HorizontalPageView x:Name="PageView" Grid.Column="1"
+                              IsVisible="{Binding ReadingVisible}"
+                              Document="{Binding Document}"
+                              ZoomMode="{Binding ZoomMode, Mode=TwoWay}"
+                              CustomZoomPercent="{Binding CustomZoomPercent, Mode=TwoWay}"
+                              CurrentPage="{Binding CurrentPage, Mode=OneWayToSource}"
+                              MarkedPageId="{Binding MarkedPageId, Mode=TwoWay}"
+                              EffectiveZoomPercent="{Binding EffectiveZoomPercent, Mode=OneWayToSource}"
+                              SearchHits="{Binding SearchHits}"
+                              CurrentSearchHit="{Binding CurrentSearchHit}" />
+      <ctl:ThumbnailGrid x:Name="OrganizeView" Grid.Column="1"
+                         IsVisible="{Binding OrganizeVisible}"
+                         Document="{Binding Document}"
+                         SelectedIds="{Binding SelectedIds}"
+                         ZoomPercent="{Binding ThumbnailZoomPercent, Mode=TwoWay}"
+                         CurrentPage="{Binding CurrentPage, Mode=OneWayToSource}" />
+      <StackPanel Grid.Column="1" IsVisible="{Binding !HasDocument}" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12">
+        <Button x:Name="StartOpenButton" Classes="primary" Content="{loc:Tr StartOpen}" Command="{Binding OpenCommand}" HorizontalAlignment="Center" Padding="28,11" FontSize="16" />
+        <TextBlock Text="{loc:Tr StartHint}" Foreground="{DynamicResource Text.Muted}" HorizontalAlignment="Center" />
+        <Button x:Name="StartGuideButton" Classes="ribbon" Content="{loc:Tr StartQuickGuide}" Command="{Binding ShowQuickGuideCommand}" HorizontalAlignment="Center" />
+        <StackPanel x:Name="StartRecent" Spacing="2" Margin="0,16,0,0" />
+      </StackPanel>
+    </Grid>
+  </DockPanel>
+</Window>

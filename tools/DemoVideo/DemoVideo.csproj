@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Records the demo video: drives the real app headless, composes banners and a pointer over its frames and pipes them to ffmpeg.
+    Not part of EasyPDF.slnx. See the head of Program.cs for how to run it; the result goes to branding/<brand>/videos/.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(AppTargetFramework)</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Headless" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Skia" Version="12.1.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The brand profile the build uses: program icon of the title card -->
+    <AssemblyMetadata Include="Brand" Value="$(Brand)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EasyPDF.App\EasyPDF.App.csproj" />
+  </ItemGroup>
+</Project>

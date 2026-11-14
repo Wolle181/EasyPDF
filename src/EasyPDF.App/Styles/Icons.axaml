@@ -1,0 +1,165 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!--
+    Two-tone line icons on a 24x24 grid. "Icon.X" is drawn in the theme foreground (the object),
+    "Icon.X.Accent" in the accent colour (the action). RibbonButton draws both.
+  -->
+
+  <!-- File -->
+  <StreamGeometry x:Key="Icon.Open">M2.5,7 Q2.5,5.5 4,5.5 L9,5.5 L11,8 L19,8 Q20.5,8 20.5,9.5 L20.5,18.5 Q20.5,20 19,20 L4,20 Q2.5,20 2.5,18.5 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Open.Accent">M6,20 L8,12.5 Q8.3,11.5 9.3,11.5 L22,11.5 Q23,11.5 22.7,12.5 L20.6,19 Q20.3,20 19.3,20</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.Save">M5,3.5 L16.5,3.5 L20.5,7.5 L20.5,19 Q20.5,20.5 19,20.5 L5,20.5 Q3.5,20.5 3.5,19 L3.5,5 Q3.5,3.5 5,3.5 Z M7.5,3.5 L7.5,8 L15,8 L15,3.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Save.Accent">M7,20.5 L7,14 L17,14 L17,20.5</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.SaveAs">M5,3.5 L16.5,3.5 L20.5,7.5 L20.5,11 M3.5,19 L3.5,5 Q3.5,3.5 5,3.5 M7.5,3.5 L7.5,8 L15,8 L15,3.5 M3.5,19 Q3.5,20.5 5,20.5 L11,20.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.SaveAs.Accent">M18,13.5 L18,21.5 M14,17.5 L22,17.5</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.Recent">M12,3 A9,9 0 1 1 11.99,3</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Recent.Accent">M12,7 L12,12 L15.5,14</StreamGeometry>
+
+  <!-- Pages -->
+  <StreamGeometry x:Key="Icon.InsertBefore">M10,2.5 L16.5,2.5 L21,7 L21,21.5 L10,21.5 Z M16.5,2.5 L16.5,7 L21,7</StreamGeometry>
+  <StreamGeometry x:Key="Icon.InsertBefore.Accent">M1.5,12 L8,12 M4.5,8.5 L1.5,12 L4.5,15.5</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.InsertAfter">M3,2.5 L9.5,2.5 L14,7 L14,21.5 L3,21.5 Z M9.5,2.5 L9.5,7 L14,7</StreamGeometry>
+  <StreamGeometry x:Key="Icon.InsertAfter.Accent">M16,12 L22.5,12 M19.5,8.5 L22.5,12 L19.5,15.5</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.BlankPage">M5,2.5 L13,2.5 L18,7.5 L18,21.5 L5,21.5 Z M13,2.5 L13,7.5 L18,7.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.BlankPage.Accent">M20,13 L20,21 M16,17 L24,17</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.Rotate">M9,8.5 L15,8.5 L15,15.5 L9,15.5 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Rotate.Accent">M19.5,12 A7.5,7.5 0 1 1 16.5,6 M19.5,3 L19.5,7.5 L15,7.5</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.RotateRight">M9,8.5 L15,8.5 L15,15.5 L9,15.5 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.RotateRight.Accent">M19.5,12 A7.5,7.5 0 1 1 16.5,6 M19.5,3 L19.5,7.5 L15,7.5</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.RotateLeft">M9,8.5 L15,8.5 L15,15.5 L9,15.5 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.RotateLeft.Accent">M4.5,12 A7.5,7.5 0 1 0 7.5,6 M4.5,3 L4.5,7.5 L9,7.5</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.Delete">M4,6.5 L20,6.5 M9,6.5 L9,4 Q9,3.5 9.5,3.5 L14.5,3.5 Q15,3.5 15,4 L15,6.5 M6,6.5 L7,20 Q7.1,21 8,21 L16,21 Q16.9,21 17,20 L18,6.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Delete.Accent">M10,10.5 L10,17 M14,10.5 L14,17</StreamGeometry>
+
+  <!-- A page with two arrows: pages swapped for others -->
+  <StreamGeometry x:Key="Icon.Replace">M4,2.5 L13,2.5 L18,7.5 L18,21.5 L4,21.5 Z M13,2.5 L13,7.5 L18,7.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Replace.Accent">M7,11.5 L15,11.5 M12.5,9 L15,11.5 L12.5,14 M15,17.5 L7,17.5 M9.5,15 L7,17.5 L9.5,20</StreamGeometry>
+
+  <!-- History -->
+  <StreamGeometry x:Key="Icon.Undo">M8.5,4.5 L3.5,9.5 L8.5,14.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Undo.Accent">M3.5,9.5 L14,9.5 A5.5,5.5 0 0 1 14,20.5 L9,20.5</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.Redo">M15.5,4.5 L20.5,9.5 L15.5,14.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Redo.Accent">M20.5,9.5 L10,9.5 A5.5,5.5 0 0 0 10,20.5 L15,20.5</StreamGeometry>
+
+  <!-- Zoom -->
+  <StreamGeometry x:Key="Icon.FitHeight">M5,3.5 L19,3.5 M5,20.5 L19,20.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.FitHeight.Accent">M12,7 L12,17 M9,10 L12,7 L15,10 M9,14 L12,17 L15,14</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.FitWidth">M3.5,5 L3.5,19 M20.5,5 L20.5,19</StreamGeometry>
+  <StreamGeometry x:Key="Icon.FitWidth.Accent">M7,12 L17,12 M10,9 L7,12 L10,15 M14,9 L17,12 L14,15</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.FitPage">M7,4.5 L17,4.5 L17,19.5 L7,19.5 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.FitPage.Accent">M2.5,8 L2.5,2.5 L8,2.5 M16,2.5 L21.5,2.5 L21.5,8 M21.5,16 L21.5,21.5 L16,21.5 M8,21.5 L2.5,21.5 L2.5,16</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.ZoomIn">M10.5,3.5 A7,7 0 1 1 10.49,3.5 M15.5,15.5 L21,21</StreamGeometry>
+  <StreamGeometry x:Key="Icon.ZoomIn.Accent">M10.5,7.5 L10.5,13.5 M7.5,10.5 L13.5,10.5</StreamGeometry>
+  <!-- Find text: the lens over lines of text -->
+  <StreamGeometry x:Key="Icon.Search">M10.5,3.5 A7,7 0 1 1 10.49,3.5 M15.5,15.5 L21,21</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Search.Accent">M7.5,8.75 L13.5,8.75 M7.5,12.25 L11.5,12.25</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Close">M7,7 L17,17 M17,7 L7,17</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.ZoomOut">M10.5,3.5 A7,7 0 1 1 10.49,3.5 M15.5,15.5 L21,21</StreamGeometry>
+  <StreamGeometry x:Key="Icon.ZoomOut.Accent">M7.5,10.5 L13.5,10.5</StreamGeometry>
+
+  <!-- Organize / output -->
+  <StreamGeometry x:Key="Icon.Concatenate">M3.5,3.5 L9.5,3.5 L12.5,6.5 L12.5,14 L3.5,14 Z M11.5,10 L17.5,10 L20.5,13 L20.5,20.5 L11.5,20.5 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Concatenate.Accent">M15.5,2.5 L15.5,7 M13.25,4.75 L17.75,4.75</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.Extract">M3.5,2.5 L11,2.5 L15.5,7 L15.5,21.5 L3.5,21.5 Z M11,2.5 L11,7 L15.5,7</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Extract.Accent">M12,14 L21.5,14 M18,10.5 L21.5,14 L18,17.5</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.Split">M3.5,3.5 L9.5,3.5 L9.5,20.5 L3.5,20.5 Z M14.5,3.5 L20.5,3.5 L20.5,20.5 L14.5,20.5 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Split.Accent">M12,2 L12,5 M12,9 L12,12 M12,16 L12,19</StreamGeometry>
+
+  <!-- A page pressed together from above and below -->
+  <StreamGeometry x:Key="Icon.ReduceSize">M5.5,7.5 L18.5,7.5 L18.5,16.5 L5.5,16.5 Z M8.5,10.5 L15.5,10.5 M8.5,13.5 L13.5,13.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.ReduceSize.Accent">M12,1.5 L12,5 M9.75,2.75 L12,5 L14.25,2.75 M12,22.5 L12,19 M9.75,21.25 L12,19 L14.25,21.25</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.SelectAll">M5,4 L19,4 Q20,4 20,5 L20,19 Q20,20 19,20 L5,20 Q4,20 4,19 L4,5 Q4,4 5,4 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.SelectAll.Accent">M8,12.5 L11,15.5 L16.5,9</StreamGeometry>
+
+  <!-- Modes / panels -->
+  <StreamGeometry x:Key="Icon.Reading">M12,6.5 Q8,4.5 2.5,5.5 L2.5,19 Q8,18 12,20 Q16,18 21.5,19 L21.5,5.5 Q16,4.5 12,6.5 Z M12,6.5 L12,20</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Reading.Accent">M5,9.5 L9,10 M5,12.5 L9,13 M15,10 L19,9.5 M15,13 L19,12.5</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.Sidebar">M3.5,4.5 L20.5,4.5 L20.5,19.5 L3.5,19.5 Z M9.5,4.5 L9.5,19.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Sidebar.Accent">M5.5,7.5 L7.5,7.5 L7.5,10 L5.5,10 Z M5.5,12.5 L7.5,12.5 L7.5,15 L5.5,15 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Organize">M3.5,3.5 L10.5,3.5 L10.5,10.5 L3.5,10.5 Z M13.5,13.5 L20.5,13.5 L20.5,20.5 L13.5,20.5 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Organize.Accent">M13.5,3.5 L20.5,3.5 L20.5,10.5 L13.5,10.5 Z M3.5,13.5 L10.5,13.5 L10.5,20.5 L3.5,20.5 Z</StreamGeometry>
+
+
+  <!-- Stamp -->
+  <StreamGeometry x:Key="Icon.Text">M4,5 L20,5 M12,5 L12,19 M8.5,19 L15.5,19</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Text.Accent">M4,5 L4,8 M20,5 L20,8</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Templates">M5,3 L15,3 L19,7 L19,21 L5,21 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Templates.Accent">M8,11 L16,11 M8,14.5 L16,14.5 M8,18 L13,18</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Print">M7,8 L7,3.5 L17,3.5 L17,8 M7,17 L4.5,17 L4.5,8 L19.5,8 L19.5,17 L17,17 M7,14 L17,14 L17,20.5 L7,20.5 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Print.Accent">M16.5,10.5 L17.5,10.5 M9.5,16.5 L14.5,16.5 M9.5,18.5 L14.5,18.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Mail">M3.5,5.5 L20.5,5.5 L20.5,18.5 L3.5,18.5 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Mail.Accent">M3.5,5.5 L12,12.5 L20.5,5.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.PenColor">M4.5,19.5 L5.5,15 L15.5,5 L19,8.5 L9,18.5 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.PenColor.Accent">M3,22 L21,22 M13.5,7 L17,10.5</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.Stamp">M12,3 Q14.6,3 14.6,5.6 Q14.6,7.6 13.3,9.4 L13.3,12 L19,12 Q20.5,12 20.5,13.5 L20.5,17 L3.5,17 L3.5,13.5 Q3.5,12 5,12 L10.7,12 L10.7,9.4 Q9.4,7.6 9.4,5.6 Q9.4,3 12,3 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Stamp.Accent">M4,20.5 L20,20.5</StreamGeometry>
+
+  <!-- Text recognition: scan frame around lines of text -->
+  <StreamGeometry x:Key="Icon.Ocr">M2.5,7.5 L2.5,2.5 L7.5,2.5 M16.5,2.5 L21.5,2.5 L21.5,7.5 M21.5,16.5 L21.5,21.5 L16.5,21.5 M7.5,21.5 L2.5,21.5 L2.5,16.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Ocr.Accent">M7,8.5 L17,8.5 M7,12 L17,12 M7,15.5 L13.5,15.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.CopyText">M8.5,6.5 L8.5,2.5 L20.5,2.5 L20.5,16.5 L16.5,16.5 M3.5,6.5 L16.5,6.5 L16.5,21.5 L3.5,21.5 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.CopyText.Accent">M6.5,10.5 L13.5,10.5 M6.5,13.5 L13.5,13.5 M6.5,16.5 L11,16.5</StreamGeometry>
+  <!-- Select text: lines of text, one highlighted, and the text cursor -->
+  <StreamGeometry x:Key="Icon.SelectText">M2.5,5.5 L15.5,5.5 M2.5,18.5 L12.5,18.5 M18.5,8 L18.5,21 M16.5,8 L20.5,8 M16.5,21 L20.5,21</StreamGeometry>
+  <StreamGeometry x:Key="Icon.SelectText.Accent">M2.5,9.5 L15.5,9.5 L15.5,14.5 L2.5,14.5 Z</StreamGeometry>
+
+  <!-- Black out: lines of text, the middle one hidden under a solid bar (three close strokes); white out: a white patch interrupts the middle line -->
+  <StreamGeometry x:Key="Icon.Redact">M3,5.5 L21,5.5 M3,18.5 L15,18.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Redact.Accent">M3.5,10.5 L20.5,10.5 M3.5,12 L20.5,12 M3.5,13.5 L20.5,13.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Cover">M3,5.5 L21,5.5 M3,12 L6.5,12 M17.5,12 L21,12 M3,18.5 L15,18.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Cover.Accent">M8.5,9 L15.5,9 L15.5,15 L8.5,15 Z</StreamGeometry>
+  <!-- Copy area: a dashed frame, the copy beside it; paste area: a clipboard with the pasted piece -->
+  <StreamGeometry x:Key="Icon.CopyArea">M3,3 L6,3 M9,3 L12,3 M15,3 L15,6 M15,9 L15,12 M3,6 L3,9 M3,12 L3,15 L6,15 M9,15 L12,15</StreamGeometry>
+  <StreamGeometry x:Key="Icon.CopyArea.Accent">M10,10 L21,10 L21,21 L10,21 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.PasteArea">M8,4.5 L5,4.5 L5,21 L19,21 L19,4.5 L16,4.5 M9,3 L15,3 L15,6 L9,6 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.PasteArea.Accent">M9,11 L15,11 L15,17 L9,17 Z</StreamGeometry>
+
+  <!-- Navigation -->
+  <StreamGeometry x:Key="Icon.FirstPage">M18,5 L11,12 L18,19</StreamGeometry>
+  <StreamGeometry x:Key="Icon.FirstPage.Accent">M6.5,4.5 L6.5,19.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.LastPage">M6,5 L13,12 L6,19</StreamGeometry>
+  <StreamGeometry x:Key="Icon.LastPage.Accent">M17.5,4.5 L17.5,19.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.GoToPage">M5.5,2.5 L13,2.5 L17.5,7 L17.5,21.5 L5.5,21.5 Z M13,2.5 L13,7 L17.5,7</StreamGeometry>
+  <StreamGeometry x:Key="Icon.GoToPage.Accent">M8.5,12 L14.5,12 M8.5,16 L14.5,16 M10.75,9.5 L9.75,18.5 M13.25,9.5 L12.25,18.5</StreamGeometry>
+
+  <!-- Application -->
+  <StreamGeometry x:Key="Icon.NewWindow">M3.5,5.5 L20.5,5.5 L20.5,19.5 L3.5,19.5 Z M3.5,9 L20.5,9</StreamGeometry>
+  <StreamGeometry x:Key="Icon.NewWindow.Accent">M12,11.5 L12,17 M9.25,14.25 L14.75,14.25</StreamGeometry>
+  <StreamGeometry x:Key="Icon.CloseDocument">M3.5,5.5 L20.5,5.5 L20.5,19.5 L3.5,19.5 Z M3.5,9 L20.5,9</StreamGeometry>
+  <StreamGeometry x:Key="Icon.CloseDocument.Accent">M9.75,11.75 L14.25,16.25 M14.25,11.75 L9.75,16.25</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Exit">M13.5,3.5 L5.5,3.5 L5.5,20.5 L13.5,20.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Exit.Accent">M10,12 L20.5,12 M17,8.5 L20.5,12 L17,15.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Settings">M12,6 A6,6 0 1 1 11.99,6 M12,9.5 A2.5,2.5 0 1 1 11.99,9.5</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Settings.Accent">M12,2 L12,6 M12,18 L12,22 M2,12 L6,12 M18,12 L22,12 M4.9,4.9 L7.75,7.75 M16.25,16.25 L19.1,19.1 M4.9,19.1 L7.75,16.25 M16.25,7.75 L19.1,4.9</StreamGeometry>
+  <StreamGeometry x:Key="Icon.CollapseRibbon">M3.5,4.5 L20.5,4.5 L20.5,10.5 L3.5,10.5 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.CollapseRibbon.Accent">M8,19 L12,15 L16,19</StreamGeometry>
+  <!-- Arrow at the right end of the tab row: fold the ribbon away / show it again -->
+  <StreamGeometry x:Key="Icon.ChevronUp">M6,15 L12,9 L18,15</StreamGeometry>
+  <StreamGeometry x:Key="Icon.ChevronDown">M6,9 L12,15 L18,9</StreamGeometry>
+
+  <StreamGeometry x:Key="Icon.Help">M12,3 A9,9 0 1 1 11.99,3</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Help.Accent">M9.25,9.5 Q9.25,6.75 12,6.75 Q14.75,6.75 14.75,9.25 Q14.75,11 12,12 L12,13.75 M12,16.75 L12,17.25</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Video">M12,3 A9,9 0 1 1 11.99,3</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Video.Accent">M10,8.5 L15.5,12 L10,15.5 Z</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Info">M12,3 A9,9 0 1 1 11.99,3</StreamGeometry>
+  <StreamGeometry x:Key="Icon.Info.Accent">M12,11 L12,17 M12,7.5 L12,8</StreamGeometry>
+</ResourceDictionary>

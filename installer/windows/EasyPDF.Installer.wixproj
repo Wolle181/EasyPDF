@@ -1,0 +1,37 @@
+<Project Sdk="WixToolset.Sdk/5.0.2">
+  <!--
+    Windows installer (MSI). Not part of EasyPDF.slnx because WiX only builds on Windows.
+    Build: installer/windows/build-windows-on-windows.ps1 (publishes the app first), or after a publish with the app's version (1.0.0.97):
+      dotnet build installer/windows/EasyPDF.Installer.wixproj -c Release -p:Version=<version>
+    Output: artifacts/installer/<AppDisplayName>-<Version>-win-x64.msi
+    The version must be passed: it is computed by a target (Directory.Build.targets), but the file name is fixed earlier.
+  -->
+  <PropertyGroup>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <OutputName>$(AppDisplayName)-$(Version)-win-x64</OutputName>
+    <OutputPath>$(MSBuildThisFileDirectory)..\..\artifacts\installer\</OutputPath>
+    <PublishDir>$(MSBuildThisFileDirectory)..\..\artifacts\publish\win-x64</PublishDir>
+    <!-- From the brand profile (branding/<Brand>/Branding.props): AppDisplayName (shown name: installed apps, start menu, context
+         menu), Company (publisher), MsiUpgradeCode and the icon -->
+    <DefineConstants>PublishDir=$(PublishDir);ProductVersion=$(Version);AppDisplayName=$(AppDisplayName);Company=$(Company);UpgradeCode=$(MsiUpgradeCode);AppIcon=$(BrandDir)icons/app.ico;RepositoryUrl=$(RepositoryUrl)</DefineConstants>
+    <SuppressPdbOutput>true</SuppressPdbOutput>
+    <!--
+      ICE61 warns that the same version is replaced too: wanted (MajorUpgrade AllowSameVersionUpgrades in Package.wxs).
+      ICE38, ICE64, ICE91 concern files and folders in the user profile (the package installs per user into
+      %LocalAppData%\Programs): they guard against roaming profiles and packages that can install per machine too. Neither
+      applies here (LocalAppData does not roam, Scope="perUser" only); obeying ICE38 would need an HKCU key for each of the
+      ~260 harvested files. Uninstalling removes the files and the empty folders anyway (checked in the CI upgrade test).
+    -->
+    <SuppressIces>ICE61;ICE38;ICE64;ICE91</SuppressIces>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="5.0.2" />
+    <ProjectReference Include="UninstallActions\UninstallActions.csproj" />
+  </ItemGroup>
+  <Target Name="CheckPublishOutput" BeforeTargets="PrepareForBuild">
+    <Error Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(Version)', '^\d+\.\d+\.\d+\.\d+$'))"
+           Text="Pass the app's version: -p:Version=1.0.0.97 (build-windows-on-windows.ps1 does). Got: '$(Version)'" />
+    <Error Condition="!Exists('$(PublishDir)\$(AppDisplayName).exe')"
+           Text="$(PublishDir)\$(AppDisplayName).exe not found. Publish first: dotnet publish src/EasyPDF.App -p:PublishProfile=win-x64" />
+  </Target>
+</Project>

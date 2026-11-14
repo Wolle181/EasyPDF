@@ -1,0 +1,15 @@
+#!/bin/sh
+# Runs before the package is unpacked. On an upgrade dpkg passes: upgrade <installed version> <new version>.
+# A newer or the same version replaces the installed one; an older one is refused (apt refuses it anyway, dpkg -i would not).
+# Versions are <major.minor.patch>.<number of commits>; only the upstream part counts (packages before that had the build time as
+# Debian revision: 0.1.0-20261009120000).
+set -e
+if [ "$1" = upgrade ] && [ -n "$2" ] && [ -n "$3" ]; then
+    installed="${2%-*}"
+    new="${3%-*}"
+    if dpkg --compare-versions "$installed" gt "$new"; then
+        echo "$DPKG_MAINTSCRIPT_PACKAGE $installed is installed, which is newer than $new. Uninstall it first to go back." >&2
+        exit 1
+    fi
+fi
+exit 0

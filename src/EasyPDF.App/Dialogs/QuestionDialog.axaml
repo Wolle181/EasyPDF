@@ -1,0 +1,15 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:EasyPDF.App.Localization"
+        x:Class="EasyPDF.App.Dialogs.QuestionDialog"
+        Width="460" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" CanResize="False" ShowInTaskbar="False">
+  <StackPanel Margin="20" Spacing="12">
+    <TextBlock x:Name="MessageText" TextWrapping="Wrap" />
+    <TextBlock x:Name="DetailsText" TextWrapping="Wrap" Opacity="0.7" FontSize="12" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button x:Name="YesButton" MinWidth="80" HorizontalContentAlignment="Center" IsDefault="True" Click="OnYes" Content="{loc:Tr Yes}" />
+      <Button x:Name="NoButton" MinWidth="80" HorizontalContentAlignment="Center" IsCancel="True" Click="OnNo" Content="{loc:Tr No}" />
+    </StackPanel>
+  </StackPanel>
+</Window>

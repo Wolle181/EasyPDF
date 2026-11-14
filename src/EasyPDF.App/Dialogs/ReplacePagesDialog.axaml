@@ -1,0 +1,48 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:EasyPDF.App.ViewModels"
+        xmlns:loc="using:EasyPDF.App.Localization"
+        x:Class="EasyPDF.App.Dialogs.ReplacePagesDialog" x:DataType="vm:ReplacePagesDialogViewModel"
+        Title="{loc:Tr ReplaceTitle}" Width="460" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" CanResize="False" ShowInTaskbar="False">
+  <StackPanel Margin="20" Spacing="14">
+    <StackPanel Spacing="6">
+      <TextBlock Text="{loc:Tr ReplaceTargetHeading}" FontWeight="SemiBold" />
+      <RadioButton GroupName="Target" Content="{Binding CurrentPageText}" IsChecked="{Binding IsCurrent}" />
+      <RadioButton GroupName="Target" Content="{loc:Tr RotateScopeSelected}" IsChecked="{Binding IsSelected}" IsEnabled="{Binding CanSelectSelected}" />
+      <RadioButton GroupName="Target" Content="{loc:Tr RotateScopeRange}" IsChecked="{Binding IsTargetRange}" />
+      <TextBox x:Name="TargetRangeBox" Text="{Binding TargetRangeText}" PlaceholderText="3-5" IsEnabled="{Binding IsTargetRange}" Margin="28,0,0,0" />
+      <TextBlock Text="{Binding TargetErrorText}" Foreground="Red" TextWrapping="Wrap" Margin="28,0,0,0" FontSize="12" />
+    </StackPanel>
+    <StackPanel Spacing="6">
+      <TextBlock Text="{loc:Tr ReplaceSourceHeading}" FontWeight="SemiBold" />
+      <RadioButton GroupName="Source" Content="{loc:Tr ReplaceSourceOpen}" IsChecked="{Binding UseOpenDocument}" IsVisible="{Binding HasOpenDocuments}" />
+      <ComboBox x:Name="DocumentBox" ItemsSource="{Binding OpenDocuments}" SelectedItem="{Binding SelectedOpenDocument}"
+                IsVisible="{Binding HasOpenDocuments}" HorizontalAlignment="Stretch" Margin="28,0,0,0">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:ReplaceDocumentItem">
+            <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <RadioButton GroupName="Source" Content="{loc:Tr ReplaceSourceFile}" IsChecked="{Binding UseFile}" />
+      <Grid ColumnDefinitions="*,Auto" Margin="28,0,0,0">
+        <TextBlock x:Name="FileText" Text="{Binding FileText}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+        <Button x:Name="BrowseButton" Grid.Column="1" Margin="8,0,0,0" Click="OnBrowse" Content="{loc:Tr ReplaceBrowse}" />
+      </Grid>
+      <TextBlock Text="{Binding SourceErrorText}" Foreground="Red" TextWrapping="Wrap" Margin="28,0,0,0" FontSize="12" />
+    </StackPanel>
+    <StackPanel Spacing="6">
+      <TextBlock Text="{loc:Tr ReplaceInsertHeading}" FontWeight="SemiBold" />
+      <RadioButton GroupName="Insert" Content="{loc:Tr InsertRangeAll}" IsChecked="{Binding InsertAllPages}" />
+      <RadioButton GroupName="Insert" Content="{loc:Tr InsertRangeRange}" IsChecked="{Binding IsInsertRange}" />
+      <TextBox x:Name="InsertRangeBox" Text="{Binding InsertRangeText}" PlaceholderText="1-3, 5" IsEnabled="{Binding IsInsertRange}" Margin="28,0,0,0" />
+      <TextBlock Text="{Binding InsertErrorText}" Foreground="Red" TextWrapping="Wrap" Margin="28,0,0,0" FontSize="12" />
+    </StackPanel>
+    <TextBlock x:Name="SummaryText" Text="{Binding SummaryText}" TextWrapping="Wrap" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button x:Name="OkButton" MinWidth="80" HorizontalContentAlignment="Center" IsDefault="True" IsEnabled="{Binding IsValid}" Click="OnOk" Content="{loc:Tr Ok}" />
+      <Button MinWidth="80" HorizontalContentAlignment="Center" IsCancel="True" Click="OnCancel" Content="{loc:Tr Cancel}" />
+    </StackPanel>
+  </StackPanel>
+</Window>

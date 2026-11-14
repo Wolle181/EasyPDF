@@ -1,0 +1,20 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:EasyPDF.App.Localization"
+        x:Class="EasyPDF.App.Dialogs.QuickGuideWindow"
+        Title="{loc:Tr GuideTitle}" Width="760" Height="700" MinWidth="460" MinHeight="360"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+  <DockPanel>
+    <Border DockPanel.Dock="Bottom" Padding="16,10" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource Card.Border}">
+      <Button HorizontalAlignment="Right" MinWidth="90" HorizontalContentAlignment="Center" IsDefault="True" IsCancel="True"
+              Click="OnClose" Content="{loc:Tr Close}" />
+    </Border>
+    <ScrollViewer x:Name="Scroller" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Margin="28,22" Spacing="18" MaxWidth="820">
+        <TextBlock Text="{loc:Tr GuideTitle}" FontSize="24" FontWeight="SemiBold" />
+        <TextBlock x:Name="IntroText" TextWrapping="Wrap" Opacity="0.85" LineHeight="21" />
+        <StackPanel x:Name="TopicList" Spacing="16" />
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
+</Window>

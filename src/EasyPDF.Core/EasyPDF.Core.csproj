@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(AppTargetFramework)</TargetFramework>
+    <RootNamespace>EasyPDF.Core</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyMetadata Include="PdfiumVersion" Value="155.0.8057" />
+    <!-- Product name (brand profile), read by AppInfo.Name -->
+    <AssemblyMetadata Include="AppDisplayName" Value="$(AppDisplayName)" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="PDFiumCore" Version="155.0.8057" />
+    <PackageReference Include="bblanchon.PDFium.Win32" Version="155.0.8057" />
+    <PackageReference Include="bblanchon.PDFium.Linux" Version="155.0.8057" />
+    <PackageReference Include="bblanchon.PDFium.macOS" Version="155.0.8057" />
+    <!-- OCR (docs/DESIGN.md): PaddleOCR models on ONNX Runtime. The package's own build step copies the models only
+         into this project's output, so it is excluded and the models are copied below (that also reaches the app). -->
+    <PackageReference Include="RapidOcrNet" Version="4.2.0" ExcludeAssets="build" GeneratePathProperty="true" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(PkgRapidOcrNet)/models/v5/*" Link="ocr-models/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+    <!-- Sample stamps with their subfolders (number stamps: tools/stamps/make_number_stamps.py), put into the user's stamp
+         folder at program start (StampLibrary.ProvideSamples); a wildcard, so names with ' need no escaping -->
+    <None Include="Stamps/Samples/**/*" Link="sample-stamps/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

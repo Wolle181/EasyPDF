@@ -1,0 +1,218 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <!--
+    UpgradeCode (MsiUpgradeCode in the brand profile, one per brand) must never change: it lets a newer MSI replace an
+    installed older version of the same brand.
+    Only one copy is ever installed: a newer or the same version (e.g. a rebuild of 1.0.0) replaces the installed
+    one (AllowSameVersionUpgrades; without it every build of the same version was installed side by side), an older one is
+    refused. Windows Installer compares the first three parts of the version only: of 1.0.0.97 (build number = number of
+    commits, see Directory.Build.targets) any other build of 1.0.0, older ones too, replaces the installed one.
+    Installed per user: into %LocalAppData%\Programs\<shown name>, registry under HKCU,
+    so installing and uninstalling need no administrator rights and show no UAC prompt (an unsigned MSI's prompt shows only
+    the path of the cached package, e.g. C:\Windows\Installer\5ad31c.msi).
+    $(var.AppDisplayName) is the shown name (brand profile): installed apps, start menu, context menu, install folder,
+    program file <name>.exe and registry keys (HKCU\Software\<name>, ...\shell\<name>.Read/Merge). After a rename the update
+    finds the old version by the UpgradeCode and removes its folder and keys; only the preselection of the preferences
+    dialog falls back to the defaults once.
+  -->
+  <Package Name="$(var.AppDisplayName)"
+           Manufacturer="$(var.Company)"
+           Version="$(var.ProductVersion)"
+           UpgradeCode="$(var.UpgradeCode)"
+           Scope="perUser"
+           Codepage="1252"
+           Compressed="yes">
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon.ico" SourceFile="$(var.AppIcon)" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.ico" />
+    <Property Id="ARPURLINFOABOUT" Value="$(var.RepositoryUrl)" />
+
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="ProgramsFolder" Name="Programs">
+        <Directory Id="INSTALLFOLDER" Name="$(var.AppDisplayName)" />
+      </Directory>
+    </StandardDirectory>
+
+    <Feature Id="Main" Title="$(var.AppDisplayName)" Level="1">
+      <!-- The complete self-contained publish output (runtime, Avalonia, pdfium) -->
+      <Files Directory="INSTALLFOLDER" Include="$(var.PublishDir)\**" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="PdfContextMenu" />
+      <ComponentRef Id="Preferences" />
+      <ComponentRef Id="PdfHandler" />
+    </Feature>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Component Id="StartMenuShortcut" Guid="4B6E1F2A-9C3D-4E5F-8A7B-1C2D3E4F5A6B">
+        <Shortcut Id="AppShortcut" Name="$(var.AppDisplayName)" Description="Read and reorganize PDF documents"
+                  Target="[INSTALLFOLDER]$(var.AppDisplayName).exe" WorkingDirectory="INSTALLFOLDER" />
+        <RegistryValue Root="HKCU" Key="Software\$(var.AppDisplayName)" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <!--
+      Explorer context menu for PDF files (classic menu; on Windows 11 under "Show more options"):
+      "Read" and "Merge" for any selection. Explorer starts one process per selected file; with "Read" (option "read") each file
+      opens in a window of its own (the processes hand their file to the first one, Services/InstanceChannel.cs);
+      with "Merge" (option "merge") the app collects them into one Concatenate dialog (Services/MergeInstances.cs).
+      Texts in German for German user locales, otherwise English.
+      (No double hyphen in this comment: XML forbids it, WiX fails with WIX0104.)
+    -->
+    <Property Id="CTXREAD" Value="Read with $(var.AppDisplayName)" />
+    <Property Id="CTXMERGE" Value="Merge with $(var.AppDisplayName)" />
+    <SetProperty Id="CTXREAD" Value="Mit $(var.AppDisplayName) lesen" Before="CostFinalize" Sequence="both"
+                 Condition="UserLanguageID = 1031 OR UserLanguageID = 2055 OR UserLanguageID = 3079 OR UserLanguageID = 4103 OR UserLanguageID = 5127" />
+    <SetProperty Id="CTXMERGE" Value="Mit $(var.AppDisplayName) zusammenführen" Before="CostFinalize" Sequence="both"
+                 Condition="UserLanguageID = 1031 OR UserLanguageID = 2055 OR UserLanguageID = 3079 OR UserLanguageID = 4103 OR UserLanguageID = 5127" />
+    <Component Id="PdfContextMenu" Directory="INSTALLFOLDER">
+      <RegistryKey Root="HKCU" Key="Software\Classes\SystemFileAssociations\.pdf\shell\$(var.AppDisplayName).Read">
+        <RegistryValue Name="MUIVerb" Value="[CTXREAD]" Type="string" KeyPath="yes" />
+        <RegistryValue Name="Icon" Value="[INSTALLFOLDER]$(var.AppDisplayName).exe" Type="string" />
+        <RegistryValue Name="MultiSelectModel" Value="Player" Type="string" />
+        <RegistryValue Key="command" Value="&quot;[INSTALLFOLDER]$(var.AppDisplayName).exe&quot; --read &quot;%1&quot;" Type="string" />
+      </RegistryKey>
+      <RegistryKey Root="HKCU" Key="Software\Classes\SystemFileAssociations\.pdf\shell\$(var.AppDisplayName).Merge">
+        <RegistryValue Name="MUIVerb" Value="[CTXMERGE]" Type="string" />
+        <RegistryValue Name="Icon" Value="[INSTALLFOLDER]$(var.AppDisplayName).exe" Type="string" />
+        <RegistryValue Name="MultiSelectModel" Value="Player" Type="string" />
+        <RegistryValue Key="command" Value="&quot;[INSTALLFOLDER]$(var.AppDisplayName).exe&quot; --merge &quot;%1&quot;" Type="string" />
+      </RegistryKey>
+    </Component>
+
+    <!--
+      The program as a PDF handler: listed under "Open with" and in Settings, Default apps (ProgId, OpenWithProgids,
+      Capabilities, RegisteredApplications). Programs may not make themselves the default since Windows 8; with the
+      check box "default program" in PreferencesDlg the Finish button opens the program's page in Settings, Default apps,
+      where one click on "Set default" does it. The check box is hidden if the program is the default already.
+    -->
+    <Component Id="PdfHandler" Directory="INSTALLFOLDER">
+      <RegistryKey Root="HKCU" Key="Software\Classes\$(var.AppDisplayName).Document" ForceDeleteOnUninstall="yes">
+        <RegistryValue Value="PDF document" Type="string" KeyPath="yes" />
+        <RegistryValue Key="DefaultIcon" Value="[INSTALLFOLDER]$(var.AppDisplayName).exe,0" Type="string" />
+        <RegistryValue Key="shell\open\command" Value="&quot;[INSTALLFOLDER]$(var.AppDisplayName).exe&quot; &quot;%1&quot;" Type="string" />
+      </RegistryKey>
+      <RegistryValue Root="HKCU" Key="Software\Classes\.pdf\OpenWithProgids" Name="$(var.AppDisplayName).Document" Value="" Type="string" />
+      <RegistryKey Root="HKCU" Key="Software\$(var.AppDisplayName)\Capabilities" ForceDeleteOnUninstall="yes">
+        <RegistryValue Name="ApplicationName" Value="$(var.AppDisplayName)" Type="string" />
+        <RegistryValue Name="ApplicationDescription" Value="Read and reorganize PDF documents" Type="string" />
+        <RegistryValue Name="ApplicationIcon" Value="[INSTALLFOLDER]$(var.AppDisplayName).exe,0" Type="string" />
+        <RegistryValue Key="FileAssociations" Name=".pdf" Value="$(var.AppDisplayName).Document" Type="string" />
+      </RegistryKey>
+      <RegistryValue Root="HKCU" Key="Software\RegisteredApplications" Name="$(var.AppDisplayName)"
+                     Value="Software\$(var.AppDisplayName)\Capabilities" Type="string" />
+    </Component>
+    <Property Id="SETDEFAULTPDF" Value="1" />
+    <!-- The user's choice for .pdf; newer Windows 11 versions keep it in UserChoiceLatest -->
+    <Property Id="PDFCHOICE">
+      <RegistrySearch Id="PdfChoice" Root="HKCU" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.pdf\UserChoice" Name="ProgId" Type="raw" />
+    </Property>
+    <Property Id="PDFCHOICELATEST">
+      <RegistrySearch Id="PdfChoiceLatest" Root="HKCU" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.pdf\UserChoiceLatest\ProgId" Name="ProgId" Type="raw" />
+    </Property>
+    <SetProperty Id="ISDEFAULTPDF" Value="1" After="AppSearch" Sequence="both"
+                 Condition="PDFCHOICE = &quot;$(var.AppDisplayName).Document&quot; OR PDFCHOICELATEST = &quot;$(var.AppDisplayName).Document&quot;" />
+    <CustomAction Id="OpenDefaultApps" Directory="INSTALLFOLDER" Return="asyncNoWait"
+                  ExeCommand="&quot;[WindowsFolder]explorer.exe&quot; &quot;ms-settings:defaultapps?registeredAppUser=$(var.AppDisplayName)&quot;" />
+
+    <!--
+      Uninstall (not an update, not silent): asks with the list of the user's folders; OK removes them after the program,
+      Cancel ends the uninstall (UninstallActions/UserDataActions.cs). A silent uninstall keeps them: nobody confirmed
+      deleting them. The actions run in the execute sequence because "Installed apps" uninstalls with a basic UI, which
+      shows no installer dialogs.
+    -->
+    <Binary Id="UninstallActions" SourceFile="$(var.UninstallActions.TargetDir)UninstallActions.CA.dll" />
+    <CustomAction Id="ConfirmRemoveUserData" BinaryRef="UninstallActions" DllEntry="ConfirmRemoveUserData" Execute="immediate" Return="check" />
+    <CustomAction Id="RemoveUserData" BinaryRef="UninstallActions" DllEntry="RemoveUserData" Execute="immediate" Return="ignore" />
+    <InstallExecuteSequence>
+      <Custom Action="ConfirmRemoveUserData" Before="InstallInitialize" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE AND UILevel &gt; 2" />
+      <Custom Action="RemoveUserData" After="InstallFinalize" Condition="REMOVEUSERDATA = &quot;1&quot;" />
+    </InstallExecuteSequence>
+
+    <!--
+      Preferences chosen in the installer (dialog PreferencesDlg): language and theme. The app takes them over into the
+      user's settings once per installer run, recognised by PreferencesStamp (Services/InstallerChoice.cs); later changes
+      in the app's settings stick. The stamp only changes when the dialog was shown, so repairs and silent installs keep
+      the user's settings. Previous choices are preselected and kept when the dialog is not shown (searched into PREV*,
+      copied unless PREFSHOWN, which the dialog sets and which reaches the execute sequence).
+    -->
+    <Property Id="APPLANGUAGE" Value="system" Secure="yes" />
+    <Property Id="APPTHEME" Value="System" Secure="yes" />
+    <Property Id="PREFSTAMP" Secure="yes" />
+    <Property Id="PREFSHOWN" Secure="yes" />
+    <Property Id="PREVLANGUAGE" Value="system">
+      <RegistrySearch Id="PrevLanguage" Root="HKCU" Key="Software\$(var.AppDisplayName)" Name="Language" Type="raw" />
+    </Property>
+    <Property Id="PREVTHEME" Value="System">
+      <RegistrySearch Id="PrevTheme" Root="HKCU" Key="Software\$(var.AppDisplayName)" Name="Theme" Type="raw" />
+    </Property>
+    <Property Id="PREVSTAMP">
+      <RegistrySearch Id="PrevStamp" Root="HKCU" Key="Software\$(var.AppDisplayName)" Name="PreferencesStamp" Type="raw" />
+    </Property>
+    <SetProperty Id="APPLANGUAGE" Value="[PREVLANGUAGE]" After="AppSearch" Sequence="both" Condition="NOT PREFSHOWN" />
+    <SetProperty Id="APPTHEME" Value="[PREVTHEME]" After="AppSearch" Sequence="both" Condition="NOT PREFSHOWN" />
+    <SetProperty Id="PREFSTAMP" Value="[PREVSTAMP]" After="AppSearch" Sequence="both" Condition="NOT PREFSHOWN" />
+    <Component Id="Preferences" Directory="INSTALLFOLDER">
+      <RegistryKey Root="HKCU" Key="Software\$(var.AppDisplayName)">
+        <RegistryValue Name="Language" Value="[APPLANGUAGE]" Type="string" KeyPath="yes" />
+        <RegistryValue Name="Theme" Value="[APPTHEME]" Type="string" />
+        <RegistryValue Name="PreferencesStamp" Value="[PREFSTAMP]" Type="string" />
+      </RegistryKey>
+    </Component>
+
+    <UI>
+      <Dialog Id="PreferencesDlg" Width="370" Height="270" Title="[ProductName] Setup">
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="WixUI_Bmp_Banner" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Preferences" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes"
+                 Text="Choose the language and the appearance of [ProductName]." />
+        <Control Id="LanguageLabel" Type="Text" X="20" Y="52" Width="330" Height="12" Text="Language:" />
+        <Control Id="LanguageGroup" Type="RadioButtonGroup" X="26" Y="64" Width="320" Height="46" Property="APPLANGUAGE">
+          <RadioButtonGroup Property="APPLANGUAGE">
+            <RadioButton Value="system" X="0" Y="0" Width="320" Height="14" Text="Same as Windows" />
+            <RadioButton Value="en" X="0" Y="15" Width="320" Height="14" Text="English" />
+            <RadioButton Value="de" X="0" Y="30" Width="320" Height="14" Text="Deutsch" />
+          </RadioButtonGroup>
+        </Control>
+        <Control Id="ThemeLabel" Type="Text" X="20" Y="114" Width="330" Height="12" Text="Appearance:" />
+        <Control Id="ThemeGroup" Type="RadioButtonGroup" X="26" Y="126" Width="320" Height="46" Property="APPTHEME">
+          <RadioButtonGroup Property="APPTHEME">
+            <RadioButton Value="System" X="0" Y="0" Width="320" Height="14" Text="Same as Windows" />
+            <RadioButton Value="Light" X="0" Y="15" Width="320" Height="14" Text="Light" />
+            <RadioButton Value="Dark" X="0" Y="30" Width="320" Height="14" Text="Dark" />
+          </RadioButtonGroup>
+        </Control>
+        <Control Id="DefaultPdf" Type="CheckBox" X="20" Y="178" Width="330" Height="14" Property="SETDEFAULTPDF" CheckBoxValue="1"
+                 Text="Use [ProductName] as the default program for PDF files" HideCondition="ISDEFAULTPDF" />
+        <Control Id="DefaultPdfHint" Type="Text" X="34" Y="193" Width="316" Height="20" NoPrefix="yes" HideCondition="ISDEFAULTPDF"
+                 Text="At the end, Windows opens its settings: confirm there with &quot;Set default&quot;." />
+        <Control Id="Hint" Type="Text" X="20" Y="216" Width="330" Height="12" Text="All of this can be changed later in the program's settings." />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)">
+          <Publish Event="NewDialog" Value="InstallDirDlg" />
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)">
+          <Publish Property="PREFSTAMP" Value="[Date] [Time]" Order="1" />
+          <Publish Property="PREFSHOWN" Value="1" Order="2" />
+          <Publish Event="NewDialog" Value="VerifyReadyDlg" Order="3" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+      </Dialog>
+      <!-- Insert the dialog after the install folder: the last NewDialog event of a control wins -->
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="PreferencesDlg" Order="5"
+               Condition="WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID=&quot;1&quot;" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="PreferencesDlg" Order="3" Condition="NOT Installed" />
+      <!-- Finish after an install with "default program" ticked: the program's page in Settings, Default apps -->
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="OpenDefaultApps" Order="1"
+               Condition="SETDEFAULTPDF = 1 AND NOT ISDEFAULTPDF AND NOT Installed" />
+    </UI>
+
+    <!-- Welcome, license, install folder, preferences, progress, finish -->
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+  </Package>
+</Wix>

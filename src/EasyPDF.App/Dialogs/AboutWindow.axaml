@@ -1,0 +1,36 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:EasyPDF.App.Localization"
+        xmlns:dlg="using:EasyPDF.App.Dialogs"
+        x:Class="EasyPDF.App.Dialogs.AboutWindow"
+        Title="{loc:Tr AboutTitle}" Width="480" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" CanResize="False" ShowInTaskbar="False">
+  <StackPanel Margin="24" Spacing="14">
+    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+      <Image x:Name="AppIcon" Source="/Assets/AppIcon-128.png" Width="64" Height="64" />
+      <StackPanel Grid.Column="1" VerticalAlignment="Center">
+        <TextBlock Text="{loc:Tr AppName}" FontSize="24" FontWeight="SemiBold" />
+        <TextBlock Text="{loc:Tr AboutTagline}" Opacity="0.7" TextWrapping="Wrap" />
+      </StackPanel>
+      <!-- Company logo of the brand (branding/<brand>/icons/company-logo.svg, drawn as vector graphics), hidden without one -->
+      <Border x:Name="CompanyLogoFrame" Grid.Column="2" CornerRadius="6" ClipToBounds="True" VerticalAlignment="Center" IsVisible="False">
+        <Image x:Name="CompanyLogo" MaxWidth="112" MaxHeight="60" Stretch="Uniform" />
+      </Border>
+    </Grid>
+    <ItemsControl x:Name="InfoList">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="dlg:AboutRow">
+          <Grid ColumnDefinitions="140,*" Margin="0,2">
+            <TextBlock Text="{Binding Label}" Opacity="0.7" />
+            <SelectableTextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap" />
+          </Grid>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button x:Name="LicensesButton" HorizontalContentAlignment="Center" Click="OnLicenses" Content="{loc:Tr AboutLicenses}" />
+      <Button HorizontalContentAlignment="Center" Click="OnCopy" Content="{loc:Tr AboutCopy}" />
+      <Button MinWidth="80" HorizontalContentAlignment="Center" IsDefault="True" IsCancel="True" Click="OnClose" Content="{loc:Tr Close}" />
+    </StackPanel>
+  </StackPanel>
+</Window>

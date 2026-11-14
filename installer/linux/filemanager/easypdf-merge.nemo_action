@@ -1,0 +1,7 @@
+[Nemo Action]
+Name=Merge with @APPNAME@
+Comment=Concatenate the selected PDFs in @APPNAME@
+Exec=@PACKAGE@ --merge %F
+Icon-Name=@PACKAGE@
+Selection=m
+Extensions=pdf;

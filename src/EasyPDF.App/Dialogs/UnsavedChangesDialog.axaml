@@ -1,0 +1,15 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:EasyPDF.App.Localization"
+        x:Class="EasyPDF.App.Dialogs.UnsavedChangesDialog"
+        Title="{loc:Tr UnsavedTitle}" Width="460" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" CanResize="False" ShowInTaskbar="False">
+  <StackPanel Margin="20" Spacing="16">
+    <TextBlock x:Name="MessageText" TextWrapping="Wrap" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button MinWidth="90" HorizontalContentAlignment="Center" IsDefault="True" Click="OnSave" Content="{loc:Tr Save}" />
+      <Button MinWidth="90" HorizontalContentAlignment="Center" Click="OnDiscard" Content="{loc:Tr DontSave}" />
+      <Button MinWidth="90" HorizontalContentAlignment="Center" IsCancel="True" Click="OnCancel" Content="{loc:Tr Cancel}" />
+    </StackPanel>
+  </StackPanel>
+</Window>

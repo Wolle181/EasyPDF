@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AppName" xml:space="preserve"><value>{App}</value></data>
+  <data name="BrandSubtitle" xml:space="preserve"><value>Read, organize and combine PDFs – locally and offline</value></data>
+  <data name="TitleWithFile" xml:space="preserve"><value>{0} – {App}</value></data>
+  <data name="TitleWithFileDirty" xml:space="preserve"><value>● {0} – {App}</value></data>
+  <data name="StatusPage" xml:space="preserve"><value>Page {0} of {1}</value></data>
+  <data name="StatusZoom" xml:space="preserve"><value>{0} %</value></data>
+  <data name="GroupPanels" xml:space="preserve"><value>Panels</value></data>
+  <data name="BtnPageSidebar" xml:space="preserve"><value>Thumbnails</value></data>
+  <data name="MenuShowPageSidebar" xml:space="preserve"><value>Page Thumbnails</value></data>
+  <data name="ZoomMenuTip" xml:space="preserve"><value>Zoom level</value></data>
+  <data name="StatusProgress" xml:space="preserve"><value>{0} %</value></data>
+  <data name="BusySaving" xml:space="preserve"><value>Saving…</value></data>
+  <data name="BusyExtracting" xml:space="preserve"><value>Extracting {0}…</value></data>
+  <data name="BusySplitting" xml:space="preserve"><value>Splitting into {0}…</value></data>
+  <data name="Untitled" xml:space="preserve"><value>Untitled</value></data>
+  <data name="StatusNoDocument" xml:space="preserve"><value>No document open</value></data>
+  <data name="StatusUnsaved" xml:space="preserve"><value>Unsaved changes</value></data>
+  <data name="TabHome" xml:space="preserve"><value>Home</value></data>
+  <data name="TabView" xml:space="preserve"><value>View</value></data>
+  <data name="GroupFile" xml:space="preserve"><value>File</value></data>
+  <data name="GroupPages" xml:space="preserve"><value>Pages</value></data>
+  <data name="GroupHistory" xml:space="preserve"><value>History</value></data>
+  <data name="GroupZoom" xml:space="preserve"><value>Zoom</value></data>
+  <data name="BtnOpen" xml:space="preserve"><value>Open…</value></data>
+  <data name="BtnRecent" xml:space="preserve"><value>Recent</value></data>
+  <data name="BtnSave" xml:space="preserve"><value>Save</value></data>
+  <data name="BtnSaveAs" xml:space="preserve"><value>Save as…</value></data>
+  <data name="BtnInsertBefore" xml:space="preserve"><value>Insert before</value></data>
+  <data name="BtnInsertAfter" xml:space="preserve"><value>Insert after</value></data>
+  <data name="BtnDelete" xml:space="preserve"><value>Delete</value></data>
+  <data name="BtnRotate" xml:space="preserve"><value>Rotate…</value></data>
+  <data name="BtnRotateLeft" xml:space="preserve"><value>Rotate left</value></data>
+  <data name="BtnRotateRight" xml:space="preserve"><value>Rotate right</value></data>
+  <data name="BtnUndo" xml:space="preserve"><value>Undo</value></data>
+  <data name="BtnRedo" xml:space="preserve"><value>Redo</value></data>
+  <data name="BtnFitHeight" xml:space="preserve"><value>Fit height</value></data>
+  <data name="BtnFitWidth" xml:space="preserve"><value>Fit width</value></data>
+  <data name="BtnFitBest" xml:space="preserve"><value>Fit page</value></data>
+  <data name="BtnZoomIn" xml:space="preserve"><value>Zoom in</value></data>
+  <data name="BtnZoomOut" xml:space="preserve"><value>Zoom out</value></data>
+  <data name="BtnActualSize" xml:space="preserve"><value>100 %</value></data>
+  <data name="StartOpen" xml:space="preserve"><value>Open PDF…</value></data>
+  <data name="StartHint" xml:space="preserve"><value>or drop a PDF file onto this window</value></data>
+  <data name="PickPdfTitle" xml:space="preserve"><value>Open PDF</value></data>
+  <data name="PickInsertTitle" xml:space="preserve"><value>Choose PDF files to insert</value></data>
+  <data name="InsertRangeTitle" xml:space="preserve"><value>Insert pages</value></data>
+  <data name="InsertRangeHeading" xml:space="preserve"><value>Which pages of "{0}" ({1}) should be inserted?</value></data>
+  <data name="InsertRangeAll" xml:space="preserve"><value>All pages</value></data>
+  <data name="InsertRangeRange" xml:space="preserve"><value>Page range:</value></data>
+  <data name="PickSaveTitle" xml:space="preserve"><value>Save PDF</value></data>
+  <data name="FilterPdf" xml:space="preserve"><value>PDF documents</value></data>
+  <data name="DefaultFileName" xml:space="preserve"><value>Document.pdf</value></data>
+  <data name="ErrorTitle" xml:space="preserve"><value>Error</value></data>
+  <data name="ErrOpenFailed" xml:space="preserve"><value>The file could not be opened.</value></data>
+  <data name="ErrPasswordProtected" xml:space="preserve"><value>The file is password protected. Password-protected PDFs are not supported yet.</value></data>
+  <data name="ErrNotAPdf" xml:space="preserve"><value>The file is damaged or not a PDF document.</value></data>
+  <data name="ErrFileOpenInOtherWindow" xml:space="preserve"><value>The file is open in another window. Close it there first or save under a different name.</value></data>
+  <data name="ErrRecentMissing" xml:space="preserve"><value>The file no longer exists and was removed from the list.</value></data>
+  <data name="ErrStartFileMissing" xml:space="preserve"><value>The file given on the command line was not found.</value></data>
+  <data name="ErrStartFilesMissing" xml:space="preserve"><value>These files given on the command line were not found.</value></data>
+  <data name="ErrSaveFailed" xml:space="preserve"><value>The document could not be saved.</value></data>
+  <data name="Ok" xml:space="preserve"><value>OK</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Close" xml:space="preserve"><value>Close</value></data>
+  <data name="Save" xml:space="preserve"><value>Save</value></data>
+  <data name="DontSave" xml:space="preserve"><value>Don't save</value></data>
+  <data name="PageLoading" xml:space="preserve"><value>Loading page {0} …</value></data>
+  <data name="PageRenderFailed" xml:space="preserve"><value>Page {0} could not be rendered</value></data>
+  <data name="CtxInsertBefore" xml:space="preserve"><value>Insert before this page…</value></data>
+  <data name="CtxInsertAfter" xml:space="preserve"><value>Insert after this page…</value></data>
+  <data name="CtxRotateDialog" xml:space="preserve"><value>Rotate…</value></data>
+  <data name="CtxDelete" xml:space="preserve"><value>Delete page(s)</value></data>
+  <data name="CtxExtract" xml:space="preserve"><value>Extract page(s)…</value></data>
+  <data name="CtxShowOrganize" xml:space="preserve"><value>Show in Organize mode</value></data>
+  <data name="CtxShowReading" xml:space="preserve"><value>Show in Reading mode</value></data>
+  <data name="TabOrganize" xml:space="preserve"><value>Organize</value></data>
+  <data name="GroupMode" xml:space="preserve"><value>Mode</value></data>
+  <data name="GroupCombine" xml:space="preserve"><value>Combine</value></data>
+  <data name="GroupOutput" xml:space="preserve"><value>Output</value></data>
+  <data name="GroupSelection" xml:space="preserve"><value>Selection</value></data>
+  <data name="BtnConcatenate" xml:space="preserve"><value>Merge…</value></data>
+  <data name="BtnExtract" xml:space="preserve"><value>Extract pages…</value></data>
+  <data name="BtnSplit" xml:space="preserve"><value>Split…</value></data>
+  <data name="BtnSelectAll" xml:space="preserve"><value>Select all</value></data>
+  <data name="BtnReadingMode" xml:space="preserve"><value>Reading</value></data>
+  <data name="BtnOrganizeMode" xml:space="preserve"><value>Organize</value></data>
+  <data name="MenuConcatenate" xml:space="preserve"><value>Merge PDFs…</value></data>
+  <data name="MenuExtract" xml:space="preserve"><value>Extract Selected Pages…</value></data>
+  <data name="MenuSplit" xml:space="preserve"><value>Split Document…</value></data>
+  <data name="MenuSelectAll" xml:space="preserve"><value>Select All</value></data>
+  <data name="MenuReadingMode" xml:space="preserve"><value>Reading Mode</value></data>
+  <data name="MenuOrganizeMode" xml:space="preserve"><value>Organize Mode</value></data>
+  <data name="ConcatenatedFileName" xml:space="preserve"><value>Merged.pdf</value></data>
+  <data name="ExtractFileName" xml:space="preserve"><value>{0}_extract.pdf</value></data>
+  <data name="MsgExtracted" xml:space="preserve"><value>{0} page(s) saved to {1}</value></data>
+  <data name="MenuReduceSize" xml:space="preserve"><value>Reduce File Size…</value></data>
+  <data name="BtnReduceSize" xml:space="preserve"><value>Reduce Size…</value></data>
+  <data name="ReduceTitle" xml:space="preserve"><value>Reduce File Size</value></data>
+  <data name="ReduceIntro" xml:space="preserve"><value>Scans and pictures with a higher resolution than needed are scaled down and saved as JPEG. Text and drawings stay exactly as they are.</value></data>
+  <data name="ReduceHigh" xml:space="preserve"><value>High quality – pictures up to 200 dpi (good for printing)</value></data>
+  <data name="ReduceMedium" xml:space="preserve"><value>Medium – pictures up to 150 dpi (recommended for e-mail and archive)</value></data>
+  <data name="ReduceSmall" xml:space="preserve"><value>Small – pictures up to 100 dpi (screen only)</value></data>
+  <data name="ReduceNote" xml:space="preserve"><value>The result is saved under a new name; the original file is not changed. Black-and-white scans, transparent pictures and graphics with few colours are left as they are.</value></data>
+  <data name="ReduceStart" xml:space="preserve"><value>Reduce and save…</value></data>
+  <data name="ReduceFileNameHigh" xml:space="preserve"><value>{0}_high.pdf</value></data>
+  <data name="ReduceFileNameMedium" xml:space="preserve"><value>{0}_medium.pdf</value></data>
+  <data name="ReduceFileNameSmall" xml:space="preserve"><value>{0}_small.pdf</value></data>
+  <data name="BusyReducing" xml:space="preserve"><value>Reducing pictures…</value></data>
+  <data name="MsgReduced" xml:space="preserve"><value>{0} picture(s) scaled down: {1} → {2} ({3} % smaller).</value></data>
+  <data name="MsgReducedNoComparison" xml:space="preserve"><value>{0} picture(s) scaled down; the file now has {1}.</value></data>
+  <data name="MsgReducedNothing" xml:space="preserve"><value>No picture could be made smaller: the pictures already have a low resolution or have to stay as they are. The file was saved anyway.</value></data>
+  <data name="MenuQuickGuide" xml:space="preserve"><value>Quick Guide</value></data>
+  <data name="MenuIntroVideo" xml:space="preserve"><value>Introduction Video</value></data>
+  <data name="VideoOpenFailed" xml:space="preserve"><value>The video could not be played.</value></data>
+  <data name="VideoNoPlayer" xml:space="preserve"><value>No program for playing videos was found. Install a video player and try again.</value></data>
+  <data name="StartQuickGuide" xml:space="preserve"><value>New here? Open the quick guide</value></data>
+  <data name="GuideTitle" xml:space="preserve"><value>Quick Guide</value></data>
+  <data name="GuideCtrlKey" xml:space="preserve"><value>Ctrl</value></data>
+  <data name="GuideIntro" xml:space="preserve"><value>{App} reads PDFs and puts them in order. Every change happens on screen first and can be undone; the file only changes when you save. The functions are in the ribbon, many also in the right-click menu of a page; the tooltips show the keyboard shortcuts.</value></data>
+  <data name="GuideOpenTitle" xml:space="preserve"><value>Open documents</value></data>
+  <data name="GuideOpenText" xml:space="preserve"><value>Click Open… ({0}+O), pick a file from Recent or drop a PDF onto the window. Every document gets its own window; {0}+N opens an empty one. In the file manager, the right-click menu offers “Read with {App}” and, for several PDFs, “Merge with {App}”.</value></data>
+  <data name="GuideReadTitle" xml:space="preserve"><value>Read</value></data>
+  <data name="GuideReadText" xml:space="preserve"><value>The pages sit side by side: scroll with the mouse wheel, the arrow keys, Page Up/Down or by dragging with the mouse. Zoom with {0}+mouse wheel, the zoom field or the buttons in the status bar; the View tab fits the pages to height, width or both. Click the page number in the status bar ({0}+G) to jump to a page; {0}+T shows thumbnails on the left.</value></data>
+  <data name="GuideOrganizeTitle" xml:space="preserve"><value>Organize</value></data>
+  <data name="GuideOrganizeText" xml:space="preserve"><value>{0}+2 (or Organize) shows all pages as thumbnails, {0}+1 goes back to reading. Click to select, {0}+click for more, Shift+click for a range, {0}+A for all. Drag the selected pages to a new place to reorder them. A double-click opens a page for reading.</value></data>
+  <data name="GuidePagesTitle" xml:space="preserve"><value>Change pages</value></data>
+  <data name="GuidePagesText" xml:space="preserve"><value>Rotate left or right ({0}+L / {0}+R) or several pages at once with Rotate… ({0}+Shift+R); delete with Del. Insert before / Insert after adds pages of another PDF at the current page (you choose which), Blank page before / after adds an empty page. Replace swaps consecutive pages for pages of another open document or PDF file. Right-click a page for the same actions.</value></data>
+  <data name="GuideStampTitle" xml:space="preserve"><value>Stamps</value></data>
+  <data name="GuideStampText" xml:space="preserve"><value>Insert stamp puts a picture from your stamp folder on the page – a signature, company stamp or logo (PNG, transparency is kept). Click the page to place it, then drag to move, pull a corner to resize; Del removes it. The stamp folder is set in Settings; pictures in a subfolder get a section of their own, e.g. the numbers 0–20 for marking an order. A stamp can show the date: “Received” writes today's date when it is placed, a double click on it changes the date until you save. Use New stamp… in the gallery to make your own from a PNG picture, or right-click a stamp to edit it.</value></data>
+  <data name="GuideTextTitle" xml:space="preserve"><value>Text</value></data>
+  <data name="GuideTextText" xml:space="preserve"><value>Choose Insert text, click the page and type; Esc or a click elsewhere finishes. Pen colour sets colour, font and size. Templates places saved text snippets in which the date, page number or file name are filled in; each is a text file in the templates folder (set in Settings). The text is saved as real PDF text: searchable and selectable.</value></data>
+  <data name="GuideOcrTitle" xml:space="preserve"><value>Recognize text (OCR)</value></data>
+  <data name="GuideOcrText" xml:space="preserve"><value>Recognize text… makes scanned pages searchable: the recognized words are saved as an invisible text layer, the page looks the same. "Select text" shows what text a page has: drag over it to highlight the text, {0}+C copies it. In Organize mode, {0}+C copies the text of the selected pages.</value></data>
+  <data name="GuideConcatenateTitle" xml:space="preserve"><value>Merge</value></data>
+  <data name="GuideConcatenateText" xml:space="preserve"><value>Merge… builds a new document from several PDFs: add files (or drop them onto the dialog), Open documents adds those of your other windows, then put them in order. The open document can be part of it, including its unsaved changes.</value></data>
+  <data name="GuideExtractTitle" xml:space="preserve"><value>Extract and split</value></data>
+  <data name="GuideExtractText" xml:space="preserve"><value>Extract pages… saves the selected pages as a new PDF. Split… cuts the document into several files, every N pages or at the selected pages. The open document stays as it is.</value></data>
+  <data name="GuideReduceTitle" xml:space="preserve"><value>Reduce file size</value></data>
+  <data name="GuideReduceText" xml:space="preserve"><value>Reduce Size… scales scans and pictures down to 200, 150 or 100 dpi and saves the smaller copy under a new name. Text and drawings stay exactly as they are; a message tells how much smaller the file got.</value></data>
+  <data name="GuidePrintTitle" xml:space="preserve"><value>Print</value></data>
+  <data name="GuidePrintText" xml:space="preserve"><value>Print… ({0}+P) prints all pages, the current page or a range – with all your changes. “Properties…” opens the printer’s own settings (tray, two-sided, paper …).</value></data>
+  <data name="GuideMailTitle" xml:space="preserve"><value>Send by email</value></data>
+  <data name="GuideMailText" xml:space="preserve"><value>“Email” opens a new message in your email program with the document attached – as you see it, with all changes, even unsaved ones. The email program is the one set as default in your system.</value></data>
+  <data name="GuideSaveTitle" xml:space="preserve"><value>Undo and save</value></data>
+  <data name="GuideSaveText" xml:space="preserve"><value>Every step can be undone and redone ({0}+Z / {0}+Y). A dot in the window title shows unsaved changes. Save ({0}+S) replaces the file safely and keeps bookmarks and form fields; Save As ({0}+Shift+S) writes a new file. Before closing, you are asked about unsaved changes.</value></data>
+  <data name="GuideSettingsTitle" xml:space="preserve"><value>Settings and help</value></data>
+  <data name="GuideSettingsText" xml:space="preserve"><value>Settings… ({0}+,) switches between light and dark and between English and German; on Windows and Linux the menu bar can also be switched on there. {0}+F1 or the arrow at the right end of the tabs folds the ribbon away for more room; a click on a tab brings it back. The gear at the top right opens the settings from any tab, F1 or the ? next to it opens this guide, the i button shows the version.</value></data>
+  <data name="MsgSplitDone" xml:space="preserve"><value>{0} written to {1}</value></data>
+  <data name="ErrExtractFailed" xml:space="preserve"><value>The pages could not be extracted.</value></data>
+  <data name="ErrSplitFailed" xml:space="preserve"><value>The document could not be split.</value></data>
+  <data name="ErrDeleteAll" xml:space="preserve"><value>A document needs at least one page. Not all pages can be deleted.</value></data>
+  <data name="SplitTitle" xml:space="preserve"><value>Split document</value></data>
+  <data name="SplitEveryN" xml:space="preserve"><value>Every N pages (N = number of pages per part):</value></data>
+  <data name="SplitAtSelected" xml:space="preserve"><value>At the selected pages (each starts a new part)</value></data>
+  <data name="SplitFolder" xml:space="preserve"><value>Output folder</value></data>
+  <data name="SplitBrowse" xml:space="preserve"><value>Browse…</value></data>
+  <data name="SplitBaseName" xml:space="preserve"><value>File name (parts are numbered automatically)</value></data>
+  <data name="ErrSplitCount" xml:space="preserve"><value>Enter a number of pages of 1 or more.</value></data>
+  <data name="ErrSplitFolder" xml:space="preserve"><value>Please choose an existing output folder.</value></data>
+  <data name="ErrSplitName" xml:space="preserve"><value>Please enter a valid file name.</value></data>
+  <data name="ErrSplitExists" xml:space="preserve"><value>"{0}" already exists (and {1} file(s) in total). Choose another folder or name.</value></data>
+  <data name="ConcatTitle" xml:space="preserve"><value>Merge PDFs</value></data>
+  <data name="ConcatAdd" xml:space="preserve"><value>Add files…</value></data>
+  <data name="ConcatRemove" xml:space="preserve"><value>Remove</value></data>
+  <data name="ConcatUp" xml:space="preserve"><value>Move up</value></data>
+  <data name="ConcatDown" xml:space="preserve"><value>Move down</value></data>
+  <data name="ConcatSort" xml:space="preserve"><value>Sort by name</value></data>
+  <data name="ConcatIncludeCurrent" xml:space="preserve"><value>Include the current document (with its unsaved changes)</value></data>
+  <data name="ConcatCurrentDocument" xml:space="preserve"><value>(current document)</value></data>
+  <data name="ConcatNeedTwo" xml:space="preserve"><value>Add at least two entries.</value></data>
+  <data name="ConcatRemoveBroken" xml:space="preserve"><value>Remove the files that cannot be read.</value></data>
+  <data name="ConcatTotal" xml:space="preserve"><value>{0} entries, {1} pages in total</value></data>
+  <data name="ConcatDropHint" xml:space="preserve"><value>Add PDF files or drop them here</value></data>
+  <data name="ConcatAddOpen" xml:space="preserve"><value>Open documents</value></data>
+  <data name="ConcatFromWindow" xml:space="preserve"><value>Open in another window</value></data>
+  <data name="ConcatFromWindowEdited" xml:space="preserve"><value>Open in another window (with its unsaved changes)</value></data>
+  <data name="ConcatWindowFailed" xml:space="preserve"><value>Its files cannot be read</value></data>
+  <data name="MenuFile" xml:space="preserve"><value>File</value></data>
+  <data name="MenuEdit" xml:space="preserve"><value>Edit</value></data>
+  <data name="MenuView" xml:space="preserve"><value>View</value></data>
+  <data name="MenuHelp" xml:space="preserve"><value>Help</value></data>
+  <data name="MenuNewWindow" xml:space="preserve"><value>New Window</value></data>
+  <data name="MenuOpen" xml:space="preserve"><value>Open…</value></data>
+  <data name="MenuOpenRecent" xml:space="preserve"><value>Open Recent</value></data>
+  <data name="MenuClearRecent" xml:space="preserve"><value>Clear List</value></data>
+  <data name="RecentEmpty" xml:space="preserve"><value>(no recent files)</value></data>
+  <data name="MenuSave" xml:space="preserve"><value>Save</value></data>
+  <data name="MenuSaveAs" xml:space="preserve"><value>Save As…</value></data>
+  <data name="MenuSettings" xml:space="preserve"><value>Settings…</value></data>
+  <data name="MenuClose" xml:space="preserve"><value>Close</value></data>
+  <data name="MenuExit" xml:space="preserve"><value>Exit</value></data>
+  <data name="MenuUndo" xml:space="preserve"><value>Undo</value></data>
+  <data name="MenuRedo" xml:space="preserve"><value>Redo</value></data>
+  <data name="MenuInsertBefore" xml:space="preserve"><value>Insert Pages Before Current Page…</value></data>
+  <data name="MenuInsertAfter" xml:space="preserve"><value>Insert Pages After Current Page…</value></data>
+  <data name="MenuRotate" xml:space="preserve"><value>Rotate Pages…</value></data>
+  <data name="MenuRotateLeft" xml:space="preserve"><value>Rotate Left</value></data>
+  <data name="MenuRotateRight" xml:space="preserve"><value>Rotate Right</value></data>
+  <data name="MenuDeletePages" xml:space="preserve"><value>Delete Page</value></data>
+  <data name="MenuFitHeight" xml:space="preserve"><value>Fit Height</value></data>
+  <data name="MenuFitWidth" xml:space="preserve"><value>Fit Width</value></data>
+  <data name="MenuFitBest" xml:space="preserve"><value>Fit Page</value></data>
+  <data name="MenuZoomIn" xml:space="preserve"><value>Zoom In</value></data>
+  <data name="MenuZoomOut" xml:space="preserve"><value>Zoom Out</value></data>
+  <data name="MenuActualSize" xml:space="preserve"><value>Actual Size (100 %)</value></data>
+  <data name="MenuFirstPage" xml:space="preserve"><value>First Page</value></data>
+  <data name="MenuLastPage" xml:space="preserve"><value>Last Page</value></data>
+  <data name="MenuGoToPage" xml:space="preserve"><value>Go to Page…</value></data>
+  <data name="GoToPagePrompt" xml:space="preserve"><value>Go to page (1–{0}):</value></data>
+  <data name="MenuToggleRibbon" xml:space="preserve"><value>Collapse/Expand Ribbon</value></data>
+  <data name="MenuAbout" xml:space="preserve"><value>About {App}…</value></data>
+  <data name="RotateTitle" xml:space="preserve"><value>Rotate pages</value></data>
+  <data name="RotateDirection" xml:space="preserve"><value>Direction</value></data>
+  <data name="RotateCw" xml:space="preserve"><value>90° clockwise</value></data>
+  <data name="RotateCcw" xml:space="preserve"><value>90° counter-clockwise</value></data>
+  <data name="Rotate180" xml:space="preserve"><value>180°</value></data>
+  <data name="RotatePages" xml:space="preserve"><value>Pages</value></data>
+  <data name="RotateScopeAll" xml:space="preserve"><value>All pages</value></data>
+  <data name="RotateScopeCurrent" xml:space="preserve"><value>Current page ({0})</value></data>
+  <data name="RotateScopeSelected" xml:space="preserve"><value>Selected pages</value></data>
+  <data name="RotateScopeRange" xml:space="preserve"><value>Page range:</value></data>
+  <data name="ErrRangeEmpty" xml:space="preserve"><value>Enter the pages, e.g. 1-3, 5, 8-10.</value></data>
+  <data name="ErrRangeSyntax" xml:space="preserve"><value>"{0}" is not a valid page or range.</value></data>
+  <data name="ErrRangeOutOfRange" xml:space="preserve"><value>"{0}": the document has only {1}.</value></data>
+  <data name="ErrRangeReversed" xml:space="preserve"><value>"{0}": the first page must not be after the last page.</value></data>
+  <data name="UnsavedTitle" xml:space="preserve"><value>Unsaved changes</value></data>
+  <data name="UnsavedMessage" xml:space="preserve"><value>Do you want to save the changes to "{0}"?</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>Settings</value></data>
+  <data name="SettingsAppearance" xml:space="preserve"><value>Appearance</value></data>
+  <data name="SettingsSystem" xml:space="preserve"><value>Follow system</value></data>
+  <data name="SettingsLight" xml:space="preserve"><value>Light</value></data>
+  <data name="SettingsDark" xml:space="preserve"><value>Dark</value></data>
+  <data name="SettingsLanguage" xml:space="preserve"><value>Language</value></data>
+  <data name="AboutTitle" xml:space="preserve"><value>About {App}</value></data>
+  <data name="AboutTagline" xml:space="preserve"><value>Read and reorganize PDF documents</value></data>
+  <data name="AboutCopy" xml:space="preserve"><value>Copy version info</value></data>
+  <data name="InfoVersion" xml:space="preserve"><value>Version</value></data>
+  <data name="InfoBuildDate" xml:space="preserve"><value>Build date</value></data>
+  <data name="InfoRuntime" xml:space="preserve"><value>.NET runtime</value></data>
+  <data name="InfoOs" xml:space="preserve"><value>Operating system</value></data>
+  <data name="InfoAvalonia" xml:space="preserve"><value>Avalonia</value></data>
+  <data name="InfoPdfium" xml:space="preserve"><value>PDFium</value></data>
+  <data name="InfoAuthor" xml:space="preserve"><value>Author</value></data>
+  <data name="InfoCopyright" xml:space="preserve"><value>Copyright</value></data>
+  <data name="InfoLicense" xml:space="preserve"><value>License</value></data>
+  <data name="InfoRepository" xml:space="preserve"><value>Project</value></data>
+  <data name="MsgCancelled" xml:space="preserve"><value>Operation cancelled.</value></data>
+  <data name="GroupStamp" xml:space="preserve"><value>Stamp</value></data>
+  <data name="BtnStamp" xml:space="preserve"><value>Insert stamp</value></data>
+  <data name="StampGalleryEmpty" xml:space="preserve"><value>No pictures found. Copy PNG files into the stamp folder.</value></data>
+  <data name="StampOpenFolder" xml:space="preserve"><value>Open stamp folder</value></data>
+  <data name="StampSkipped" xml:space="preserve"><value>{0} file(s) could not be read.</value></data>
+  <data name="StampSelected" xml:space="preserve"><value>Stamp “{0}” selected – click on a page to place it.</value></data>
+  <data name="SettingsStampFolder" xml:space="preserve"><value>Stamp folder</value></data>
+  <data name="SettingsChoose" xml:space="preserve"><value>Choose…</value></data>
+  <data name="SettingsDefault" xml:space="preserve"><value>Default</value></data>
+  <data name="StampPlaced" xml:space="preserve"><value>Stamp placed (Ctrl/Cmd+Z undoes it).</value></data>
+  <data name="StampPlacedDated" xml:space="preserve"><value>Stamp placed with the date {0}. Double-click it to change the date; Ctrl/Cmd+Z undoes it.</value></data>
+  <data name="StampDateTitle" xml:space="preserve"><value>Stamp date</value></data>
+  <data name="StampDateChanged" xml:space="preserve"><value>Date of the stamp changed to {0}.</value></data>
+  <data name="StampNew" xml:space="preserve"><value>New stamp…</value></data>
+  <data name="StampEdit" xml:space="preserve"><value>Edit…</value></data>
+  <data name="StampPngHint" xml:space="preserve"><value>Stamps are PNG files; other picture formats are not used.</value></data>
+  <data name="StampEditHint" xml:space="preserve"><value>Right-click a stamp to edit it.</value></data>
+  <data name="StampEditorTitle" xml:space="preserve"><value>Stamp editor</value></data>
+  <data name="StampEditorName" xml:space="preserve"><value>Name</value></data>
+  <data name="StampDefaultName" xml:space="preserve"><value>New stamp</value></data>
+  <data name="StampEditorChoosePicture" xml:space="preserve"><value>Choose picture…</value></data>
+  <data name="StampPictures" xml:space="preserve"><value>PNG pictures</value></data>
+  <data name="StampEditorPngOnly" xml:space="preserve"><value>“{0}” is not a PNG. Only PNG pictures can hold the fields of a stamp.</value></data>
+  <data name="StampEditorWhite" xml:space="preserve"><value>Make white transparent</value></data>
+  <data name="StampEditorHint" xml:space="preserve"><value>Drag on the picture to add a field, e.g. for the date. Drag a field to move it, pull a corner of the selected field to resize it.</value></data>
+  <data name="StampFieldText" xml:space="preserve"><value>Text of the field</value></data>
+  <data name="StampFieldColor" xml:space="preserve"><value>Colour</value></data>
+  <data name="StampFieldAlign" xml:space="preserve"><value>Alignment</value></data>
+  <data name="StampFieldAlignCenter" xml:space="preserve"><value>Centre</value></data>
+  <data name="StampFieldAlignLeft" xml:space="preserve"><value>Left</value></data>
+  <data name="StampFieldAlignRight" xml:space="preserve"><value>Right</value></data>
+  <data name="StampFieldUpper" xml:space="preserve"><value>Capital letters</value></data>
+  <data name="StampFieldLanguage" xml:space="preserve"><value>Language of the date</value></data>
+  <data name="StampFieldLanguageProgram" xml:space="preserve"><value>Language of the program</value></data>
+  <data name="StampFieldRemove" xml:space="preserve"><value>Remove field</value></data>
+  <data name="StampSaved" xml:space="preserve"><value>Stamp “{0}” saved.</value></data>
+  <data name="StampSaveFailed" xml:space="preserve"><value>The stamp “{0}” could not be saved: {1}</value></data>
+  <data name="StampUnreadable" xml:space="preserve"><value>The picture “{0}” could not be read.</value></data>
+  <data name="MenuInsertBlankBefore" xml:space="preserve"><value>Insert Blank Page Before Current Page</value></data>
+  <data name="MenuInsertBlankAfter" xml:space="preserve"><value>Insert Blank Page After Current Page</value></data>
+  <data name="CtxInsertBlankBefore" xml:space="preserve"><value>Insert blank page before this page</value></data>
+  <data name="CtxInsertBlankAfter" xml:space="preserve"><value>Insert blank page after this page</value></data>
+  <data name="BtnBlankBefore" xml:space="preserve"><value>Blank page before</value></data>
+  <data name="BtnBlankAfter" xml:space="preserve"><value>Blank page after</value></data>
+  <data name="MenuReplacePages" xml:space="preserve"><value>Replace Pages…</value></data>
+  <data name="CtxReplacePages" xml:space="preserve"><value>Replace pages…</value></data>
+  <data name="BtnReplace" xml:space="preserve"><value>Replace</value></data>
+  <data name="ReplaceTitle" xml:space="preserve"><value>Replace pages</value></data>
+  <data name="ReplaceTargetHeading" xml:space="preserve"><value>Replace these pages (they are removed):</value></data>
+  <data name="ReplaceSourceHeading" xml:space="preserve"><value>Replace them with:</value></data>
+  <data name="ReplaceSourceOpen" xml:space="preserve"><value>Open document</value></data>
+  <data name="ReplaceSourceFile" xml:space="preserve"><value>File</value></data>
+  <data name="ReplaceBrowse" xml:space="preserve"><value>Browse…</value></data>
+  <data name="ReplaceNoFile" xml:space="preserve"><value>(no file chosen)</value></data>
+  <data name="ReplacePickTitle" xml:space="preserve"><value>Choose the PDF with the new pages</value></data>
+  <data name="ReplaceInsertHeading" xml:space="preserve"><value>Pages to insert from it:</value></data>
+  <data name="ReplaceDocumentEntry" xml:space="preserve"><value>{0} ({1})</value></data>
+  <data name="ReplaceSummary" xml:space="preserve"><value>{0} page(s) will be replaced by {1} page(s) from “{2}”.</value></data>
+  <data name="ReplaceChooseSource" xml:space="preserve"><value>Choose the document or file with the new pages.</value></data>
+  <data name="ErrReplaceNotConsecutive" xml:space="preserve"><value>Only consecutive pages can be replaced (e.g. 3-5).</value></data>
+  <data name="GroupNavigation" xml:space="preserve"><value>Navigate</value></data>
+  <data name="GroupApplication" xml:space="preserve"><value>Application</value></data>
+  <data name="BtnFirstPage" xml:space="preserve"><value>First page</value></data>
+  <data name="BtnLastPage" xml:space="preserve"><value>Last page</value></data>
+  <data name="BtnGoToPage" xml:space="preserve"><value>Go to page…</value></data>
+  <data name="BtnCollapseRibbon" xml:space="preserve"><value>Collapse ribbon</value></data>
+  <data name="BtnExpandRibbon" xml:space="preserve"><value>Show ribbon</value></data>
+  <data name="BtnNewWindow" xml:space="preserve"><value>New window</value></data>
+  <data name="BtnCloseDocument" xml:space="preserve"><value>Close</value></data>
+  <data name="BtnExit" xml:space="preserve"><value>Exit</value></data>
+  <data name="BtnSettings" xml:space="preserve"><value>Settings…</value></data>
+  <data name="SettingsShowMenuBar" xml:space="preserve"><value>Show the menu bar</value></data>
+  <data name="SettingsMenuBarHint" xml:space="preserve"><value>Every command is in the ribbon as well; the keyboard shortcuts keep working.</value></data>
+  <data name="GroupText" xml:space="preserve"><value>Text</value></data>
+  <data name="BtnText" xml:space="preserve"><value>Insert text</value></data>
+  <data name="BtnTextStyle" xml:space="preserve"><value>Pen colour</value></data>
+  <data name="TextToolSelected" xml:space="preserve"><value>Click on a page to place the text.</value></data>
+  <data name="TextPenColor" xml:space="preserve"><value>Pen colour</value></data>
+  <data name="TextColorCode" xml:space="preserve"><value>Colour</value></data>
+  <data name="TextFont" xml:space="preserve"><value>Font</value></data>
+  <data name="TextSize" xml:space="preserve"><value>Size</value></data>
+  <data name="TextPlaced" xml:space="preserve"><value>Text placed - double-click it to edit.</value></data>
+  <data name="BtnTemplates" xml:space="preserve"><value>Templates</value></data>
+  <data name="TemplatesNone" xml:space="preserve"><value>No templates</value></data>
+  <data name="TemplatesEdit" xml:space="preserve"><value>Edit templates…</value></data>
+  <data name="TemplateSelected" xml:space="preserve"><value>Click on a page to place “{0}”.</value></data>
+  <data name="TemplatesTitle" xml:space="preserve"><value>Templates</value></data>
+  <data name="TemplateName" xml:space="preserve"><value>Name</value></data>
+  <data name="TemplateText" xml:space="preserve"><value>Text</value></data>
+  <data name="TemplateAdd" xml:space="preserve"><value>New</value></data>
+  <data name="TemplateDelete" xml:space="preserve"><value>Delete</value></data>
+  <data name="TemplateMacros" xml:space="preserve"><value>Macros, expanded when the text is placed: {$DATE}, {$DATE:yyyy-MM-dd}, {$TIME}, {$USER}, {$FILE}, {$FILENAME}, {$PAGE}, {$PAGES}</value></data>
+  <data name="StampFolderNumbers" xml:space="preserve"><value>Numbers</value></data>
+  <data name="StampGroupHeader" xml:space="preserve"><value>{0} ({1})</value></data>
+  <data name="TemplateOpenFolder" xml:space="preserve"><value>Open templates folder</value></data>
+  <data name="SettingsTemplateFolder" xml:space="preserve"><value>Templates folder</value></data>
+  <data name="TemplatesSaveFailed" xml:space="preserve"><value>Not all templates could be saved in {0}.</value></data>
+  <data name="TemplateSampleDateName" xml:space="preserve"><value>Date</value></data>
+  <data name="TemplateSampleDateText" xml:space="preserve"><value>{$DATE}</value></data>
+  <data name="TemplateSamplePageName" xml:space="preserve"><value>Page x of y</value></data>
+  <data name="TemplateSamplePageText" xml:space="preserve"><value>Page {$PAGE} of {$PAGES}</value></data>
+  <data name="TemplateSampleDraftName" xml:space="preserve"><value>Draft</value></data>
+  <data name="TemplateSampleDraftText" xml:space="preserve"><value>DRAFT {$DATE:yyyy-MM-dd}</value></data>
+  <data name="TemplateSampleReceivedName" xml:space="preserve"><value>Received</value></data>
+  <data name="TemplateSampleReceivedText" xml:space="preserve"><value>Received on {$DATE}, {$USER}</value></data>
+  <data name="MenuPrint" xml:space="preserve"><value>Print…</value></data>
+  <data name="BtnPrint" xml:space="preserve"><value>Print</value></data>
+  <data name="PrintTitle" xml:space="preserve"><value>Print</value></data>
+  <data name="PrintPrinter" xml:space="preserve"><value>Printer</value></data>
+  <data name="PrintCopies" xml:space="preserve"><value>Copies</value></data>
+  <data name="PrintPages" xml:space="preserve"><value>Pages</value></data>
+  <data name="PrintScopeCurrent" xml:space="preserve"><value>Current page ({0})</value></data>
+  <data name="PrintScopeRange" xml:space="preserve"><value>Page range</value></data>
+  <data name="PrintScopeAll" xml:space="preserve"><value>All pages ({0})</value></data>
+  <data name="PrintOk" xml:space="preserve"><value>Print</value></data>
+  <data name="PrintNoPrinters" xml:space="preserve"><value>No printer is available.</value></data>
+  <data name="PrintProperties" xml:space="preserve"><value>Properties…</value></data>
+  <data name="PrintCustomSetup" xml:space="preserve"><value>Custom printer settings are used.</value></data>
+  <data name="PrintPropertiesFailed" xml:space="preserve"><value>The printer settings could not be opened: {0}</value></data>
+  <data name="PrinterOptionsTitle" xml:space="preserve"><value>Printer settings – {0}</value></data>
+  <data name="PrinterOptionsNone" xml:space="preserve"><value>This printer has no settings to choose.</value></data>
+  <data name="PrinterOptionsReset" xml:space="preserve"><value>Printer defaults</value></data>
+  <data name="BusyPrinting" xml:space="preserve"><value>Printing {0} page(s)…</value></data>
+  <data name="MsgPrinted" xml:space="preserve"><value>Sent {0} page(s) to “{1}”.</value></data>
+  <data name="ErrPrintFailed" xml:space="preserve"><value>The document could not be printed.</value></data>
+  <data name="MenuSendByMail" xml:space="preserve"><value>Send by Email…</value></data>
+  <data name="BtnSendByMail" xml:space="preserve"><value>Email</value></data>
+  <data name="BusyPreparingMail" xml:space="preserve"><value>Preparing the email attachment…</value></data>
+  <data name="MsgMailOpened" xml:space="preserve"><value>Opening a new email with “{0}” attached…</value></data>
+  <data name="ErrMailFailed" xml:space="preserve"><value>No email could be opened. Is an email program set up as default (e.g. Outlook, Thunderbird or Mail)?</value></data>
+  <data name="CtxPrint" xml:space="preserve"><value>Print page(s)…</value></data>
+  <data name="GroupRecognize" xml:space="preserve"><value>Recognize</value></data>
+  <data name="BtnRecognizeText" xml:space="preserve"><value>Recognize text…</value></data>
+  <data name="MenuRecognizeText" xml:space="preserve"><value>Recognize Text (OCR)…</value></data>
+  <data name="CtxRecognizeText" xml:space="preserve"><value>Recognize text (OCR)…</value></data>
+  <data name="OcrTitle" xml:space="preserve"><value>Recognize text (OCR)</value></data>
+  <data name="OcrIntro" xml:space="preserve"><value>Reads the text of scanned pages (German and English) and adds it as an invisible layer: the pages look the same, but the text can be searched, selected and copied once the document is saved.</value></data>
+  <data name="OcrSkipPagesWithText" xml:space="preserve"><value>Skip pages that already contain text</value></data>
+  <data name="OcrStart" xml:space="preserve"><value>Recognize</value></data>
+  <data name="BusyOcr" xml:space="preserve"><value>Recognizing text: page {0} of {1}…</value></data>
+  <data name="MsgOcrDone" xml:space="preserve"><value>Text recognized on {0} ({1}). Save the document to keep the text layer.</value></data>
+  <data name="MsgOcrNothingToDo" xml:space="preserve"><value>All chosen pages already contain text; nothing was recognized.</value></data>
+  <data name="ErrOcrFailed" xml:space="preserve"><value>The text could not be recognized.</value></data>
+  <data name="StatusUnsavedOcr" xml:space="preserve"><value>Unsaved changes (text layer on {0})</value></data>
+  <data name="InfoOcr" xml:space="preserve"><value>Text recognition</value></data>
+  <data name="BtnCopyText" xml:space="preserve"><value>Copy text</value></data>
+  <data name="MenuCopyText" xml:space="preserve"><value>Copy Text</value></data>
+  <data name="MenuFind" xml:space="preserve"><value>Find…</value></data>
+  <data name="MenuFindNext" xml:space="preserve"><value>Find Next</value></data>
+  <data name="MenuFindPrevious" xml:space="preserve"><value>Find Previous</value></data>
+  <data name="BtnFind" xml:space="preserve"><value>Find</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Find in document</value></data>
+  <data name="SearchResult" xml:space="preserve"><value>{0} of {1}</value></data>
+  <data name="SearchResultCount" xml:space="preserve"><value>{0} matches</value></data>
+  <data name="SearchRunning" xml:space="preserve"><value>Searching…</value></data>
+  <data name="SearchNoMatches" xml:space="preserve"><value>No matches</value></data>
+  <data name="SearchNoText" xml:space="preserve"><value>No searchable text – recognize the text first</value></data>
+  <data name="SearchPrevious" xml:space="preserve"><value>Previous match</value></data>
+  <data name="SearchNext" xml:space="preserve"><value>Next match</value></data>
+  <data name="SearchClose" xml:space="preserve"><value>Close search</value></data>
+  <data name="SidebarSplitterTip" xml:space="preserve"><value>Drag to make the thumbnails wider or narrower</value></data>
+  <data name="CtxCopyText" xml:space="preserve"><value>Copy text of selected pages</value></data>
+  <data name="MsgTextCopied" xml:space="preserve"><value>Text of {0} page(s) copied to the clipboard ({1}).</value></data>
+  <data name="MsgNoTextToCopy" xml:space="preserve"><value>The selected pages contain no text. Run "Recognize text (OCR)" first.</value></data>
+  <data name="BtnSelectText" xml:space="preserve"><value>Select text</value></data>
+  <data name="MenuSelectText" xml:space="preserve"><value>Select Text</value></data>
+  <data name="SelectTextToolSelected" xml:space="preserve"><value>Drag over a page to select its text. Only text the page really contains (recognized or in the file) can be selected. Esc ends.</value></data>
+  <data name="MsgPageHasNoText" xml:space="preserve"><value>Page {0} contains no text. Run "Recognize text" to add it.</value></data>
+  <data name="MsgSelectionCopied" xml:space="preserve"><value>Selected text copied to the clipboard ({0}).</value></data>
+  <data name="ErrCopyTextFailed" xml:space="preserve"><value>The text could not be copied.</value></data>
+  <data name="AboutLicenses" xml:space="preserve"><value>Third-party licenses</value></data>
+  <data name="Yes" xml:space="preserve"><value>Yes</value></data>
+  <data name="No" xml:space="preserve"><value>No</value></data>
+  <data name="SettingsPdfFiles" xml:space="preserve"><value>PDF files</value></data>
+  <data name="SettingsMakeDefault" xml:space="preserve"><value>Open PDF files with {App}</value></data>
+  <data name="DefaultAppIsSet" xml:space="preserve"><value>{App} is the default program for PDF files.</value></data>
+  <data name="DefaultAppIsOther" xml:space="preserve"><value>PDF files are opened by another program.</value></data>
+  <data name="DefaultAppSettingsOpened" xml:space="preserve"><value>Windows does not let programs do this themselves: in the settings that just opened, choose “Set default” for {App}.</value></data>
+  <data name="DefaultAppNotAvailable" xml:space="preserve"><value>Only possible for the installed program (not when it runs from an unpacked archive).</value></data>
+  <data name="DefaultAppFailed" xml:space="preserve"><value>The default program for PDF files could not be changed.</value></data>
+  <data name="DefaultAppQuestionTitle" xml:space="preserve"><value>Default program</value></data>
+  <data name="DefaultAppQuestion" xml:space="preserve"><value>Should {App} open PDF files from now on?</value></data>
+  <data name="DefaultAppQuestionDetail" xml:space="preserve"><value>{App} becomes the default program for PDF files. You can change this later in the settings.</value></data>
+  <data name="GroupRedact" xml:space="preserve"><value>Redact</value></data>
+  <data name="BtnRedact" xml:space="preserve"><value>Black out</value></data>
+  <data name="BtnCover" xml:space="preserve"><value>White out</value></data>
+  <data name="MenuRedact" xml:space="preserve"><value>Black Out</value></data>
+  <data name="MenuCover" xml:space="preserve"><value>White Out</value></data>
+  <data name="RedactToolSelected" xml:space="preserve"><value>Drag over text or draw a box around an area to black it out. When saving, everything underneath is removed from the file. Esc ends.</value></data>
+  <data name="CoverToolSelected" xml:space="preserve"><value>Drag over text or draw a box around an area to cover it in white. When saving, everything underneath is removed from the file. Esc ends.</value></data>
+  <data name="MsgRedacted" xml:space="preserve"><value>Blacked out – what lies underneath is removed from the file when saving.</value></data>
+  <data name="MsgCovered" xml:space="preserve"><value>Covered in white – what lies underneath is removed from the file when saving.</value></data>
+  <data name="GuideRedactTitle" xml:space="preserve"><value>Black out and white out</value></data>
+  <data name="GuideRedactText" xml:space="preserve"><value>Black out hides confidential passages behind a black box, White out covers content in white as if the paper were empty. With either tool, drag over text to cover exactly those words, or draw a box around any area – pictures and scans too; with Select text, a click on the button covers the selected text. Drag a box to move it, pull a corner to resize it, Del removes it. When saving, everything under the boxes is removed from the file for good: text, pictures, drawings, comments and form entries; the rest of the page stays as it is. Before the original file is overwritten, a warning offers to save a copy instead (can be switched off in Settings).</value></data>
+  <data name="RedactedSaveTitle" xml:space="preserve"><value>Blacked-out content</value></data>
+  <data name="RedactedSaveMessage" xml:space="preserve"><value>Save the blacked-out version over “{0}”?</value></data>
+  <data name="RedactedSaveDetails" xml:space="preserve"><value>Pages with boxes: {0}. Everything under the boxes is removed from the file for good and cannot be restored – not even with Undo. Save a copy to keep the original.</value></data>
+  <data name="RedactedSaveCopy" xml:space="preserve"><value>Save a copy…</value></data>
+  <data name="RedactedSaveOverwrite" xml:space="preserve"><value>Overwrite</value></data>
+  <data name="RedactedSaveDontAsk" xml:space="preserve"><value>Don't ask again (can be switched on again in Settings)</value></data>
+  <data name="RedactedFileName" xml:space="preserve"><value>{0}_redacted.pdf</value></data>
+  <data name="SettingsRedact" xml:space="preserve"><value>Black out and white out</value></data>
+  <data name="SettingsWarnRedacted" xml:space="preserve"><value>Warn before overwriting the original</value></data>
+  <data name="SettingsWarnRedactedHint" xml:space="preserve"><value>Asks before a document with blacked-out or whited-out content is saved over its own file, and offers to save a copy.</value></data>
+  <data name="GroupArea" xml:space="preserve"><value>Area</value></data>
+  <data name="BtnCopyArea" xml:space="preserve"><value>Copy area</value></data>
+  <data name="BtnPasteArea" xml:space="preserve"><value>Paste</value></data>
+  <data name="MenuCopyArea" xml:space="preserve"><value>Copy Area</value></data>
+  <data name="MenuPasteArea" xml:space="preserve"><value>Paste Area</value></data>
+  <data name="CopyAreaToolSelected" xml:space="preserve"><value>Draw a frame around the area to copy. Esc ends.</value></data>
+  <data name="MsgAreaCopied" xml:space="preserve"><value>Area copied – click where it should go. With Esc you can paste it later (Paste area).</value></data>
+  <data name="PasteAreaSelected" xml:space="preserve"><value>Click where the copied area should go. Esc cancels.</value></data>
+  <data name="MsgAreaPasted" xml:space="preserve"><value>Area pasted – what lies underneath is removed from the file when saving.</value></data>
+  <data name="ErrCopyAreaFailed" xml:space="preserve"><value>The area could not be copied.</value></data>
+  <data name="GuideAreaTitle" xml:space="preserve"><value>Copy and paste areas</value></data>
+  <data name="GuideAreaText" xml:space="preserve"><value>Copy area (Home ▸ Redact, also in the Edit menu) copies any part of a page as a picture – text, pictures, stamps and boxes as they are shown: draw a frame around it. The copy then follows the pointer; a click places it in its original size, on the same page, another page or in another window. Esc stops pasting but keeps the copy: Paste (next to Undo) or {0}+V places it again, as often as you like. The pasted area covers what lies underneath; drag it to move it, pull a corner to resize it, Del removes it, Undo takes back every step. Only when saving is the content under it removed from the file for good, and the area becomes part of the page as a picture (its text cannot be searched).</value></data>
+  <data name="FolderOpenFailed" xml:space="preserve"><value>The folder {0} could not be opened.</value></data>
+  <data name="FolderNoFileManager" xml:space="preserve"><value>The file manager could not be started.</value></data>
+  <data name="FolderProblemHint" xml:space="preserve"><value>A protection program may be blocking access (on Windows for example "Controlled folder access"), or the rights are missing. You can choose another folder in the settings.</value></data>
+  <data name="CountPage" xml:space="preserve"><value>{0} page</value></data>
+  <data name="CountPages" xml:space="preserve"><value>{0} pages</value></data>
+  <data name="CountFile" xml:space="preserve"><value>{0} file</value></data>
+  <data name="CountFiles" xml:space="preserve"><value>{0} files</value></data>
+  <data name="CountWord" xml:space="preserve"><value>{0} word</value></data>
+  <data name="CountWords" xml:space="preserve"><value>{0} words</value></data>
+  <data name="CountCharacter" xml:space="preserve"><value>{0} character</value></data>
+  <data name="CountCharacters" xml:space="preserve"><value>{0} characters</value></data>
+</root>

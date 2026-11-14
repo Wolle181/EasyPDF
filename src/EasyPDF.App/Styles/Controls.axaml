@@ -1,0 +1,118 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!--
+    Plain controls in the sober house style (colours in App.axaml). Included before Ribbon.axaml:
+    with equal priority the later style wins, so ribbon buttons keep their flat look.
+  -->
+
+  <!-- Buttons: white with a grey frame; the default button of a dialog (and Button.primary) is the accent-coloured main action -->
+  <Style Selector="Button">
+    <Setter Property="Background" Value="{DynamicResource Button.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Button.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Ribbon.Hover}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Button.BorderHover}" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+  </Style>
+  <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Ribbon.Pressed}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Button.BorderHover}" />
+  </Style>
+  <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Button.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Card.Border}" />
+  </Style>
+
+  <Style Selector="Button.primary, Button[IsDefault=True]">
+    <Setter Property="Background" Value="{DynamicResource Primary.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Primary.Background}" />
+    <Setter Property="Foreground" Value="{DynamicResource Primary.Foreground}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button[IsDefault=True]:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Primary.Hover}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Primary.Hover}" />
+    <Setter Property="Foreground" Value="{DynamicResource Primary.Foreground}" />
+  </Style>
+  <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter, Button[IsDefault=True]:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Primary.Pressed}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Primary.Pressed}" />
+  </Style>
+  <Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter, Button[IsDefault=True]:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Primary.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Primary.Background}" />
+    <Setter Property="Foreground" Value="{DynamicResource Primary.Foreground}" />
+  </Style>
+  <Style Selector="Button.primary:disabled, Button[IsDefault=True]:disabled">
+    <Setter Property="Opacity" Value="0.45" />
+  </Style>
+
+  <!-- Lists: a white card; the selected row is filled in the primary colour -->
+  <Style Selector="ListBox">
+    <Setter Property="Background" Value="{DynamicResource Card.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Card.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Padding" Value="4" />
+  </Style>
+  <Style Selector="ListBoxItem">
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Margin" Value="0,1" />
+  </Style>
+  <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Ribbon.Hover}" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+  </Style>
+  <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Selection.Background}" />
+    <Setter Property="Foreground" Value="{DynamicResource Selection.Foreground}" />
+  </Style>
+  <Style Selector="ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Selection.Background}" />
+    <Setter Property="Foreground" Value="{DynamicResource Selection.Foreground}" />
+  </Style>
+
+  <!-- Marked text: the selection colour with its own text colour (Fluent leaves the text dark, unreadable on the primary colour) -->
+  <Style Selector="TextBox">
+    <Setter Property="SelectionBrush" Value="{DynamicResource Selection.Background}" />
+    <Setter Property="SelectionForegroundBrush" Value="{DynamicResource Selection.Foreground}" />
+  </Style>
+  <Style Selector="SelectableTextBlock">
+    <Setter Property="SelectionBrush" Value="{DynamicResource Selection.Background}" />
+    <Setter Property="SelectionForegroundBrush" Value="{DynamicResource Selection.Foreground}" />
+  </Style>
+
+  <!-- Small grey pill for counts ("3 pages") -->
+  <Style Selector="Border.pill">
+    <Setter Property="Background" Value="{DynamicResource Pill.Background}" />
+    <Setter Property="CornerRadius" Value="9" />
+    <Setter Property="Padding" Value="8,1,8,2" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Border.pill TextBlock">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource Pill.Foreground}" />
+  </Style>
+
+  <!-- Strip on the right edge of the page sidebar: dragging it changes the width of the sidebar (and of its thumbnails) -->
+  <Style Selector="Thumb.sidebarSplitter">
+    <Setter Property="Width" Value="6" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Cursor" Value="SizeWestEast" />
+    <!-- The theme has no template for a Thumb on its own (only inside a ScrollBar): without one it has nothing to hit -->
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}" />
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="Thumb.sidebarSplitter:pointerover, Thumb.sidebarSplitter:pressed">
+    <Setter Property="Background" Value="{DynamicResource Card.Border}" />
+  </Style>
+</Styles>

@@ -1,0 +1,170 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:st="using:EasyPDF.App.Styles"
+             x:Class="EasyPDF.App.App"
+             RequestedThemeVariant="Default">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="/Styles/Icons.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+      <!-- Embedded typeface (Barlow, SIL OFL); Fluent uses this key for all controls -->
+      <FontFamily x:Key="ContentControlThemeFontFamily">/Assets/Fonts#Barlow</FontFamily>
+      <!--
+        Sober corporate look: a dark primary colour, a bright accent colour as the only signal colour, white and cool greys.
+        Brand.Accent is the accent colour (the line under the band); everything else is a role (what the colour is used for).
+        No fixed colours: every colour is a shade of the two brand colours BrandPrimaryColor (dark) and BrandAccentColor
+        (light) from the brand profile - {st:BrandColor Primary, S=share of its saturation, L=lightness 0..1} or
+        Lighten=change of its lightness (shades that must stay next to it, such as hover). The greys are the primary hue
+        with little saturation. Only white and the red of the delete icons are fixed.
+      -->
+      <SolidColorBrush x:Key="Brand.Accent" Color="{st:BrandColor Accent}" />
+      <!-- Brand header above the tabs (both themes): a gradient that ends in the colour of the tab band; its top is a
+           slightly lighter primary or BrandHeaderColor of the brand profile -->
+      <LinearGradientBrush x:Key="Header.Background" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="{st:BrandColor Header}" />
+        <GradientStop Offset="1" Color="{st:BrandColor Primary}" />
+      </LinearGradientBrush>
+      <SolidColorBrush x:Key="Header.MarkBackground" Color="{st:BrandColor Primary, Lighten=-0.03}" />
+      <SolidColorBrush x:Key="Header.Subtitle" Color="{st:BrandColor Primary, S=0.25, L=0.81}" />
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <!-- Primary band with the ribbon tabs (and the help/info buttons) -->
+          <SolidColorBrush x:Key="Band.Background" Color="{st:BrandColor Primary}" />
+          <SolidColorBrush x:Key="Band.Hover" Color="{st:BrandColor Primary, S=0.72, Lighten=0.07}" />
+          <SolidColorBrush x:Key="Band.Selected" Color="{st:BrandColor Primary, S=0.59, Lighten=0.12}" />
+          <SolidColorBrush x:Key="Band.Foreground">#FFFFFF</SolidColorBrush>
+          <SolidColorBrush x:Key="Band.ForegroundMuted" Color="{st:BrandColor Primary, S=0.21, L=0.72}" />
+          <SolidColorBrush x:Key="Band.CircleBorder" Color="{st:BrandColor Primary, S=0.22, L=0.46}" />
+          <!-- Ribbon panel under the band: white, captions and lines in quiet greys -->
+          <SolidColorBrush x:Key="Ribbon.Panel">#FFFFFF</SolidColorBrush>
+          <SolidColorBrush x:Key="Ribbon.Caption" Color="{st:BrandColor Primary, S=0.18, L=0.45}" />
+          <SolidColorBrush x:Key="Ribbon.Separator" Color="{st:BrandColor Primary, S=0.20, L=0.90}" />
+          <SolidColorBrush x:Key="Ribbon.Hover" Color="{st:BrandColor Primary, S=0.26, L=0.95}" />
+          <SolidColorBrush x:Key="Ribbon.HoverBorder" Color="{st:BrandColor Primary, S=0.21, L=0.86}" />
+          <SolidColorBrush x:Key="Ribbon.Pressed" Color="{st:BrandColor Primary, S=0.24, L=0.90}" />
+          <SolidColorBrush x:Key="Ribbon.Active" Color="{st:BrandColor Primary, S=0.27, L=0.91}" />
+          <SolidColorBrush x:Key="Ribbon.ActiveBorder" Color="{st:BrandColor Primary}" />
+          <!-- Filled primary button (current mode in the status bar), like a primary button -->
+          <SolidColorBrush x:Key="Mode.Active" Color="{st:BrandColor Primary}" />
+          <SolidColorBrush x:Key="Mode.ActiveForeground">#FFFFFF</SolidColorBrush>
+          <!-- Icons: one ink colour for the lines, an accent fill; red only for removing things.
+               The Icon.Color.* keys name the meaning, so a theme could colour them apart again. -->
+          <SolidColorBrush x:Key="Icon.Ink" Color="{st:BrandColor Primary}" />
+          <SolidColorBrush x:Key="Icon.Tint" Color="{st:BrandColor Accent}" />
+          <SolidColorBrush x:Key="Icon.Color.Amber" Color="{st:BrandColor Primary, S=0.46, L=0.32}" />
+          <SolidColorBrush x:Key="Icon.Color.Blue" Color="{st:BrandColor Primary, S=0.46, L=0.32}" />
+          <SolidColorBrush x:Key="Icon.Color.Green" Color="{st:BrandColor Primary, S=0.46, L=0.32}" />
+          <SolidColorBrush x:Key="Icon.Color.Red">#C8312F</SolidColorBrush>
+          <SolidColorBrush x:Key="Icon.Color.Violet" Color="{st:BrandColor Primary, S=0.46, L=0.32}" />
+          <SolidColorBrush x:Key="Icon.Color.Teal" Color="{st:BrandColor Primary, S=0.46, L=0.32}" />
+          <SolidColorBrush x:Key="Icon.Color.Slate" Color="{st:BrandColor Primary, S=0.46, L=0.32}" />
+          <!-- Behind the pages in the reading view and on the start page -->
+          <SolidColorBrush x:Key="Content.Background" Color="{st:BrandColor Primary, S=0.19, L=0.92}" />
+          <!-- Organize view and page sidebar: light grey with white page cards, the selected card filled in the primary colour -->
+          <SolidColorBrush x:Key="Organize.Background" Color="{st:BrandColor Primary, S=0.14, L=0.96}" />
+          <SolidColorBrush x:Key="Card.Background">#FFFFFF</SolidColorBrush>
+          <SolidColorBrush x:Key="Card.Border" Color="{st:BrandColor Primary, S=0.19, L=0.88}" />
+          <SolidColorBrush x:Key="Text.Primary" Color="{st:BrandColor Primary, S=0.39, L=0.18}" />
+          <SolidColorBrush x:Key="Selection.Background" Color="{st:BrandColor Primary}" />
+          <SolidColorBrush x:Key="Selection.Foreground">#FFFFFF</SolidColorBrush>
+          <SolidColorBrush x:Key="Page.Border" Color="{st:BrandColor Primary, S=0.15, L=0.76}" />
+          <SolidColorBrush x:Key="StatusBar.Background" Color="{st:BrandColor Primary, S=0.14, L=0.96}" />
+          <SolidColorBrush x:Key="StatusBar.Border" Color="{st:BrandColor Primary, S=0.19, L=0.88}" />
+          <SolidColorBrush x:Key="Text.Muted" Color="{st:BrandColor Primary, S=0.18, L=0.45}" />
+          <!-- Main action (Open on the start page): accent with primary-coloured text -->
+          <SolidColorBrush x:Key="Primary.Background" Color="{st:BrandColor Accent}" />
+          <SolidColorBrush x:Key="Primary.Hover" Color="{st:BrandColor Accent, Lighten=-0.03}" />
+          <SolidColorBrush x:Key="Primary.Pressed" Color="{st:BrandColor Accent, Lighten=-0.06}" />
+          <!-- Other buttons: white with a grey frame; pills: small grey labels for counts -->
+          <SolidColorBrush x:Key="Button.Background">#FFFFFF</SolidColorBrush>
+          <SolidColorBrush x:Key="Button.Border" Color="{st:BrandColor Primary, S=0.19, L=0.80}" />
+          <SolidColorBrush x:Key="Button.BorderHover" Color="{st:BrandColor Primary, S=0.16, L=0.60}" />
+          <SolidColorBrush x:Key="Pill.Background" Color="{st:BrandColor Primary, S=0.27, L=0.91}" />
+          <SolidColorBrush x:Key="Pill.Foreground" Color="{st:BrandColor Primary, S=0.39, L=0.18}" />
+          <SolidColorBrush x:Key="Primary.Foreground" Color="{st:BrandColor Primary}" />
+          <!-- Round icon buttons in the ribbon -->
+          <SolidColorBrush x:Key="Circle.Background">#FFFFFF</SolidColorBrush>
+          <SolidColorBrush x:Key="Circle.Border" Color="{st:BrandColor Primary, S=0.21, L=0.83}" />
+          <SolidColorBrush x:Key="Circle.BorderHover" Color="{st:BrandColor Primary}" />
+          <SolidColorBrush x:Key="Circle.Active" Color="{st:BrandColor Primary}" />
+          <SolidColorBrush x:Key="Circle.ActiveHover" Color="{st:BrandColor Primary, S=0.59, Lighten=0.12}" />
+          <SolidColorBrush x:Key="Circle.ActiveForeground">#FFFFFF</SolidColorBrush>
+          <SolidColorBrush x:Key="Window.Background">#FFFFFF</SolidColorBrush>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="Band.Background" Color="{st:BrandColor Primary}" />
+          <SolidColorBrush x:Key="Band.Hover" Color="{st:BrandColor Primary, S=0.72, Lighten=0.07}" />
+          <SolidColorBrush x:Key="Band.Selected" Color="{st:BrandColor Primary, S=0.59, Lighten=0.12}" />
+          <SolidColorBrush x:Key="Band.Foreground">#FFFFFF</SolidColorBrush>
+          <SolidColorBrush x:Key="Band.ForegroundMuted" Color="{st:BrandColor Primary, S=0.21, L=0.72}" />
+          <SolidColorBrush x:Key="Band.CircleBorder" Color="{st:BrandColor Primary, S=0.22, L=0.46}" />
+          <SolidColorBrush x:Key="Ribbon.Panel" Color="{st:BrandColor Primary, S=0.23, L=0.14}" />
+          <SolidColorBrush x:Key="Ribbon.Caption" Color="{st:BrandColor Primary, S=0.19, L=0.64}" />
+          <SolidColorBrush x:Key="Ribbon.Separator" Color="{st:BrandColor Primary, S=0.21, L=0.23}" />
+          <SolidColorBrush x:Key="Ribbon.Hover" Color="{st:BrandColor Primary, S=0.22, L=0.19}" />
+          <SolidColorBrush x:Key="Ribbon.HoverBorder" Color="{st:BrandColor Primary, S=0.21, L=0.29}" />
+          <SolidColorBrush x:Key="Ribbon.Pressed" Color="{st:BrandColor Primary, S=0.22, L=0.23}" />
+          <SolidColorBrush x:Key="Ribbon.Active" Color="{st:BrandColor Primary, S=0.41, L=0.25}" />
+          <SolidColorBrush x:Key="Ribbon.ActiveBorder" Color="{st:BrandColor Primary, S=0.52, L=0.71}" />
+          <SolidColorBrush x:Key="Mode.Active" Color="{st:BrandColor Primary, S=0.54, L=0.40}" />
+          <SolidColorBrush x:Key="Mode.ActiveForeground">#FFFFFF</SolidColorBrush>
+          <SolidColorBrush x:Key="Icon.Ink" Color="{st:BrandColor Primary, S=0.33, L=0.88}" />
+          <SolidColorBrush x:Key="Icon.Tint" Color="{st:BrandColor Accent}" />
+          <SolidColorBrush x:Key="Icon.Color.Amber" Color="{st:BrandColor Primary, S=0.43, L=0.76}" />
+          <SolidColorBrush x:Key="Icon.Color.Blue" Color="{st:BrandColor Primary, S=0.43, L=0.76}" />
+          <SolidColorBrush x:Key="Icon.Color.Green" Color="{st:BrandColor Primary, S=0.43, L=0.76}" />
+          <SolidColorBrush x:Key="Icon.Color.Red">#F06A6A</SolidColorBrush>
+          <SolidColorBrush x:Key="Icon.Color.Violet" Color="{st:BrandColor Primary, S=0.43, L=0.76}" />
+          <SolidColorBrush x:Key="Icon.Color.Teal" Color="{st:BrandColor Primary, S=0.43, L=0.76}" />
+          <SolidColorBrush x:Key="Icon.Color.Slate" Color="{st:BrandColor Primary, S=0.43, L=0.76}" />
+          <SolidColorBrush x:Key="Content.Background" Color="{st:BrandColor Primary, S=0.27, L=0.08}" />
+          <SolidColorBrush x:Key="Organize.Background" Color="{st:BrandColor Primary, S=0.24, L=0.11}" />
+          <SolidColorBrush x:Key="Card.Background" Color="{st:BrandColor Primary, S=0.23, L=0.15}" />
+          <SolidColorBrush x:Key="Card.Border" Color="{st:BrandColor Primary, S=0.22, L=0.22}" />
+          <SolidColorBrush x:Key="Text.Primary" Color="{st:BrandColor Primary, S=0.37, L=0.92}" />
+          <SolidColorBrush x:Key="Selection.Background" Color="{st:BrandColor Primary, S=0.54, L=0.40}" />
+          <SolidColorBrush x:Key="Selection.Foreground">#FFFFFF</SolidColorBrush>
+          <SolidColorBrush x:Key="Page.Border" Color="{st:BrandColor Primary, S=0.21, L=0.29}" />
+          <SolidColorBrush x:Key="StatusBar.Background" Color="{st:BrandColor Primary, S=0.24, L=0.11}" />
+          <SolidColorBrush x:Key="StatusBar.Border" Color="{st:BrandColor Primary, S=0.22, L=0.22}" />
+          <SolidColorBrush x:Key="Text.Muted" Color="{st:BrandColor Primary, S=0.19, L=0.64}" />
+          <SolidColorBrush x:Key="Primary.Background" Color="{st:BrandColor Accent}" />
+          <SolidColorBrush x:Key="Primary.Hover" Color="{st:BrandColor Accent, S=0.79, Lighten=0.17}" />
+          <SolidColorBrush x:Key="Primary.Pressed" Color="{st:BrandColor Accent, Lighten=-0.04}" />
+          <SolidColorBrush x:Key="Button.Background" Color="{st:BrandColor Primary, S=0.23, L=0.15}" />
+          <SolidColorBrush x:Key="Button.Border" Color="{st:BrandColor Primary, S=0.21, L=0.29}" />
+          <SolidColorBrush x:Key="Button.BorderHover" Color="{st:BrandColor Primary, S=0.15, L=0.49}" />
+          <SolidColorBrush x:Key="Pill.Background" Color="{st:BrandColor Primary, S=0.22, L=0.22}" />
+          <SolidColorBrush x:Key="Pill.Foreground" Color="{st:BrandColor Primary, S=0.37, L=0.92}" />
+          <SolidColorBrush x:Key="Primary.Foreground" Color="{st:BrandColor Primary}" />
+          <SolidColorBrush x:Key="Circle.Background" Color="{st:BrandColor Primary, S=0.23, L=0.15}" />
+          <SolidColorBrush x:Key="Circle.Border" Color="{st:BrandColor Primary, S=0.21, L=0.29}" />
+          <SolidColorBrush x:Key="Circle.BorderHover" Color="{st:BrandColor Primary, S=0.52, L=0.71}" />
+          <SolidColorBrush x:Key="Circle.Active" Color="{st:BrandColor Primary, S=0.54, L=0.40}" />
+          <SolidColorBrush x:Key="Circle.ActiveHover" Color="{st:BrandColor Primary, S=0.51, L=0.47}" />
+          <SolidColorBrush x:Key="Circle.ActiveForeground">#FFFFFF</SolidColorBrush>
+          <!-- Fluent's window/dialog background is pure black in dark mode; a little lighter is easier on the eyes -->
+          <SolidColorBrush x:Key="Window.Background" Color="{st:BrandColor Primary, S=0.23, L=0.09}" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+  <Application.Styles>
+    <!-- Accent of all Fluent controls (focus lines, check boxes, progress, selection) in the primary colour of the band -->
+    <FluentTheme>
+      <FluentTheme.Palettes>
+        <ColorPaletteResources x:Key="Light" Accent="{st:BrandColor Primary}" />
+        <ColorPaletteResources x:Key="Dark" Accent="{st:BrandColor Primary, S=0.51, L=0.47}" />
+      </FluentTheme.Palettes>
+    </FluentTheme>
+    <StyleInclude Source="/Styles/Controls.axaml" />
+    <StyleInclude Source="/Styles/Ribbon.axaml" />
+    <!-- App icon in the title bar and taskbar of every window (main window and dialogs) -->
+    <Style Selector="Window">
+      <Setter Property="Icon" Value="/Assets/AppIcon.ico" />
+      <Setter Property="Background" Value="{DynamicResource Window.Background}" />
+      <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    </Style>
+  </Application.Styles>
+</Application>

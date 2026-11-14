@@ -1,0 +1,229 @@
+# Builds the installers for Windows (.msi), Linux (.deb, .tar.gz) and macOS (.dmg, Apple Silicon, macOS 14+) and puts
+# them into the pre-release "latest" (download: gh release download latest). Release files do not count against the
+# Actions storage quota (0.5 GB on the free plan), so there are no workflow artifacts.
+# Start manually under Actions > Installers > Run workflow (or: gh workflow run installers.yml --ref <branch>);
+# "platform" builds only one installer (gh: -f platform=macos) and replaces only its files in the release,
+# "brand" picks the brand profile in branding/ (gh: -f brand=<id>).
+name: Installers
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Which installers to build
+        type: choice
+        options: [all, windows, linux, macos]
+        default: all
+      brand:
+        description: Brand profile (folder in branding/)
+        type: string
+        default: easypdf
+  # Automatic builds are switched off. To switch them on:
+  # push:
+  #   tags: ['v*']
+  #   branches: [main]
+  #   paths: ['installer/**', 'licenses/**', '.github/workflows/installers.yml']
+
+permissions:
+  contents: read
+
+# One run at a time: all runs write into the same release
+concurrency: installers-release
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  EASYPDF_BRAND: ${{ inputs.brand || 'easypdf' }}   # read by Directory.Build.props
+
+jobs:
+  # A full build starts the pre-release "latest" anew; a single platform only replaces its own files in it
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PLATFORM: ${{ inputs.platform || 'all' }}   # without the input (automatic builds) everything is built
+    steps:
+      - name: Prepare the pre-release latest
+        run: |
+          notes="Installers of branch $GITHUB_REF_NAME, commit ${GITHUB_SHA::7}. The file names contain the version (the last part is the build number). Replaced by the next build."
+          if [ "$PLATFORM" = all ]; then
+            gh release delete latest --cleanup-tag --yes || true
+          fi
+          if ! gh release view latest >/dev/null 2>&1; then
+            gh release create latest --prerelease --target "$GITHUB_SHA" --title "Installers (latest build)" --notes "$notes"
+          fi
+
+  windows:
+    needs: release
+    if: ${{ !inputs.platform || inputs.platform == 'all' || inputs.platform == 'windows' }}
+    runs-on: windows-latest
+    permissions:
+      contents: write   # the .msi goes into the release "latest"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # full history: the build number is the number of commits
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json   # SDK version from global.json
+      - name: Build MSI
+        shell: pwsh
+        run: ./installer/windows/build-windows-on-windows.ps1
+      - name: "Upgrade test: per user, same version replaces, older is refused, uninstall cleans up"
+        shell: pwsh
+        run: |
+          # Verbose msiexec log per install (<name>.log next to the MSI), printed when a check fails
+          function Install($path, $extra = @()) {
+            $log = [IO.Path]::ChangeExtension($path, '.log')
+            $code = (Start-Process msiexec -ArgumentList (@('/i', "`"$path`"") + $extra + @('/qn', '/l*v', "`"$log`"")) -Wait -PassThru).ExitCode
+            Write-Host "msiexec /i $(Split-Path -Leaf $path) $extra -> $code"
+            $code
+          }
+          function Show-Log($path) {
+            Write-Host "== $path (upgrade related lines)"
+            Select-String -Path ([IO.Path]::ChangeExtension($path, '.log')) -Pattern 'FindRelatedProducts|RemoveExistingProducts|WIX_UPGRADE_DETECTED|WIX_DOWNGRADE_DETECTED|ProductCode|ProductVersion|Return value 3|error' |
+              Select-Object -First 80 | ForEach-Object Line
+          }
+          function ProductCode($path) {
+            $db = (New-Object -ComObject WindowsInstaller.Installer).OpenDatabase($path, 0)
+            $view = $db.OpenView("SELECT Value FROM Property WHERE Property='ProductCode'"); $view.Execute()
+            $view.Fetch().StringData(1)
+          }
+          # ProductCodes of the installed app (by the brand's UpgradeCode). A per-user package has no entry under
+          # HKLM\...\Uninstall, so ask Windows Installer; its items are COM objects, "$_" makes strings of them
+          $upgradeCode = dotnet msbuild src/EasyPDF.App -getProperty:MsiUpgradeCode
+          function Installed {
+            @((New-Object -ComObject WindowsInstaller.Installer).RelatedProducts("{$upgradeCode}") | ForEach-Object { "$_" })
+          }
+          $first = Join-Path $env:RUNNER_TEMP 'first.msi'
+          Copy-Item artifacts/installer/*.msi $first
+          $db = (New-Object -ComObject WindowsInstaller.Installer).OpenDatabase($first, 0)
+          if (($db.SummaryInformation(0).Property(15) -band 8) -eq 0) { throw 'the MSI asks for administrator rights (Word Count bit 8 missing)' }
+          # Install folder, program file and registry keys have the shown name (AppDisplayName in the brand profile)
+          $appName = dotnet msbuild src/EasyPDF.App -getProperty:AppDisplayName
+          $installDir = Join-Path $env:LOCALAPPDATA "Programs\$appName"
+          $version = dotnet msbuild src/EasyPDF.App -getProperty:Version -t:SetVersionFromGit
+          if ($version -notmatch '^\d+\.\d+\.\d+\.\d{2,}$') { throw "unexpected version $version (shallow clone?)" }
+          # A rebuild of the same version gets a new ProductCode, like a second local build
+          dotnet build installer/windows/EasyPDF.Installer.wixproj -c Release --no-incremental -p:OutputPath=$env:RUNNER_TEMP\same\ -p:Version=$version
+          dotnet build installer/windows/EasyPDF.Installer.wixproj -c Release --no-incremental -p:OutputPath=$env:RUNNER_TEMP\old\ -p:Version=0.0.1.1
+          $same = Get-ChildItem $env:RUNNER_TEMP\same\*.msi
+          $old = Get-ChildItem $env:RUNNER_TEMP\old\*.msi
+          Write-Host "Version $version; ProductCodes: first $(ProductCode $first), rebuild $(ProductCode $same.FullName), old $(ProductCode $old.FullName)"
+          if ((Install $first) -ne 0) { Show-Log $first; throw 'first install failed' }
+          # @(...): PowerShell unrolls a returned one-element array into the string itself, [0] would then be "{"
+          $firstCode = @(Installed)
+          if ($firstCode.Count -ne 1) { throw "expected one installed $($appName): $firstCode" }
+          if (-not (Test-Path "$installDir\$appName.exe")) { throw "$appName.exe not in $installDir" }
+          if (-not (Test-Path "HKCU:\Software\Classes\SystemFileAssociations\.pdf\shell\$appName.Read")) { throw 'no context menu entry in HKCU' }
+          # Registered as a PDF program ("Open with", Settings > Default apps)
+          if ($null -eq (Get-ItemProperty 'HKCU:\Software\Classes\.pdf\OpenWithProgids' -Name "$appName.Document" -ErrorAction SilentlyContinue)) { throw 'not in OpenWithProgids' }
+          if ((Get-ItemProperty 'HKCU:\Software\RegisteredApplications' -Name $appName -ErrorAction SilentlyContinue).$appName -ne "Software\$appName\Capabilities") { throw 'not in RegisteredApplications' }
+          if ((Install $same.FullName) -ne 0) { Show-Log $same.FullName; throw 'install of the rebuild failed' }
+          $now = @(Installed)
+          if ($now.Count -ne 1 -or $now[0] -eq $firstCode[0]) { Show-Log $same.FullName; throw "the rebuild did not replace the first install: $now" }
+          if ((Install $old.FullName) -eq 0) { Show-Log $old.FullName; throw 'an older version was installed over a newer one' }
+          if (@(Installed).Count -ne 1) { throw "expected exactly one installed $appName" }
+          # A silent uninstall asks nothing and keeps the user's folders (with a UI: question, then removed; docs/TEST_CHECKLIST.md)
+          $userFolder = Join-Path $env:APPDATA $appName
+          New-Item -ItemType Directory -Force $userFolder | Out-Null
+          Set-Content (Join-Path $userFolder 'settings.json') '{}'
+          $code = (Start-Process msiexec -ArgumentList '/x', $now[0], '/qn' -Wait -PassThru).ExitCode
+          if ($code -ne 0) { throw "uninstall failed: $code" }
+          if (-not (Test-Path (Join-Path $userFolder 'settings.json'))) { throw 'a silent uninstall removed the user folder' }
+          if (@(Installed).Count -ne 0) { throw 'still installed after uninstall' }
+          if (Test-Path $installDir) { throw "$installDir is left after uninstall" }
+          if (Test-Path "HKCU:\Software\$appName") { throw "HKCU\Software\$appName is left after uninstall" }
+          if (Test-Path "HKCU:\Software\Classes\$appName.Document") { throw "the ProgId $appName.Document is left after uninstall" }
+          if ($null -ne (Get-ItemProperty 'HKCU:\Software\RegisteredApplications' -Name $appName -ErrorAction SilentlyContinue)) { throw 'RegisteredApplications entry is left after uninstall' }
+      - name: Put the .msi into the pre-release latest
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view latest --json assets -q '.assets[].name' | { grep -E '\.msi$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
+          gh release upload latest artifacts/installer/*.msi
+
+  linux:
+    needs: release
+    if: ${{ !inputs.platform || inputs.platform == 'all' || inputs.platform == 'linux' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # the .deb and .tar.gz go into the release "latest"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json   # SDK version from global.json
+      - name: OCR tests (ONNX Runtime on Linux)
+        run: dotnet test tests/EasyPDF.Core.Tests --filter "FullyQualifiedName~Ocr"
+      - name: Publish
+        run: dotnet publish src/EasyPDF.App -p:PublishProfile=linux-x64
+      - name: Build .deb and .tar.gz
+        run: |
+          python3 installer/linux/build_linux.py
+          # Package and command name = AppDisplayName in lower case (build_linux.py)
+          echo "PKG=$(dpkg-deb -f artifacts/installer/*_amd64.deb Package)" >> "$GITHUB_ENV"
+      - name: Install the .deb and start the app
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb ./artifacts/installer/${PKG}_*_amd64.deb
+          dpkg -s "$PKG"
+          test -x "/usr/bin/$PKG"
+          # Smoke test: the app must still be running after 15 s (timeout exits with 124)
+          code=0; xvfb-run -a timeout 15 "$PKG" || code=$?
+          test "$code" -eq 124
+      - name: "Upgrade test: newer and same version replace, older is refused"
+        run: |
+          deb=$(ls artifacts/installer/${PKG}_*_amd64.deb)
+          installed() { dpkg-query -W -f='${Version}' "$PKG"; }
+          variant() {   # variant <version> <file>: the same package with another version
+            rm -rf variant && dpkg-deb -R "$deb" variant
+            sed -i "s/^Version: .*/Version: $1/" variant/DEBIAN/control
+            dpkg-deb -Zgzip -z1 -b variant "$2" >/dev/null
+          }
+          variant "0.0.1-1" old.deb
+          if sudo dpkg -i old.deb; then echo "an older version replaced a newer one"; exit 1; fi
+          test "$(installed)" = "$(dpkg-deb -f "$deb" Version)"
+          variant "$(dpkg-deb -f "$deb" Version)9" rebuild.deb   # same version, later build
+          sudo apt-get install -y ./rebuild.deb
+          test "$(installed)" = "$(dpkg-deb -f rebuild.deb Version)"
+          variant "99.0.0-1" newer.deb
+          sudo apt-get install -y ./newer.deb
+          test "$(installed)" = "99.0.0-1"
+          test "$(dpkg-query -W "${PKG}*" | wc -l)" -eq 1
+      - name: Put the .deb and .tar.gz into the pre-release latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view latest --json assets -q '.assets[].name' | { grep -E '\.(deb|tar\.gz)$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
+          gh release upload latest artifacts/installer/*.deb artifacts/installer/*.tar.gz
+
+  macos:
+    needs: release
+    if: ${{ !inputs.platform || inputs.platform == 'all' || inputs.platform == 'macos' }}
+    runs-on: macos-latest
+    permissions:
+      contents: write   # the .dmg goes into the release "latest"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json   # SDK version from global.json
+      - name: OCR tests (ONNX Runtime on macOS)
+        run: dotnet test tests/EasyPDF.Core.Tests --filter "FullyQualifiedName~Ocr"
+      - name: Build .app and .dmg (Apple Silicon)
+        run: bash installer/build-macos-on-macos.sh
+      - name: Put the .dmg into the pre-release latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view latest --json assets -q '.assets[].name' | { grep -E '\.dmg$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
+          gh release upload latest artifacts/installer/*.dmg

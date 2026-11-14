@@ -1,0 +1,56 @@
+Third-party software
+====================
+
+This application itself is licensed under the MIT License (see LICENSE.txt).
+It includes the following open source components. The full license texts are
+in this folder.
+
+PDF rendering and editing
+-------------------------
+PDFium                        BSD-3-Clause and Apache-2.0      PDFium-LICENSE.txt
+  Copyright 2014 The PDFium Authors. https://pdfium.googlesource.com/pdfium/
+PDFium binaries (bblanchon)   MIT                              pdfium-binaries-MIT.txt
+  Copyright 2014-2025 Benoit Blanchon. https://github.com/bblanchon/pdfium-binaries
+PDFiumCore                    Apache-2.0                       Apache-2.0.txt
+  https://github.com/Dtronix/PDFiumCore
+
+User interface
+--------------
+Avalonia                      MIT                              Avalonia-MIT.txt
+  Copyright (c) AvaloniaUI OÜ. https://github.com/AvaloniaUI/Avalonia
+SkiaSharp                     MIT                              SkiaSharp-MIT.txt
+  Copyright (c) 2015-2016 Xamarin, Inc., (c) 2017-2018 Microsoft Corporation.
+  https://github.com/mono/SkiaSharp
+CommunityToolkit.Mvvm         MIT                              CommunityToolkit-MIT.txt
+  Copyright (c) .NET Foundation and Contributors. https://github.com/CommunityToolkit/dotnet
+.NET runtime                  MIT                              https://github.com/dotnet/runtime
+Barlow (typeface)             SIL Open Font License 1.1        Barlow-OFL.txt
+  Copyright 2017 The Barlow Project Authors. https://github.com/jpt/barlow
+
+Text recognition (OCR)
+----------------------
+RapidOcrNet                   Apache-2.0                       Apache-2.0.txt
+  https://github.com/BobLd/RapidOcrNet
+PaddleOCR models (PP-OCRv5)   Apache-2.0                       Apache-2.0.txt
+  Files in the folder ocr-models. https://github.com/PaddlePaddle/PaddleOCR
+ONNX Runtime                  MIT                              OnnxRuntime-MIT.txt,
+  Copyright (c) Microsoft Corporation.                         OnnxRuntime-ThirdPartyNotices.txt
+  https://github.com/microsoft/onnxruntime
+Clipper2                      Boost Software License 1.0       Clipper2-BSL-1.0.txt
+  https://github.com/AngusJohnson/Clipper2
+PContour / PContourNet        MIT                              PContour-MIT.txt
+  Copyright (c) 2021 Lingdong Huang. https://github.com/LingDong-/PContour
+
+NOTICE of RapidOcrNet (Apache-2.0, section 4d)
+----------------------------------------------
+Based on source code originally developed in the RapidOCR project (Apache-2.0 license).
+	- https://github.com/RapidAI/RapidOCR
+
+Uses parts of source code originally developed in the PdfPig project (Apache-2.0 license).
+	- https://github.com/UglyToad/PdfPig
+
+The dependency on OpenCV was removed thanks to the PContour library and its C# port.
+	- https://github.com/LingDong-/PContour
+	- https://github.com/BobLd/PContourNet
+
+The models made available are from the PaddleOCR project (Apache-2.0 license) and were downloaded from https://github.com/RapidAI/RapidOCR/blob/main/python/rapidocr/default_models.yaml

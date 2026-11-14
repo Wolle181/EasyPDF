@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Custom actions of the Windows installer (Package.wxs): asks before an uninstall and removes the user's folders. Runs inside
+    Windows Installer, so it targets the .NET Framework that comes with Windows, not the app's runtime (which is being
+    removed). Not part of EasyPDF.slnx because it only builds on Windows; the WiX project references it.
+    Output: UninstallActions.CA.dll (made by the Dtf package, the DLL Windows Installer can load).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Dtf.CustomAction" Version="5.0.2" />
+    <PackageReference Include="WixToolset.Dtf.WindowsInstaller" Version="5.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="CustomAction.config" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

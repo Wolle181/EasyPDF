@@ -1,0 +1,67 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:EasyPDF.App.ViewModels"
+        xmlns:loc="using:EasyPDF.App.Localization"
+        x:Class="EasyPDF.App.Dialogs.SettingsWindow" x:DataType="vm:SettingsViewModel"
+        Title="{loc:Tr SettingsTitle}" Width="400" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" CanResize="False" ShowInTaskbar="False">
+  <StackPanel Margin="20" Spacing="16">
+    <StackPanel Spacing="6">
+      <TextBlock Text="{loc:Tr SettingsAppearance}" FontWeight="SemiBold" />
+      <ComboBox SelectedIndex="{Binding ThemeIndex}" HorizontalAlignment="Stretch">
+        <ComboBoxItem Content="{loc:Tr SettingsSystem}" />
+        <ComboBoxItem Content="{loc:Tr SettingsLight}" />
+        <ComboBoxItem Content="{loc:Tr SettingsDark}" />
+      </ComboBox>
+      <CheckBox x:Name="MenuBarBox" IsChecked="{Binding ShowMenuBar}" IsVisible="{Binding CanHideMenuBar}" Margin="0,4,0,0">
+        <StackPanel>
+          <TextBlock Text="{loc:Tr SettingsShowMenuBar}" />
+          <TextBlock Text="{loc:Tr SettingsMenuBarHint}" TextWrapping="Wrap" Opacity="0.7" FontSize="12" />
+        </StackPanel>
+      </CheckBox>
+    </StackPanel>
+    <StackPanel Spacing="6">
+      <TextBlock Text="{loc:Tr SettingsLanguage}" FontWeight="SemiBold" />
+      <ComboBox SelectedIndex="{Binding LanguageIndex}" HorizontalAlignment="Stretch">
+        <ComboBoxItem Content="{loc:Tr SettingsSystem}" />
+        <ComboBoxItem Content="English" />
+        <ComboBoxItem Content="Deutsch" />
+      </ComboBox>
+    </StackPanel>
+    <StackPanel Spacing="6">
+      <TextBlock Text="{loc:Tr SettingsStampFolder}" FontWeight="SemiBold" />
+      <TextBox x:Name="StampFolderBox" IsReadOnly="True" Text="{Binding StampFolder}" />
+      <TextBlock Text="{loc:Tr StampPngHint}" TextWrapping="Wrap" Opacity="0.7" FontSize="12" />
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button x:Name="StampChooseButton" Click="OnChooseStampFolder" Content="{loc:Tr SettingsChoose}" />
+        <Button x:Name="StampOpenButton" Click="OnOpenStampFolder" Content="{loc:Tr StampOpenFolder}" />
+        <Button x:Name="StampResetButton" Click="OnResetStampFolder" Content="{loc:Tr SettingsDefault}" />
+      </StackPanel>
+    </StackPanel>
+    <StackPanel Spacing="6">
+      <TextBlock Text="{loc:Tr SettingsTemplateFolder}" FontWeight="SemiBold" />
+      <TextBox x:Name="TemplateFolderBox" IsReadOnly="True" Text="{Binding TemplateFolder}" />
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button x:Name="TemplateChooseButton" Click="OnChooseTemplateFolder" Content="{loc:Tr SettingsChoose}" />
+        <Button x:Name="TemplateOpenButton" Click="OnOpenTemplateFolder" Content="{loc:Tr TemplateOpenFolder}" />
+        <Button x:Name="TemplateResetButton" Click="OnResetTemplateFolder" Content="{loc:Tr SettingsDefault}" />
+      </StackPanel>
+    </StackPanel>
+    <StackPanel Spacing="6">
+      <TextBlock Text="{loc:Tr SettingsRedact}" FontWeight="SemiBold" />
+      <CheckBox x:Name="WarnRedactedBox" IsChecked="{Binding WarnOverwriteRedacted}">
+        <StackPanel>
+          <TextBlock Text="{loc:Tr SettingsWarnRedacted}" TextWrapping="Wrap" />
+          <TextBlock Text="{loc:Tr SettingsWarnRedactedHint}" TextWrapping="Wrap" Opacity="0.7" FontSize="12" />
+        </StackPanel>
+      </CheckBox>
+    </StackPanel>
+    <StackPanel Spacing="6">
+      <TextBlock Text="{loc:Tr SettingsPdfFiles}" FontWeight="SemiBold" />
+      <Button x:Name="DefaultAppButton" Command="{Binding MakeDefaultCommand}" Content="{loc:Tr SettingsMakeDefault}" />
+      <TextBlock x:Name="DefaultAppStatusText" Text="{Binding DefaultAppStatus}" TextWrapping="Wrap" Opacity="0.7" FontSize="12"
+                 IsVisible="{Binding DefaultAppStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+    </StackPanel>
+    <Button HorizontalAlignment="Right" MinWidth="80" HorizontalContentAlignment="Center" IsDefault="True" IsCancel="True" Click="OnClose" Content="{loc:Tr Close}" />
+  </StackPanel>
+</Window>

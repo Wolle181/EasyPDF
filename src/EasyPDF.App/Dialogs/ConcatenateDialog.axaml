@@ -1,0 +1,48 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:EasyPDF.App.ViewModels"
+        xmlns:loc="using:EasyPDF.App.Localization"
+        x:Class="EasyPDF.App.Dialogs.ConcatenateDialog" x:DataType="vm:ConcatenateDialogViewModel"
+        Title="{loc:Tr ConcatTitle}" Width="700" Height="460" MinWidth="520" MinHeight="360"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" DragDrop.AllowDrop="True">
+  <Grid Margin="16" RowDefinitions="Auto,*,Auto,Auto" RowSpacing="10">
+    <WrapPanel ItemSpacing="6" LineSpacing="6">
+      <Button Click="OnAdd" Content="{loc:Tr ConcatAdd}" />
+      <Button x:Name="OpenDocumentsButton" Content="{loc:Tr ConcatAddOpen}" IsVisible="{Binding HasOtherDocuments}"
+              Command="{Binding AddAllOpenDocumentsCommand}" />
+      <Button Click="OnRemove" Content="{loc:Tr ConcatRemove}" />
+      <Button Click="OnUp" Content="{loc:Tr ConcatUp}" />
+      <Button Click="OnDown" Content="{loc:Tr ConcatDown}" />
+      <Button Click="OnSort" Content="{loc:Tr ConcatSort}" />
+    </WrapPanel>
+    <Grid Grid.Row="1">
+      <ListBox x:Name="FileList" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected, Mode=TwoWay}">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:ConcatItem">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+              <StackPanel>
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Folder}" Opacity="0.6" FontSize="11" TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+              <Border Grid.Column="1" Classes="pill">
+                <TextBlock Text="{Binding PagesText}" />
+              </Border>
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+      <Border x:Name="DropMarker" Height="3" CornerRadius="1.5" VerticalAlignment="Top" HorizontalAlignment="Stretch"
+              Background="{DynamicResource SystemControlHighlightAccentBrush}" IsVisible="False" IsHitTestVisible="False" />
+      <TextBlock Text="{loc:Tr ConcatDropHint}" Opacity="0.5" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 IsVisible="{Binding !Items.Count}" />
+    </Grid>
+    <StackPanel Grid.Row="2" Spacing="4">
+      <CheckBox IsChecked="{Binding IncludeCurrent}" IsVisible="{Binding HasCurrentDocument}" Content="{loc:Tr ConcatIncludeCurrent}" />
+      <TextBlock Text="{Binding HintText}" Opacity="0.7" />
+    </StackPanel>
+    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button MinWidth="80" HorizontalContentAlignment="Center" IsDefault="True" IsEnabled="{Binding IsValid}" Click="OnOk" Content="{loc:Tr Ok}" />
+      <Button MinWidth="80" HorizontalContentAlignment="Center" IsCancel="True" Click="OnCancel" Content="{loc:Tr Cancel}" />
+    </StackPanel>
+  </Grid>
+</Window>

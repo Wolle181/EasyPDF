@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Set by build-macos-on-macos.sh from the brand profile: @APPNAME@ = shown name (AppDisplayName), also the executable;
+       @BUNDLEID@ = MacBundleId -->
+  <key>CFBundleName</key>
+  <string>@APPNAME@</string>
+  <key>CFBundleDisplayName</key>
+  <string>@APPNAME@</string>
+  <key>CFBundleIdentifier</key>
+  <string>@BUNDLEID@</string>
+  <key>CFBundleExecutable</key>
+  <string>@APPNAME@</string>
+  <key>CFBundleIconFile</key>
+  <string>AppIcon</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleVersion</key>
+  <string>@BUILD@</string>
+  <key>CFBundleShortVersionString</key>
+  <string>@VERSION@</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>LSMinimumSystemVersion</key>
+  <string>14.0</string>
+  <key>LSApplicationCategoryType</key>
+  <string>public.app-category.productivity</string>
+  <!-- Listed under "Open With" for PDFs (several selected PDFs go to the Concatenate dialog), not the default viewer -->
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeName</key>
+      <string>PDF document</string>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>LSHandlerRank</key>
+      <string>Alternate</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>com.adobe.pdf</string>
+      </array>
+    </dict>
+  </array>
+  <key>NSHighResolutionCapable</key>
+  <true/>
+  <key>NSHumanReadableCopyright</key>
+  <string>@COPYRIGHT@, MIT License</string>
+</dict>
+</plist>

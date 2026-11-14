@@ -1,0 +1,26 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:EasyPDF.App.Localization"
+        x:Class="EasyPDF.App.Dialogs.ReduceSizeDialog"
+        Title="{loc:Tr ReduceTitle}" Width="460" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" CanResize="False" ShowInTaskbar="False">
+  <StackPanel Margin="20" Spacing="14">
+    <TextBlock Text="{loc:Tr ReduceIntro}" TextWrapping="Wrap" Opacity="0.8" />
+    <StackPanel Spacing="6">
+      <RadioButton x:Name="HighOption" GroupName="Level">
+        <TextBlock Text="{loc:Tr ReduceHigh}" TextWrapping="Wrap" />
+      </RadioButton>
+      <RadioButton x:Name="MediumOption" GroupName="Level">
+        <TextBlock Text="{loc:Tr ReduceMedium}" TextWrapping="Wrap" />
+      </RadioButton>
+      <RadioButton x:Name="SmallOption" GroupName="Level">
+        <TextBlock Text="{loc:Tr ReduceSmall}" TextWrapping="Wrap" />
+      </RadioButton>
+    </StackPanel>
+    <TextBlock Text="{loc:Tr ReduceNote}" TextWrapping="Wrap" Opacity="0.7" FontSize="12" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button x:Name="OkButton" MinWidth="80" HorizontalContentAlignment="Center" IsDefault="True" Click="OnOk" Content="{loc:Tr ReduceStart}" />
+      <Button MinWidth="80" HorizontalContentAlignment="Center" IsCancel="True" Click="OnCancel" Content="{loc:Tr Cancel}" />
+    </StackPanel>
+  </StackPanel>
+</Window>

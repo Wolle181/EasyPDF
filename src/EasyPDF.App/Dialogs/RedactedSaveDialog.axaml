@@ -1,0 +1,18 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:EasyPDF.App.Localization"
+        x:Class="EasyPDF.App.Dialogs.RedactedSaveDialog"
+        Title="{loc:Tr RedactedSaveTitle}" Width="480" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" CanResize="False" ShowInTaskbar="False">
+  <StackPanel Margin="20" Spacing="12">
+    <TextBlock x:Name="MessageText" TextWrapping="Wrap" FontWeight="SemiBold" />
+    <TextBlock x:Name="DetailsText" TextWrapping="Wrap" />
+    <CheckBox x:Name="DontAskBox" Content="{loc:Tr RedactedSaveDontAsk}" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,4,0,0">
+      <!-- The safe choice is the default -->
+      <Button x:Name="CopyButton" MinWidth="90" HorizontalContentAlignment="Center" IsDefault="True" Click="OnCopy" Content="{loc:Tr RedactedSaveCopy}" />
+      <Button x:Name="OverwriteButton" MinWidth="90" HorizontalContentAlignment="Center" Click="OnOverwrite" Content="{loc:Tr RedactedSaveOverwrite}" />
+      <Button x:Name="CancelButton" MinWidth="90" HorizontalContentAlignment="Center" IsCancel="True" Click="OnCancel" Content="{loc:Tr Cancel}" />
+    </StackPanel>
+  </StackPanel>
+</Window>

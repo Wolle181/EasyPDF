@@ -1,0 +1,19 @@
+<Project>
+  <!--
+    Version = VersionPrefix (Directory.Build.props) + build number, e.g. 1.0.0.97. The build number is the number of
+    commits up to the built one (counted by git rev-list): it grows with every commit and is the same for every build
+    of a commit. Without git (or in a shallow clone, where it is 1) the number is wrong: the CI fetches the full history.
+    -p:Version=... overrides it. The installer scripts read it with:
+      dotnet msbuild src/EasyPDF.App -getProperty:Version -t:SetVersionFromGit
+  -->
+  <Target Name="SetVersionFromGit" BeforeTargets="GetAssemblyVersion" Condition="'$(VersionPrefix)' != '' And '$(Version)' == '$(VersionPrefix)'">
+    <Exec Command="git rev-list --count HEAD" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
+          IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low">
+      <Output PropertyName="_GitCommitCount" TaskParameter="ConsoleOutput" />
+    </Exec>
+    <PropertyGroup>
+      <_GitCommitCount Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(_GitCommitCount)', '^\d+$'))">0</_GitCommitCount>
+      <Version>$(VersionPrefix).$(_GitCommitCount)</Version>
+    </PropertyGroup>
+  </Target>
+</Project>

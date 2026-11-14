@@ -1,0 +1,30 @@
+<Project>
+  <PropertyGroup>
+    <!-- Major.Minor.Patch, maintained by hand. The fourth part (build number = number of commits) is appended by
+         Directory.Build.targets: 1.0.0.97 -->
+    <VersionPrefix>1.0.0</VersionPrefix>
+	
+    <!-- Target framework of all projects (they use $(AppTargetFramework)); the SDK is pinned in global.json.
+         Moving to a newer .NET = change both. Not TargetFramework itself, so the WiX project stays untouched. -->
+    <AppTargetFramework>net11.0</AppTargetFramework>
+	
+    <!-- The project's git repository, the one place that names it: Help > About, MSI (Apps & features link),
+         .deb homepage. The same for every brand. -->
+    <RepositoryUrl>https://github.com/Wolle181/EasyPDF</RepositoryUrl>
+	
+    <!-- Brand profile: name, colours, publisher, icons and installer ids of the app come from branding/<Brand>/Branding.props
+         (see branding/README.md). Choose it with -p:Brand=<id>, the environment variable EASYPDF_BRAND or the -Brand
+         parameter of the installer scripts; without one it is the original brand easypdf. -->
+    <Brand Condition="'$(Brand)' == ''">$(EASYPDF_BRAND)</Brand>
+    <Brand Condition="'$(Brand)' == ''">easypdf</Brand>
+    <BrandDir>$(MSBuildThisFileDirectory)branding/$(Brand)/</BrandDir>
+  </PropertyGroup>
+  <Import Project="$(BrandDir)Branding.props" />
+  <PropertyGroup>
+    <Product>$(AppDisplayName)</Product>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>

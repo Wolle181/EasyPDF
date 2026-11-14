@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=@APPNAME@
+GenericName=PDF Organizer
+GenericName[de]=PDF-Organisierer
+Comment=Read and reorganize PDF documents
+Comment[de]=PDF-Dokumente lesen und neu ordnen
+Exec=@PACKAGE@ %F
+Icon=@PACKAGE@
+Terminal=false
+Categories=Office;Viewer;Graphics;
+MimeType=application/pdf;
+Keywords=PDF;pages;merge;split;rotate;
+StartupWMClass=@APPNAME@

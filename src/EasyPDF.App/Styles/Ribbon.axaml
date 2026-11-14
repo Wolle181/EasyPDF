@@ -1,0 +1,233 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rb="using:EasyPDF.App.Controls.Ribbon"
+        xmlns:st="using:EasyPDF.App.Styles">
+  <!-- Ribbon buttons: flat, a quiet grey on hover, the active choice framed in the primary colour -->
+  <Style Selector="Button.ribbon">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="Button.ribbon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Ribbon.Hover}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Ribbon.HoverBorder}" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+  </Style>
+  <Style Selector="Button.ribbon:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Ribbon.Pressed}" />
+  </Style>
+  <Style Selector="Button.ribbon.active /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Ribbon.Active}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Ribbon.ActiveBorder}" />
+  </Style>
+  <Style Selector="Button.ribbon:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+
+  <!-- Icons: lines in the ink colour, the action layer in the button's IconColor (set locally), an accent fill -->
+  <Style Selector="Button.ribbon Path">
+    <Setter Property="Stroke" Value="{DynamicResource Icon.Ink}" />
+  </Style>
+  <Style Selector="Button.ribbon Path.tint">
+    <Setter Property="Fill" Value="{DynamicResource Icon.Tint}" />
+    <Setter Property="Opacity" Value="0.45" />
+  </Style>
+  <Style Selector="Button.ribbon:disabled Path">
+    <Setter Property="Opacity" Value="0.35" />
+  </Style>
+  <Style Selector="Button.ribbon:disabled Path.tint">
+    <Setter Property="Opacity" Value="0.15" />
+  </Style>
+
+
+  <!-- Round icon buttons: the icon sits in a white circle with a thin
+       grey frame; hover and press light up the circle instead of a rectangle; icons are plain lines (no accent fill) -->
+  <Style Selector="Button.ribbon Border.iconCircle">
+    <Setter Property="Background" Value="{DynamicResource Circle.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Circle.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BoxShadow" Value="{st:BrandShadow '0 1 2 0', Alpha=0.133}" />
+  </Style>
+  <Style Selector="Button.ribbon.round:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.ribbon.round:pressed /template/ ContentPresenter#PART_ContentPresenter, Button.ribbon.round.active /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+  <Style Selector="Button.ribbon.round Path.tint">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <Style Selector="Button.ribbon:pointerover Border.iconCircle">
+    <Setter Property="Background" Value="{DynamicResource Ribbon.Hover}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Circle.BorderHover}" />
+  </Style>
+  <Style Selector="Button.ribbon:pressed Border.iconCircle">
+    <Setter Property="Background" Value="{DynamicResource Ribbon.Pressed}" />
+  </Style>
+  <Style Selector="Button.ribbon:disabled Border.iconCircle">
+    <Setter Property="Background" Value="{DynamicResource Circle.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Card.Border}" />
+    <Setter Property="BoxShadow" Value="none" />
+  </Style>
+  <!-- Switched on (text tool, sidebar …): filled circle, white lines, label semi-bold -->
+  <Style Selector="Button.ribbon.active Border.iconCircle">
+    <Setter Property="Background" Value="{DynamicResource Circle.Active}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Circle.Active}" />
+  </Style>
+  <Style Selector="Button.ribbon.round.active Path">
+    <Setter Property="Stroke" Value="{DynamicResource Circle.ActiveForeground}" />
+  </Style>
+  <Style Selector="Button.ribbon.round.active TextBlock">
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <!-- Emphasis: Open = primary circle ("strong"), Save = accent circle ("signal"), like the filled buttons of the sample -->
+  <Style Selector="Button.ribbon.strong Border.iconCircle">
+    <Setter Property="Background" Value="{DynamicResource Circle.Active}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Circle.Active}" />
+  </Style>
+  <Style Selector="Button.ribbon.strong:pointerover Border.iconCircle">
+    <Setter Property="Background" Value="{DynamicResource Circle.ActiveHover}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Circle.ActiveHover}" />
+  </Style>
+  <Style Selector="Button.ribbon.strong Path">
+    <Setter Property="Stroke" Value="{DynamicResource Circle.ActiveForeground}" />
+  </Style>
+  <Style Selector="Button.ribbon.signal Border.iconCircle">
+    <Setter Property="Background" Value="{DynamicResource Primary.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Primary.Background}" />
+  </Style>
+  <Style Selector="Button.ribbon.signal:pointerover Border.iconCircle">
+    <Setter Property="Background" Value="{DynamicResource Primary.Hover}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Primary.Hover}" />
+  </Style>
+  <Style Selector="Button.ribbon.signal Path">
+    <Setter Property="Stroke" Value="{DynamicResource Primary.Foreground}" />
+  </Style>
+  <Style Selector="Button.ribbon.strong:disabled Border.iconCircle, Button.ribbon.signal:disabled Border.iconCircle">
+    <Setter Property="Opacity" Value="0.4" />
+  </Style>
+
+  <!-- Buttons on the primary band (help, info): white lines -->
+  <Style Selector="Button.ribbon.band Path">
+    <Setter Property="Stroke" Value="{DynamicResource Band.Foreground}" />
+  </Style>
+  <Style Selector="Button.ribbon.band:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Band.Hover}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+  <Style Selector="Button.ribbon.band:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Band.Selected}" />
+  </Style>
+  <!-- Round on the band: a light ring around white lines; hover and press fill the circle instead of a rectangle -->
+  <Style Selector="Button.ribbon.band.round:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.ribbon.band.round:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Button.ribbon.band Border.iconCircle">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Band.CircleBorder}" />
+    <Setter Property="BoxShadow" Value="none" />
+  </Style>
+  <Style Selector="Button.ribbon.band:pointerover Border.iconCircle">
+    <Setter Property="Background" Value="{DynamicResource Band.Selected}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Band.Foreground}" />
+  </Style>
+  <Style Selector="Button.ribbon.band:pressed Border.iconCircle">
+    <Setter Property="Background" Value="{DynamicResource Band.Hover}" />
+  </Style>
+
+  <!-- Tab headers. Ribbon is styled as TabControl (StyleKeyOverride), so `rb|Ribbon` / `:is()` would not match; it adds the class `ribbon`.
+       The tabs sit on the primary band: muted white text, the selected tab white on a lighter primary shade; no Fluent underline pipe. -->
+  <Style Selector="TabControl.ribbon /template/ ItemsPresenter#PART_ItemsPresenter">
+    <Setter Property="Margin" Value="8,4,0,0" />
+  </Style>
+  <Style Selector="TabControl.ribbon">
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="TabControl.ribbon /template/ ContentPresenter#PART_SelectedContentHost">
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="TabControl.ribbon TabItem">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Padding" Value="18,6,18,7" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Margin" Value="0,0,2,0" />
+    <Setter Property="CornerRadius" Value="4,4,0,0" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource Band.ForegroundMuted}" />
+  </Style>
+  <Style Selector="TabControl.ribbon TabItem /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="TabControl.ribbon TabItem /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource Band.ForegroundMuted}" />
+  </Style>
+  <Style Selector="TabControl.ribbon TabItem:pointerover /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource Band.Hover}" />
+  </Style>
+  <Style Selector="TabControl.ribbon TabItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource Band.Foreground}" />
+  </Style>
+  <Style Selector="TabControl.ribbon TabItem:selected /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource Band.Selected}" />
+  </Style>
+  <Style Selector="TabControl.ribbon TabItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource Band.Foreground}" />
+  </Style>
+  <Style Selector="TabControl.ribbon TabItem /template/ Border#PART_SelectedPipe">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+
+  <!-- Group template: quiet caption under the buttons, thin grey separator on the right.
+       The caption keeps 6 px to either side: a group reduced to one column of icons is narrower than its caption
+       ("Schwärzen", "Erkennen"), and without the gap neighbouring captions ran into each other. -->
+  <Style Selector="rb|RibbonGroup">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <DockPanel>
+          <Border x:Name="PART_Caption" DockPanel.Dock="Bottom" Margin="0,2,0,0">
+            <TextBlock x:Name="PART_CaptionText" Text="{TemplateBinding Caption}" FontSize="11" FontWeight="Medium"
+                       Foreground="{DynamicResource Ribbon.Caption}" HorizontalAlignment="Center" Margin="6,2,6,4" />
+          </Border>
+          <Border DockPanel.Dock="Right" Width="1" Margin="0,6,0,6" Background="{DynamicResource Ribbon.Separator}" />
+          <ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="Left" Margin="5,4,5,0" />
+        </DockPanel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <!-- Panel under the band: white, topped by the accent line -->
+  <Style Selector="Border.ribbonPanel">
+    <Setter Property="Background" Value="{DynamicResource Ribbon.Panel}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brand.Accent}" />
+    <Setter Property="BorderThickness" Value="0,3,0,0" />
+  </Style>
+
+  <!-- Zoom buttons in the status bar -->
+  <Style Selector="Border.statusZoom Button.ribbon">
+    <Setter Property="Padding" Value="6,1" />
+    <Setter Property="MinHeight" Value="0" />
+  </Style>
+
+  <!-- Mode switch in the status bar: the active mode is a filled in the primary colour button with white text and icon -->
+  <Style Selector="Border.modeSwitch Button.ribbon">
+    <Setter Property="Padding" Value="8,1" />
+    <Setter Property="MinHeight" Value="0" />
+  </Style>
+  <Style Selector="Border.modeSwitch Button.ribbon.active /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Mode.Active}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Mode.Active}" />
+  </Style>
+  <Style Selector="Border.modeSwitch Button.ribbon.active TextBlock">
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource Mode.ActiveForeground}" />
+  </Style>
+  <Style Selector="Border.modeSwitch Button.ribbon.active Path">
+    <Setter Property="Stroke" Value="{DynamicResource Mode.ActiveForeground}" />
+  </Style>
+</Styles>

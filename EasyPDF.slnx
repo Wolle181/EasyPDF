@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/EasyPDF.App/EasyPDF.App.csproj" />
+    <Project Path="src/EasyPDF.Core/EasyPDF.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/EasyPDF.Core.Tests/EasyPDF.Core.Tests.csproj" />
+    <Project Path="tests/EasyPDF.App.Tests/EasyPDF.App.Tests.csproj" />
+  </Folder>
+</Solution>

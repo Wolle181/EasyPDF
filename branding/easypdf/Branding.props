@@ -1,0 +1,40 @@
+<Project>
+  <!--
+    Brand profile "easypdf": the original app. Template for a new brand: copy this folder to branding/<id>/, change the
+    values, draw the icons (tools/icon/make_icon.py, option brand) and build with -p:Brand=<id> (branding/README.md).
+  -->
+  <PropertyGroup>
+    <!-- Product name the user sees: UI texts ({App} in Strings*.resx), window title, start menu, installed apps, file manager
+         context menu, Linux desktop entry, macOS app name, program file (<name>.exe), install folder, registry keys and
+         installer file names, the user's folders (settings, stamps, temp), Linux package and command (in lower case).
+         Plain ASCII without spaces is safest. Projects and namespaces keep the technical name EasyPDF. -->
+    <AppDisplayName>EasyPDF</AppDisplayName>
+
+    <!-- Brand colours (#RRGGBB): every colour of the app is a shade of these two (Styles/BrandColors.cs, App.axaml), light
+         and dark theme, and the drawn program icon (tools/icon/make_icon.py, run it after a change). Primary: dark main
+         colour (band, selection, white text on it; its hue tints the greys). Accent: light signal colour (Save, line under
+         the band, icon accents; text in the primary colour on it). -->
+    <BrandPrimaryColor>#003A66</BrandPrimaryColor>
+    <BrandAccentColor>#79A5D7</BrandAccentColor>
+    <!-- Optional: top of the header gradient (#RRGGBB; it ends in the primary colour of the band below). Without it the
+         header starts in a slightly lighter primary colour. Here: the darkest blue of the company logo. -->
+    <BrandHeaderColor>#0061AC</BrandHeaderColor>
+
+    <!-- Publisher: .exe details, "Installed apps" (MSI Manufacturer), .deb Maintainer -->
+    <Company>UBX IT-Consulting GmbH</Company>
+    <!-- .exe details, macOS Finder info, line "Copyright" in Help > About -->
+    <Copyright>Copyright © 2026 Wolfgang Ahting</Copyright>
+    <!-- Line "Author" in Help > About (and in "Copy version info"); XML: write & as &amp;. The company logo shown there is
+         icons/company-logo.svg (tools/icon/make_icon.py, option company-logo); without that file About shows none. -->
+    <AppAuthor>Wolfgang Ahting &amp; Claude</AppAuthor>
+
+    <!-- Installer ids, one of their own per brand, so two brands can be installed side by side. Never change them once a
+         brand is shipped: the MSI UpgradeCode lets a newer MSI replace an older one, the bundle id identifies the macOS app. -->
+    <MsiUpgradeCode>BC290CBC-EFF9-4B1E-B262-0710B3E488DB</MsiUpgradeCode>
+    <MacBundleId>io.github.wolle181.easypdf</MacBundleId>
+
+    <!-- Words that belong to this brand only (';'-separated, whole words, case-sensitive): a test fails if one of them, or
+         the shown name of a brand other than EasyPDF, appears outside this folder -->
+    <BrandWords>UBX</BrandWords>
+  </PropertyGroup>
+</Project>

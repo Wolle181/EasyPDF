@@ -1,0 +1,27 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:EasyPDF.App.ViewModels"
+        xmlns:loc="using:EasyPDF.App.Localization"
+        x:Class="EasyPDF.App.Dialogs.OcrDialog" x:DataType="vm:OcrDialogViewModel"
+        Title="{loc:Tr OcrTitle}" Width="440" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" CanResize="False" ShowInTaskbar="False">
+  <StackPanel Margin="20" Spacing="14">
+    <TextBlock Text="{loc:Tr OcrIntro}" TextWrapping="Wrap" Opacity="0.8" />
+    <StackPanel Spacing="6">
+      <TextBlock Text="{loc:Tr RotatePages}" FontWeight="SemiBold" />
+      <RadioButton GroupName="Scope" Content="{loc:Tr RotateScopeAll}" IsChecked="{Binding IsAll}" />
+      <RadioButton GroupName="Scope" Content="{Binding CurrentPageText}" IsChecked="{Binding IsCurrent}" />
+      <RadioButton GroupName="Scope" Content="{loc:Tr RotateScopeSelected}" IsChecked="{Binding IsSelected}" IsEnabled="{Binding CanSelectSelected}" />
+      <RadioButton GroupName="Scope" Content="{loc:Tr RotateScopeRange}" IsChecked="{Binding IsRangeScope}" />
+      <TextBox x:Name="RangeBox" Text="{Binding RangeText}" PlaceholderText="1-3, 5, 8-10" IsEnabled="{Binding IsRangeScope}" Margin="28,0,0,0" />
+      <TextBlock Text="{Binding ErrorText}" Foreground="Red" TextWrapping="Wrap" Margin="28,0,0,0" FontSize="12" />
+    </StackPanel>
+    <CheckBox x:Name="SkipBox" IsChecked="{Binding SkipPagesWithText}">
+      <TextBlock Text="{loc:Tr OcrSkipPagesWithText}" TextWrapping="Wrap" />
+    </CheckBox>
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button x:Name="OkButton" MinWidth="80" HorizontalContentAlignment="Center" IsDefault="True" IsEnabled="{Binding IsValid}" Click="OnOk" Content="{loc:Tr OcrStart}" />
+      <Button MinWidth="80" HorizontalContentAlignment="Center" IsCancel="True" Click="OnCancel" Content="{loc:Tr Cancel}" />
+    </StackPanel>
+  </StackPanel>
+</Window>
