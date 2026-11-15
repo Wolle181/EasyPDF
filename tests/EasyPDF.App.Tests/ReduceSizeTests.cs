@@ -120,7 +120,7 @@ public class ReduceSizeTests
         await Pump();
         Assert.True(window.ViewModel.ReduceSizeCommand.CanExecute(null));
         window.Close();
-        await window.ViewModel.Document!.DisposeAsync();
+        await window.ViewModel.ReleaseDocumentAsync();
     }
 }
 

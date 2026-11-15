@@ -521,6 +521,23 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
             dialogs.CloseWindow();
     }
 
+    /// <summary>
+    /// The window was closed: gives up the document without asking, so that none of its files stays open (the process
+    /// lives on while other windows are open, and an open file cannot be deleted or replaced). Without a document it
+    /// returns the release that is still running, if any.
+    /// </summary>
+    public Task ReleaseDocumentAsync()
+    {
+        _operation?.Cancel();
+        var old = Document;
+        if (old == null)
+            return _release;
+        Document = null;
+        return _release = old.DisposeAsync().AsTask();
+    }
+
+    private Task _release = Task.CompletedTask;
+
     /// <summary>True if it is fine to replace/close the document (nothing unsaved, saved, or discarded).</summary>
     public async Task<bool> ConfirmDiscardAsync()
     {

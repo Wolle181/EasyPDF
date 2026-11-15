@@ -210,7 +210,7 @@ public class AppUiTests
         await Pump();
         Assert.False(panel.IsVisible);
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -305,7 +305,7 @@ public class AppUiTests
         vm.TogglePageSidebarCommand.Execute(null);             // View > Thumbnails switches it off
         Assert.False(panel.IsVisible);
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -354,7 +354,7 @@ public class AppUiTests
         Assert.Equal(200, vm.ThumbnailZoomPercent);
         Assert.False(fitHeight.Command.CanExecute(null));
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -394,7 +394,7 @@ public class AppUiTests
         Assert.Equal(Colors.White, ((ISolidColorBrush)label.Foreground!).Color);   // white text on primary
         Assert.Contains("+2)", (string)ToolTip.GetTip(organize)!);   // shortcut shown as "Ctrl+2", not "Ctrl+D2"
         window.Close();
-        await window.ViewModel.Document!.DisposeAsync();
+        await window.ViewModel.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -497,7 +497,7 @@ public class AppUiTests
                     Assert.True(t.Text![line.FirstTextSourceIndex + line.Length - 1] == ' ', $"'{t.Text}' is broken inside a word");
             });
             window.Close();
-            await window.ViewModel.Document!.DisposeAsync();
+            await window.ViewModel.ReleaseDocumentAsync();
         }
         finally
         {
@@ -540,7 +540,7 @@ public class AppUiTests
                 }
             }
             window.Close();
-            await window.ViewModel.Document!.DisposeAsync();
+            await window.ViewModel.ReleaseDocumentAsync();
         }
         finally
         {
@@ -653,7 +653,7 @@ public class AppUiTests
         var presenter = print.GetVisualDescendants().OfType<Avalonia.Controls.Presenters.ContentPresenter>().First(c => c.Name == "PART_ContentPresenter");
         Assert.Equal(Colors.Transparent, ((ISolidColorBrush)presenter.Background!).Color);
         window.Close();
-        await window.ViewModel.Document!.DisposeAsync();
+        await window.ViewModel.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -720,7 +720,7 @@ public class AppUiTests
         var after = PrimaryPixels();
         Assert.True(after > before + 4 * 1000, $"{before} -> {after}");   // every selected page sits on a primary card
         window.Close();
-        await window.ViewModel.Document!.DisposeAsync();
+        await window.ViewModel.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -882,7 +882,7 @@ public class AppUiTests
         Assert.Contains(headers, h => h != null && h.Contains("Extract"));
         Assert.Same(menu.GetType(), window.FindControl<EasyPDF.App.Controls.ThumbnailGrid>("OrganizeView")!.ContextMenu!.GetType());
         window.Close();
-        await window.ViewModel.Document!.DisposeAsync();
+        await window.ViewModel.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -937,7 +937,7 @@ public class AppUiTests
         window.MouseUp(q, MouseButton.Right);
         Assert.Equal(1, view.HighlightedPage);                 // ... and keeps it marked (the context menu acts on it)
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [Fact]

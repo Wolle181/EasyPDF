@@ -136,7 +136,7 @@ public class SelectTextTests
         await Pump();
         Assert.Null(vm.SelectedText);
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -173,7 +173,7 @@ public class SelectTextTests
         await Pump();
         Assert.Null(vm.SelectedText);
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -206,7 +206,7 @@ public class SelectTextTests
         await Pump(300);
         Assert.Equal(stopped, view.ScrollOffset); // released: no more scrolling
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -227,7 +227,7 @@ public class SelectTextTests
         Assert.Equal(Loc.F("MsgPageHasNoText", 2), vm.StatusMessage);
         Assert.Null(vm.SelectedText);
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -260,6 +260,6 @@ public class SelectTextTests
         var edit = NativeMenu.GetMenu(window)!.Items.OfType<NativeMenuItem>().Single(i => i.Header == "Edit").Menu!;
         Assert.Contains(edit.Items.OfType<NativeMenuItem>(), i => i.Header == "Select Text" && i.Command == vm.ToggleSelectTextToolCommand);
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 }

@@ -43,7 +43,7 @@ public class TextToolTests
         Assert.Equal("Times", next.TextFont);
 
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -63,7 +63,7 @@ public class TextToolTests
         Assert.False(vm.IsTextToolActive);
 
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -105,6 +105,6 @@ public class TextToolTests
         Assert.Equal(18, view.PenSize);
 
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 }

@@ -141,7 +141,7 @@ public class CommandLineTests
         Assert.False(window.ViewModel.Document.HasFile);
         Assert.All(window.ViewModel.Document.Sources, src => Assert.True(src.IsOpen)); // the files stay open for the new document
         window.Close();
-        await window.ViewModel.Document.DisposeAsync();
+        await window.ViewModel.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]

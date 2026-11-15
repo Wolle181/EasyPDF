@@ -88,6 +88,6 @@ public class TextEditTests
         Assert.Single(vm.Document.Pages[0].Texts);
 
         window.Close();
-        await vm.Document.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 }

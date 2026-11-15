@@ -136,7 +136,7 @@ public class StampPlacementTests
         Assert.Null(vm.PendingStampPath);
         Assert.Null(surface.Cursor);
         window.Close();
-        await vm.Document.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -208,7 +208,7 @@ public class StampPlacementTests
         Assert.Equal(56.64, stamp.Rect.Width, 2);            // 236 px at 300 dpi = 20 mm, not 177 pt as at 96 dpi
         Assert.Equal(56.64, stamp.Rect.Height, 2);
         window.Close();
-        await window.ViewModel.Document.DisposeAsync();
+        await window.ViewModel.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]

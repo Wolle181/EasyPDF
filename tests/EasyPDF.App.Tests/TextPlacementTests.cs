@@ -111,7 +111,7 @@ public class TextPlacementTests
         Assert.Empty(vm.Document.Pages[0].Texts);
 
         window.Close();
-        await vm.Document.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -144,7 +144,7 @@ public class TextPlacementTests
         Assert.Null(Editor(view));
 
         window.Close();
-        await vm.Document.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     private static unsafe int CountRed(Avalonia.Media.Imaging.WriteableBitmap frame)

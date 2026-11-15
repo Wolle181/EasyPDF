@@ -996,6 +996,20 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
         }
     }
 
+    /// <summary>A closed window keeps no file open: the other windows keep the process (and so its handles) alive.</summary>
+    protected override async void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        try
+        {
+            await _viewModel.ReleaseDocumentAsync();
+        }
+        catch (Exception)
+        {
+            // Nothing to tell the user: the window is gone
+        }
+    }
+
     /// <summary>Dropped files: the first one opens here (if the window is empty), each further one in its own window.</summary>
     private async void OnDrop(object? sender, DragEventArgs e)
     {

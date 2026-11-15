@@ -607,8 +607,10 @@ public sealed class EditableDocument : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        foreach (var s in _sources)
-            await s.DisposeAsync().ConfigureAwait(false);
+        // Taken out first: a second call while this one is still closing files finds nothing left to do
+        PdfSource[] sources = [.. _sources];
         _sources.Clear();
+        foreach (var s in sources)
+            await s.DisposeAsync().ConfigureAwait(false);
     }
 }

@@ -95,7 +95,7 @@ public class SearchUiTests
         Assert.Empty(view.SearchHits);
         Assert.Equal("welt", vm.SearchText);                 // kept for the next time
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -121,7 +121,7 @@ public class SearchUiTests
         Assert.Empty(vm.SearchHits);
         Assert.Equal("No matches", vm.SearchStatusText);
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -138,7 +138,7 @@ public class SearchUiTests
         await Pump();
         Assert.Equal("No searchable text – recognize the text first", vm.SearchStatusText);
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -179,6 +179,6 @@ public class SearchUiTests
         await Pump();
         Assert.True(panel.Bounds.Width <= window.Bounds.Width / 2 + 1);
         window.Close();
-        await window.ViewModel.Document!.DisposeAsync();
+        await window.ViewModel.ReleaseDocumentAsync();
     }
 }

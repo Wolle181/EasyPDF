@@ -131,7 +131,7 @@ public class RedactionUiTests
         Assert.Empty(vm.Document.Pages[0].Redactions);
         Assert.Equal(2, vm.Document.PageCount); // Del removed the box, not the page
         window.Close();
-        await vm.Document.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -173,7 +173,7 @@ public class RedactionUiTests
         await Pump();
         Assert.Equal("Welt", vm.SelectedText);
         window.Close();
-        await vm.Document.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -200,7 +200,7 @@ public class RedactionUiTests
         Assert.True(vm.IsSelectTextToolActive);
         Assert.Null(vm.ActiveRedaction);
         window.Close();
-        await vm.Document.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -232,6 +232,6 @@ public class RedactionUiTests
         vm.CoverCommand.Execute(null);
         Assert.Null(vm.ActiveRedaction);
         window.Close();
-        await vm.Document.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 }

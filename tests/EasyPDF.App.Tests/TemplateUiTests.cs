@@ -65,7 +65,7 @@ public class TemplateUiTests
         Assert.Single(view.Children.OfType<TextBox>());
 
         window.Close();
-        await vm.Document.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     private static async Task<(EasyPDF.App.Views.MainWindow Window, HorizontalPageView View, TempDir Dir)> OpenWithTemplateAsync(string template)
@@ -153,7 +153,7 @@ public class TemplateUiTests
             Assert.Equal("Page 1\nof 3", Assert.Single(vm.Document!.Pages[0].Texts).Text);
             Assert.True(preview.SetEquals(TextPixels(window, view))); // nothing moved, nothing doubled
             window.Close();
-            await vm.Document.DisposeAsync();
+            await vm.ReleaseDocumentAsync();
         }
     }
 
@@ -198,7 +198,7 @@ public class TemplateUiTests
             Assert.Equal("Ibeam", surface.Cursor?.ToString());
             Assert.Empty(TextPixels(window, view));
             window.Close();
-            await vm.Document.DisposeAsync();
+            await vm.ReleaseDocumentAsync();
         }
     }
 

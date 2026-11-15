@@ -138,6 +138,6 @@ public class MailTests
         Dispatcher.UIThread.RunJobs();
         Assert.True(window.ViewModel.SendByMailCommand.CanExecute(null));
         window.Close();
-        await window.ViewModel.Document!.DisposeAsync();
+        await window.ViewModel.ReleaseDocumentAsync();
     }
 }

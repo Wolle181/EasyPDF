@@ -31,7 +31,7 @@ public class SaveWithViewTests
         Assert.False(vm.Document.IsDirty);
         Assert.Empty(vm.Document.Pages[0].Texts); // written into the file now
         window.Close();
-        await vm.Document.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     /// <summary>After opening, landscape pages far behind portrait first pages are shown in landscape, not distorted.</summary>
@@ -55,7 +55,7 @@ public class SaveWithViewTests
         var rect = view.PageRectInViewport(last);
         Assert.Equal((100 + 10.0 * last) / 200, rect.Width / rect.Height, 2);
         window.Close();
-        await window.ViewModel.Document!.DisposeAsync();
+        await window.ViewModel.ReleaseDocumentAsync();
     }
 
     /// <summary>After saving, landscape pages behind a portrait first page are shown in landscape, not distorted.</summary>
@@ -82,6 +82,6 @@ public class SaveWithViewTests
         Assert.Equal(0.95, Aspect(0), 2);                       // 190 × 200
         Assert.Equal(1.1, Aspect(4), 2);
         window.Close();
-        await vm.Document.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 }

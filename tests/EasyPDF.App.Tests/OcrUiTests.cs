@@ -338,7 +338,7 @@ public class OcrWindowTests
         var edit = NativeMenu.GetMenu(window)!.Items.OfType<NativeMenuItem>().Single(i => i.Header == "Edit").Menu!;
         Assert.Contains(edit.Items.OfType<NativeMenuItem>(), i => i.Header == "Recognize Text (OCR)…" && i.Command == window.ViewModel.RecognizeTextCommand);
         window.Close();
-        await window.ViewModel.Document!.DisposeAsync();
+        await window.ViewModel.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]

@@ -502,7 +502,7 @@ public class OrganizeUiTests
         Assert.Empty(vm.SelectedIds);                                                             // click on empty space
 
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -524,7 +524,7 @@ public class OrganizeUiTests
         vm.UndoCommand.Execute(null);
         Assert.Equal(new[] { 0, 1, 2, 3, 4 }, vm.Document!.Pages.Take(5).Select(p => p.SourceIndex).ToArray());
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -549,7 +549,7 @@ public class OrganizeUiTests
         Assert.Equal(new[] { 1, 3, 4, 5, 0, 2 }, vm.Document!.Pages.Take(6).Select(p => p.SourceIndex).ToArray());
         Assert.Equal(2, vm.SelectedIds.Count);                    // still selected
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -565,7 +565,7 @@ public class OrganizeUiTests
         Assert.Equal(new[] { vm.Document!.Pages[1].Id }, vm.SelectedIds.ToArray());
         Assert.False(vm.IsDirty);
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -583,7 +583,7 @@ public class OrganizeUiTests
         Assert.False(vm.IsOrganizeMode);
         Assert.Equal(7, vm.CurrentPage);
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -598,7 +598,7 @@ public class OrganizeUiTests
         Assert.Equal(5, grid.ContextPage);
         Assert.Equal(new[] { vm.Document!.Pages[5].Id }, vm.SelectedIds.ToArray());
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -621,7 +621,7 @@ public class OrganizeUiTests
         await Pump(400);
         Assert.True(CountRedPixels(window.CaptureRenderedFrame()!, contentTop) > 0);
         window.Close();
-        await window.ViewModel.Document!.DisposeAsync();
+        await window.ViewModel.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -639,7 +639,7 @@ public class OrganizeUiTests
         Assert.Contains(window.ViewModel.SelectAllCommand, commands);
         Assert.Contains(window.ViewModel.ShowOrganizeCommand, commands);
         window.Close();
-        await window.ViewModel.Document!.DisposeAsync();
+        await window.ViewModel.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -657,7 +657,7 @@ public class OrganizeUiTests
             await Pump(40);
         }
         window.Close();
-        await window.ViewModel.Document!.DisposeAsync();
+        await window.ViewModel.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
@@ -707,6 +707,6 @@ public class OrganizeUiTests
         Assert.Equal(vm.EffectiveZoomPercent.ToString("0"), vm.ZoomInput);
         Assert.True(vm.FitWidthCommand.CanExecute(null));
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 }

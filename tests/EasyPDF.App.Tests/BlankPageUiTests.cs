@@ -31,6 +31,6 @@ public class BlankPageUiTests
         vm.UndoCommand.Execute(null);
         Assert.Equal(3, vm.Document.PageCount);
         window.Close();
-        await vm.Document.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 }

@@ -39,11 +39,11 @@ public class MultiWindowTests
 
     private static async Task CloseAllAsync(WindowManager windows)
     {
-        var documents = windows.Windows.Select(w => w.ViewModel.Document).OfType<EditableDocument>().ToList();
-        foreach (var window in windows.Windows.ToList())
+        var all = windows.Windows.ToList();
+        foreach (var window in all)
             window.CloseWindow();
-        foreach (var document in documents)
-            await document.DisposeAsync();
+        foreach (var window in all)
+            await window.ViewModel.ReleaseDocumentAsync();     // closing released the files: wait until they are closed
     }
 
     private static async Task<T> WaitForAsync<T>(Func<T?> find) where T : class
@@ -167,6 +167,27 @@ public class MultiWindowTests
         Assert.False(dialog.Model.IncludeCurrent);                     // the new window has no document to offer
         dialog.Close();                                                 // [X] = cancel
         await running;
+        Assert.Equal(dir.File("a.pdf"), first.ViewModel.Document!.FilePath);
+        await CloseAllAsync(windows);
+    }
+
+    [AvaloniaFact]
+    public async Task AClosedWindowLeavesItsFileFreeWhileOthersAreOpen()
+    {
+        using var dir = new TempDir();
+        var windows = new WindowManager(new AppSettings());
+        var first = ShowFirst(windows);
+        await first.ViewModel.OpenPathAsync(dir.Pdf("a.pdf", 2));
+        await first.ViewModel.OpenPathAsync(dir.Pdf("b.pdf", 3));
+        var second = windows.Windows.Single(w => w != first);
+        var document = second.ViewModel.Document!;
+
+        second.Close();                                                 // [X]: not the Close command
+        Assert.Single(windows.Windows);
+        await WaitForAsync(() => document.Sources.Count == 0 ? document : null);
+        Assert.Null(second.ViewModel.Document);
+        File.Delete(dir.File("b.pdf"));                                 // throws while a handle is open (Windows)
+        Assert.False(File.Exists(dir.File("b.pdf")));
         Assert.Equal(dir.File("a.pdf"), first.ViewModel.Document!.FilePath);
         await CloseAllAsync(windows);
     }

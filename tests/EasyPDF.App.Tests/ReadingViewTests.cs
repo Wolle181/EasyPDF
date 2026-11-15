@@ -130,7 +130,7 @@ public class ReadingViewTests
         Assert.Equal(0, vm.CurrentPage);
         Assert.True(Shows(0));
         window.Close();
-        await vm.Document!.DisposeAsync();
+        await vm.ReleaseDocumentAsync();
     }
 
     [AvaloniaFact]
