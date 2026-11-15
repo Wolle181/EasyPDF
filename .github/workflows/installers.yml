@@ -3,7 +3,7 @@
 # Actions storage quota (0.5 GB on the free plan), so there are no workflow artifacts.
 # Start manually under Actions > Installers > Run workflow (or: gh workflow run installers.yml --ref <branch>);
 # "platform" builds only one installer (gh: -f platform=macos) and replaces only its files in the release,
-# "brand" picks the brand profile in branding/ (gh: -f brand=<id>).
+# "brand" picks the brand profile in branding/ (gh: -f brand=<id>); empty = the default in Directory.Build.props.
 name: Installers
 
 on:
@@ -15,9 +15,8 @@ on:
         options: [all, windows, linux, macos]
         default: all
       brand:
-        description: Brand profile (folder in branding/)
+        description: Brand profile (folder in branding/; empty = default in Directory.Build.props)
         type: string
-        default: easypdf
   # Automatic builds are switched off. To switch them on:
   # push:
   #   tags: ['v*']
@@ -33,7 +32,7 @@ concurrency: installers-release
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-  EASYPDF_BRAND: ${{ inputs.brand || 'easypdf' }}   # read by Directory.Build.props
+  EASYPDF_BRAND: ${{ inputs.brand }}   # read by Directory.Build.props; empty = its default
 
 jobs:
   # A full build starts the pre-release "latest" anew; a single platform only replaces its own files in it
@@ -106,7 +105,9 @@ jobs:
           $appName = dotnet msbuild src/EasyPDF.App -getProperty:AppDisplayName
           $installDir = Join-Path $env:LOCALAPPDATA "Programs\$appName"
           $version = dotnet msbuild src/EasyPDF.App -getProperty:Version -t:SetVersionFromGit
-          if ($version -notmatch '^\d+\.\d+\.\d+\.\d{2,}$') { throw "unexpected version $version (shallow clone?)" }
+          # The build number counts the commits, so it needs the full history (a repository may have just one commit)
+          if ((git rev-parse --is-shallow-repository) -ne 'false') { throw 'shallow clone: the build number would be wrong' }
+          if ($version -notmatch '^\d+\.\d+\.\d+\.[1-9]\d*$') { throw "unexpected version $version" }
           # A rebuild of the same version gets a new ProductCode, like a second local build
           dotnet build installer/windows/EasyPDF.Installer.wixproj -c Release --no-incremental -p:OutputPath=$env:RUNNER_TEMP\same\ -p:Version=$version
           dotnet build installer/windows/EasyPDF.Installer.wixproj -c Release --no-incremental -p:OutputPath=$env:RUNNER_TEMP\old\ -p:Version=0.0.1.1

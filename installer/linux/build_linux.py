@@ -164,7 +164,8 @@ def build_deb(ver, name, package, maintainer, icons):
         # Avalonia (X11, fontconfig), .NET globalization (ICU, any of the common versions);
         # ONNX Runtime (OCR) needs glibc 2.28 (Debian 10, Ubuntu 18.10) and libstdc++ (GLIBCXX_3.4.22)
         "Depends: libc6 (>= 2.28), libstdc++6 (>= 6), libfontconfig1, libx11-6, libice6, libsm6, "
-        "libicu76 | libicu74 | libicu72 | libicu71 | libicu70 | libicu67 | libicu66 | libicu63",
+        "libicu78 | libicu77 | libicu76 | libicu75 | libicu74 | libicu73 | libicu72 | libicu71 | libicu70 | libicu67 | "
+        "libicu66 | libicu63",
         f"Homepage: {build_property('RepositoryUrl')}",
         "Description: Read and reorganize PDF documents",
         f" {name} shows PDF pages side by side and lets you reorder, rotate, delete,",

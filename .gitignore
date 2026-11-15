@@ -361,3 +361,6 @@ tools/icon/preview.png
 
 # Publish profiles of the app are part of the build (installers, CI)
 !src/EasyPDF.App/Properties/PublishProfiles/*.pubxml
+
+# Personal launchers for Claude Code
+/start-claude*.cmd

@@ -88,7 +88,7 @@ xattr -cr /Applications/<App>.app
 Without Terminal: start it once, close the warning, then System Settings ▸ Privacy & Security ▸ *Open Anyway*. A copy built on the same Mac starts without warning.
 
 ## Without local tools: GitHub Actions
-The workflow *Installers* (`.github/workflows/installers.yml`) builds the `.msi`, `.deb`/`.tar.gz` and the `.dmg` on GitHub, tests the MSI and `.deb` upgrades, starts the installed app on Linux and runs the OCR tests on Linux and macOS. It runs manually (Actions ▸ Installers ▸ Run workflow, or `gh workflow run installers.yml --ref <branch>`); the automatic trigger is commented out in the workflow. *platform* builds all three (default) or only one, *brand* picks the brand profile.
+The workflow *Installers* (`.github/workflows/installers.yml`) builds the `.msi`, `.deb`/`.tar.gz` and the `.dmg` on GitHub, tests the MSI and `.deb` upgrades, starts the installed app on Linux and runs the OCR tests on Linux and macOS. It runs manually (Actions ▸ Installers ▸ Run workflow, or `gh workflow run installers.yml --ref <branch>`); the automatic trigger is commented out in the workflow. *platform* builds all three (default) or only one, *brand* picks the brand profile (empty: the default in `Directory.Build.props`).
 
 ### Installers in the pre-release *latest*
 All installers go into the pre-release *latest* (release files do not count against the 0.5 GB of Actions storage of the free plan, so there are no workflow artifacts). A full build creates it anew, a build of a single platform replaces only that platform's files. So there is only ever the newest build and it needs no cleanup. The repository is private: only its members can see and download it.
