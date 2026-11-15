@@ -3,6 +3,9 @@
 A customization of the app: **SmartPDF** for the INTER Versicherungsgruppe. Build it with
 `-p:Brand=inter` or `EASYPDF_BRAND=inter` (see [../README.md](../README.md)).
 
+**Release repository:** the folder `SmartPDF` next to the development repository, with `inter` as the default brand
+([docs/BUILDING.md](../../docs/BUILDING.md), "Development and release repositories").
+
 **Look:** sober corporate design after the INTER CI (by wirDesign) and a sample app called SmartPDF: dark navy `#001B41`
 as primary colour, the yellow `#DEDC00` as the only signal colour, white and cool greys, typeface Barlow. The round ribbon
 buttons follow that sample app.

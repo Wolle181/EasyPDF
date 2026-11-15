@@ -109,6 +109,31 @@ All installers go into the pre-release *latest* (release files do not count agai
   gh release delete latest --cleanup-tag --yes
   ```
 
+## Development and release repositories
+All work happens in the development repository, on `main` only; there are no brand branches. Each published brand has
+its own release repository: a clone next to the development repository, in a folder named after the brand's shown
+name (the brand's `README.md` in `branding/<id>/` names it). A release repository holds the files of `main` with these
+differences:
+- `<RepositoryUrl>` in `Directory.Build.props` is its own address.
+- If its brand is not `easypdf`, that brand is the default: `<Brand>` in `Directory.Build.props` and the places that
+  state the default (`CLAUDE.md`, `README.md`, `README_DE.md`, `branding/README.md`, `.claude/skills/branding/SKILL.md`).
+
+Nothing else is edited in a release repository, and it is never force pushed: every commit of `main` arrives there as
+an ordinary commit, so the history shows each change. After a commit on `main` (build and tests green, pushed), in
+every release repository:
+```
+git fetch <path of the development repository> main
+git cherry-pick -x <last>..FETCH_HEAD      # <last>: see below
+git push origin main
+```
+- `<last>` is the commit of `main` that was carried over last: the hash in the line `(cherry picked from commit …)`
+  of the newest commit (`git log -1`).
+- On a conflict in one of the files above, keep the release repository's address and default brand and take
+  everything else from `main`.
+- Check before the push: `git diff --stat FETCH_HEAD HEAD` lists only the files above.
+
+The build number is the number of commits, so the same change has a lower one in a release repository.
+
 ## Demo videos
 `branding/<id>/make-presentation-videos.cmd` records the introduction in German and English for that brand
 (`tools/DemoVideo`, drives the real app headless; ffmpeg is downloaded into a temp folder for the run) into

@@ -69,4 +69,11 @@ Test-PDFs mit Lesezeichen/verschiedenen Seitengrößen werden in den Tests von H
 - **UI language: English + German.** Every new UI string goes into **both** `Strings.resx` and `Strings.de.resx` (a test checks completeness, placeholders and that every used key exists). No string concatenation for sentences – use format placeholders (`{0}`).
 - Dialog-Ergebnisse so definieren, dass „Fenster mit [X] schließen“ = Abbrechen ist (z. B. `UnsavedChoice.Cancel` ist der Default-Wert).
 - UI-Tests: Neue UI-Funktionen bekommen Headless-Tests (`[AvaloniaFact]`, Maus/Tastatur per `window.MouseDown/KeyPress`); zwei schnelle Klicks auf dieselbe Stelle gelten als Doppelklick.
-- Nach jedem Arbeitsschritt: Build + Tests grün, Commit, Push.
+- Nach jedem Arbeitsschritt: Build + Tests grün, Commit, Push, dann in die Release-Repos übernehmen (nächster Abschnitt).
+
+## Repositories und Ablauf
+Details: [docs/BUILDING.md](docs/BUILDING.md) „Development and release repositories“.
+- **Entwickelt wird nur im Entwicklungs-Repo auf `main`**; es gibt keine Marken-Branches.
+- **Release-Repos:** je veröffentlichter Marke eines, als Klon neben dem Entwicklungs-Repo (Ordner heißt wie der angezeigte Name der Marke; steht in `branding/<id>/README.md`). Sie unterscheiden sich von `main` nur durch die eigene `<RepositoryUrl>` und, wenn ihre Marke nicht `easypdf` ist, durch die Standardmarke (`<Brand>` in `Directory.Build.props` und die Stellen, die den Standard nennen: `CLAUDE.md`, `README.md`, `README_DE.md`, `branding/README.md`, `.claude/skills/branding/SKILL.md`).
+- **Übernehmen** nach jedem Commit auf `main`, in jedem Release-Repo: `git fetch <Entwicklungs-Repo> main`, `git cherry-pick -x <zuletzt>..FETCH_HEAD`, `git push origin main`. `<zuletzt>` = Hash aus der Zeile `(cherry picked from commit …)` des neuesten Commits dort. Bei Konflikten in den genannten Dateien Adresse und Standardmarke des Release-Repos behalten. Vor dem Push prüfen: `git diff --stat FETCH_HEAD HEAD` zeigt nur die genannten Dateien.
+- In den Release-Repos nie direkt arbeiten und **nie Force-Push**: jede Änderung soll dort als eigener, normaler Commit nachvollziehbar sein.

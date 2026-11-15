@@ -2,6 +2,9 @@
 
 The default brand (also the template for new brands, see [../README.md](../README.md)).
 
+**Release repository:** the folder `EasyPDF` next to the development repository
+([docs/BUILDING.md](../../docs/BUILDING.md), "Development and release repositories").
+
 **Look:** the header runs from the darkest blue of the UBX company logo (`logos/company/`), `#0061AC`
 (`BrandHeaderColor`), into the darker `#003A66` (`BrandPrimaryColor`: tab band, selection, icons, tinted greys); the
 light blue `#79A5D7` of the logo is the signal colour (line under the band, Save button). `#003A66` is the lightest blue
