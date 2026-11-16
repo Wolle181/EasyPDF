@@ -478,4 +478,25 @@
   <data name="CountWords" xml:space="preserve"><value>{0} words</value></data>
   <data name="CountCharacter" xml:space="preserve"><value>{0} character</value></data>
   <data name="CountCharacters" xml:space="preserve"><value>{0} characters</value></data>
+  <data name="BtnAttachments" xml:space="preserve"><value>Attachments…</value></data>
+  <data name="MenuAttachments" xml:space="preserve"><value>Attachments…</value></data>
+  <data name="AttachmentsTitle" xml:space="preserve"><value>Attachments</value></data>
+  <data name="AttachmentsMessage" xml:space="preserve"><value>Files embedded in this PDF:</value></data>
+  <data name="AttachmentOpen" xml:space="preserve"><value>Open</value></data>
+  <data name="AttachmentSave" xml:space="preserve"><value>Save…</value></data>
+  <data name="AttachmentCannotOpen" xml:space="preserve"><value>This kind of file is not opened directly, as it could contain a program. Save it and check it first.</value></data>
+  <data name="AttachmentItem" xml:space="preserve"><value>{0} ({1})</value></data>
+  <data name="AttachmentItemEInvoice" xml:space="preserve"><value>{0} – electronic invoice</value></data>
+  <data name="SizeBytes" xml:space="preserve"><value>{0} bytes</value></data>
+  <data name="SizeKilobytes" xml:space="preserve"><value>{0} KB</value></data>
+  <data name="SizeMegabytes" xml:space="preserve"><value>{0} MB</value></data>
+  <data name="EInvoiceBarText" xml:space="preserve"><value>This PDF contains an electronic invoice (ZUGFeRD / XRechnung) as XML.</value></data>
+  <data name="EInvoiceOpen" xml:space="preserve"><value>Open XML</value></data>
+  <data name="EInvoiceSave" xml:space="preserve"><value>Save XML…</value></data>
+  <data name="EInvoiceBarClose" xml:space="preserve"><value>Close</value></data>
+  <data name="ErrAttachmentRead" xml:space="preserve"><value>The attachment "{0}" could not be read.</value></data>
+  <data name="ErrAttachmentOpen" xml:space="preserve"><value>No program was found to open "{0}".</value></data>
+  <data name="ErrAttachmentSave" xml:space="preserve"><value>The attachment "{0}" could not be saved.</value></data>
+  <data name="StatusAttachmentSaved" xml:space="preserve"><value>Saved: {0}</value></data>
+  <data name="FilterExtension" xml:space="preserve"><value>{0} file</value></data>
 </root>

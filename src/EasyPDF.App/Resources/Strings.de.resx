@@ -478,4 +478,25 @@
   <data name="CountWords" xml:space="preserve"><value>{0} Wörter</value></data>
   <data name="CountCharacter" xml:space="preserve"><value>{0} Zeichen</value></data>
   <data name="CountCharacters" xml:space="preserve"><value>{0} Zeichen</value></data>
+  <data name="BtnAttachments" xml:space="preserve"><value>Anhänge…</value></data>
+  <data name="MenuAttachments" xml:space="preserve"><value>Anhänge…</value></data>
+  <data name="AttachmentsTitle" xml:space="preserve"><value>Anhänge</value></data>
+  <data name="AttachmentsMessage" xml:space="preserve"><value>In diese PDF eingebettete Dateien:</value></data>
+  <data name="AttachmentOpen" xml:space="preserve"><value>Öffnen</value></data>
+  <data name="AttachmentSave" xml:space="preserve"><value>Speichern…</value></data>
+  <data name="AttachmentCannotOpen" xml:space="preserve"><value>Diese Art Datei wird nicht direkt geöffnet, weil sie ein Programm enthalten könnte. Bitte speichern und vorher prüfen.</value></data>
+  <data name="AttachmentItem" xml:space="preserve"><value>{0} ({1})</value></data>
+  <data name="AttachmentItemEInvoice" xml:space="preserve"><value>{0} – elektronische Rechnung</value></data>
+  <data name="SizeBytes" xml:space="preserve"><value>{0} Byte</value></data>
+  <data name="SizeKilobytes" xml:space="preserve"><value>{0} KB</value></data>
+  <data name="SizeMegabytes" xml:space="preserve"><value>{0} MB</value></data>
+  <data name="EInvoiceBarText" xml:space="preserve"><value>Diese PDF enthält eine elektronische Rechnung (ZUGFeRD / XRechnung) als XML.</value></data>
+  <data name="EInvoiceOpen" xml:space="preserve"><value>XML öffnen</value></data>
+  <data name="EInvoiceSave" xml:space="preserve"><value>XML speichern…</value></data>
+  <data name="EInvoiceBarClose" xml:space="preserve"><value>Schließen</value></data>
+  <data name="ErrAttachmentRead" xml:space="preserve"><value>Der Anhang „{0}“ konnte nicht gelesen werden.</value></data>
+  <data name="ErrAttachmentOpen" xml:space="preserve"><value>Es wurde kein Programm gefunden, um „{0}“ zu öffnen.</value></data>
+  <data name="ErrAttachmentSave" xml:space="preserve"><value>Der Anhang „{0}“ konnte nicht gespeichert werden.</value></data>
+  <data name="StatusAttachmentSaved" xml:space="preserve"><value>Gespeichert: {0}</value></data>
+  <data name="FilterExtension" xml:space="preserve"><value>{0}-Datei</value></data>
 </root>

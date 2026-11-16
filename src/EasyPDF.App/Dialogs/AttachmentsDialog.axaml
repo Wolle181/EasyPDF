@@ -1,0 +1,19 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:EasyPDF.App.Localization"
+        x:Class="EasyPDF.App.Dialogs.AttachmentsDialog"
+        Title="{loc:Tr AttachmentsTitle}" Width="520" Height="360" MinWidth="380" MinHeight="240"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+  <DockPanel Margin="20">
+    <TextBlock DockPanel.Dock="Top" Text="{loc:Tr AttachmentsMessage}" TextWrapping="Wrap" Margin="0,0,0,10" />
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
+      <Button x:Name="OpenButton" MinWidth="90" HorizontalContentAlignment="Center" IsDefault="True" Click="OnOpen" Content="{loc:Tr AttachmentOpen}" />
+      <Button x:Name="SaveButton" MinWidth="90" HorizontalContentAlignment="Center" Click="OnSave" Content="{loc:Tr AttachmentSave}" />
+      <Button x:Name="CloseButton" MinWidth="90" HorizontalContentAlignment="Center" IsCancel="True" Click="OnClose" Content="{loc:Tr Close}" />
+    </StackPanel>
+    <!-- Hint why Open is greyed out for programs, scripts and other risky types -->
+    <TextBlock x:Name="CannotOpenText" DockPanel.Dock="Bottom" Text="{loc:Tr AttachmentCannotOpen}" TextWrapping="Wrap"
+               Foreground="{DynamicResource Text.Muted}" Margin="0,8,0,0" IsVisible="False" />
+    <ListBox x:Name="AttachmentList" SelectionMode="Single" DoubleTapped="OnDoubleTapped" />
+  </DockPanel>
+</Window>

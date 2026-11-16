@@ -35,6 +35,31 @@ internal sealed class FakeDialogs : IDialogService
         return Task.FromResult(SavePath);
     }
 
+    public string? SaveFilePath;
+    public string? SuggestedSaveFileName;
+
+    public Task<string?> PickSaveFilePathAsync(string suggestedFileName, string? initialFolder)
+    {
+        SuggestedSaveFileName = suggestedFileName;
+        return Task.FromResult(SaveFilePath);
+    }
+
+    /// <summary>Files handed to the system's program, with their content at that moment.</summary>
+    public readonly List<(string Path, byte[] Content)> OpenedFiles = [];
+    public bool OpenResult = true;
+
+    public Task<bool> OpenInSystemAsync(string path)
+    {
+        OpenedFiles.Add((path, File.ReadAllBytes(path)));
+        return Task.FromResult(OpenResult);
+    }
+
+    /// <summary>Picks from the listed attachments (null = closed without a choice).</summary>
+    public Func<IReadOnlyList<EasyPDF.Core.Pdfium.PdfAttachment>, AttachmentChoice?>? AttachmentAnswer;
+
+    public Task<AttachmentChoice?> ShowAttachmentsAsync(IReadOnlyList<EasyPDF.Core.Pdfium.PdfAttachment> attachments) =>
+        Task.FromResult(AttachmentAnswer?.Invoke(attachments));
+
     public Task<RotateResult?> ShowRotateDialogAsync(RotateDialogContext context)
     {
         LastRotateContext = context;
@@ -213,6 +238,43 @@ internal sealed class TempDir : IDisposable
         sb.Append($"trailer\n<</Size {objects.Count + 1}/Root 1 0 R>>\nstartxref\n{xref}\n%%EOF\n");
         var path = File(name);
         System.IO.File.WriteAllText(path, sb.ToString(), Encoding.ASCII);
+        return path;
+    }
+
+    /// <summary>One 200 x 300 pt page with the given files embedded (document-level attachments, /EmbeddedFiles name tree).</summary>
+    public string AttachmentPdf(string name, params (string Name, byte[] Data)[] files)
+    {
+        var names = string.Join(" ", files.Select((f, i) => $"({f.Name}) {4 + 2 * i} 0 R"));
+        var objects = new List<byte[]>
+        {
+            Encoding.Latin1.GetBytes($"<</Type/Catalog/Pages 2 0 R/Names<</EmbeddedFiles<</Names[{names}]>>>>>>"),
+            Encoding.ASCII.GetBytes("<</Type/Pages/Kids[3 0 R]/Count 1>>"),
+            Encoding.ASCII.GetBytes("<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 300]>>"),
+        };
+        for (var i = 0; i < files.Length; i++)
+        {
+            objects.Add(Encoding.Latin1.GetBytes($"<</Type/Filespec/F({files[i].Name})/UF({files[i].Name})/EF<</F {5 + 2 * i} 0 R>>>>"));
+            objects.Add([.. Encoding.ASCII.GetBytes($"<</Type/EmbeddedFile/Length {files[i].Data.Length}>>\nstream\n"), .. files[i].Data,
+                .. Encoding.ASCII.GetBytes("\nendstream")]);
+        }
+        using var file = new MemoryStream();
+        void Write(string s) => file.Write(Encoding.ASCII.GetBytes(s));
+        Write("%PDF-1.7\n");
+        var offsets = new List<long>();
+        for (var i = 0; i < objects.Count; i++)
+        {
+            offsets.Add(file.Position);
+            Write($"{i + 1} 0 obj\n");
+            file.Write(objects[i]);
+            Write("\nendobj\n");
+        }
+        var xref = file.Position;
+        Write($"xref\n0 {objects.Count + 1}\n0000000000 65535 f \n");
+        foreach (var o in offsets)
+            Write($"{o:D10} 00000 n \n");
+        Write($"trailer\n<</Size {objects.Count + 1}/Root 1 0 R>>\nstartxref\n{xref}\n%%EOF\n");
+        var path = File(name);
+        System.IO.File.WriteAllBytes(path, file.ToArray());
         return path;
     }
 

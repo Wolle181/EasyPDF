@@ -230,6 +230,12 @@ Difference to "Insert": Insert puts files *into the open document* at a specific
 - **Split:** the document is broken into several files, either every N pages or at chosen pages. The user picks a target folder; the parts are numbered automatically (e.g. "Manual_part01.pdf").
 - **Reduce file size:** scans and pictures with more resolution than needed are scaled down; the smaller copy is saved under a new name and shown, text and drawings stay as they are.
 
+### Attachments and electronic invoices
+Files embedded in the PDF (document-level attachments, `/EmbeddedFiles`) are read with pdfium (`PdfSource.ListAttachmentsAsync`, `Core/Pdfium/PdfAttachments.cs`); they belong to the document's file (`BaseSource`) and saving keeps them (`PdfSaver` works on a copy of that file).
+- **Electronic invoice:** an attachment named `factur-x.xml`, `zugferd-invoice.xml` or `xrechnung.xml` (any case; the names ZUGFeRD 1/2, Factur-X and XRechnung prescribe) is the invoice XML. A bar above the pages says so, with **Open XML** (system program) and **Save XML…** (suggested as `<PDF name>.xml`, next to the PDF); [X] hides it for this document. There is no viewer of our own: the official visualisations are XSLT, which does not work under Native AOT, and the system's XML program or a dedicated e-invoice viewer does the job better.
+- **Attachments…** (ribbon Home ▸ File, shown only when there are attachments, since the tab has no room to spare; menu File, enabled only then) lists all embedded files with size, the invoice marked and preselected: **Open** or **Save…**.
+- **Open** writes the file to a temporary folder (`<temp>/<App>-attachments/<random>/`) and hands it to the system (`Launcher`). Only harmless types open (`PdfAttachment.CanOpen`: XML, PDF, text, CSV, JSON, pictures, Office documents without macros); programs, scripts and the like can only be saved, the dialog says why. Names from the PDF are cleaned (`SafeFileName`: no folders, no invalid characters).
+
 ### Undo and saving
 Every action (move, rotate, delete, insert) can be undone and redone (Ctrl/Cmd+Z / Ctrl/Cmd+Y). As long as there are unsaved changes, the window title shows a dot and the status bar shows a notice. **Save** overwrites the original file safely (written to a temporary file first, then replaced); **Save As** creates a new file. Bookmarks, metadata and form fields of the original document are kept. When opening another file, closing or quitting with unsaved changes, the app asks first.
 

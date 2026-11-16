@@ -45,7 +45,9 @@ header plays it. It is recorded per brand with `branding/<id>/make-presentation-
   searchable and copyable in every PDF viewer – offline, the models ship with the app
 - **Reduce file size** (scans and pictures with more resolution than needed), **print**, **send by email** – always
   with your current changes, even unsaved ones
-- Undo/redo for every step; saving keeps bookmarks, metadata and forms
+- **Electronic invoices (ZUGFeRD, Factur-X, XRechnung):** a bar above the pages points out the embedded invoice XML,
+  which opens in the system's program or is saved with one click; **Attachments…** lists every file embedded in the PDF
+- Undo/redo for every step; saving keeps bookmarks, metadata, forms and attachments
 
 ### Operation
 - One window per document; menu bar (native on macOS), ribbon, keyboard shortcuts, recent files, drag & drop of files

@@ -29,6 +29,8 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
     private static readonly double[] _zoomSteps = [10, 25, 50, 75, 100, 125, 150, 200, 300, 400, 600, 800];
     private static readonly double[] _thumbnailZoomSteps = [50, 75, 100, 125, 150, 200, 250, 300];
 
+    private IDialogService Dialogs => dialogs;
+
     private int _lastRotateDegrees = 90;
     private string? _suggestedFileName;
     private System.Threading.CancellationTokenSource? _operation;
@@ -191,6 +193,8 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
 
     partial void OnDocumentChanged(EditableDocument? value)
     {
+        IsEInvoiceBarDismissed = false;
+        RefreshAttachments();
         if (value != null)
             value.Changed += OnDocumentEdited;
         else
@@ -204,7 +208,12 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
         RefreshState();
     }
 
-    private void OnDocumentEdited(DocumentChangeKind kind) => RefreshState();
+    private void OnDocumentEdited(DocumentChangeKind kind)
+    {
+        if (kind == DocumentChangeKind.Reloaded)
+            RefreshAttachments();
+        RefreshState();
+    }
 
     partial void OnCurrentPageChanged(int value) => OnPropertyChanged(nameof(StatusPageText));
 
@@ -363,6 +372,7 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
                      PasteAreaCommand, ShowSearchCommand, FindNextCommand, FindPreviousCommand,
                  })
             c.NotifyCanExecuteChanged();
+        RefreshAttachmentCommands();
     }
 
     /// <summary>Starts a long operation (save, extract, split): the status bar shows <paramref name="text"/>, progress and Cancel.</summary>

@@ -73,6 +73,41 @@ public class ScreenshotTests
     }
 
     /// <summary>German texts are longer: the ribbon and the merge dialog in German.</summary>
+    /// <summary>A PDF with a ZUGFeRD invoice: the bar above the pages and the attachments dialog, German, light and dark.</summary>
+    [AvaloniaFact]
+    public async Task EInvoiceScreens()
+    {
+        var old = System.Globalization.CultureInfo.CurrentUICulture;
+        EasyPDF.App.Localization.Loc.SetCulture(new System.Globalization.CultureInfo("de"));
+        using var dir = new TempDir();
+        var path = dir.AttachmentPdf("Rechnung.pdf", ("factur-x.xml", "<x/>"u8.ToArray()), ("Lieferschein.pdf", new byte[52_000]));
+        try
+        {
+            foreach (var theme in new[] { "light", "dark" })
+            {
+                Application.Current!.RequestedThemeVariant = theme == "dark" ? ThemeVariant.Dark : ThemeVariant.Light;
+                var window = new MainWindow { Width = 1200, Height = 560 };
+                window.Show();
+                await window.OpenPathAsync(path);
+                await window.ViewModel.AttachmentsLoading;
+                await Pump();
+                Save(window, $"einvoice-bar-{theme}");
+                var dialog = new EasyPDF.App.Dialogs.AttachmentsDialog(window.ViewModel.Attachments);
+                dialog.Show();
+                await Pump();
+                Save(dialog, $"einvoice-dialog-{theme}");
+                dialog.Close();
+                window.Close();
+                await window.ViewModel.ReleaseDocumentAsync();
+            }
+        }
+        finally
+        {
+            Application.Current!.RequestedThemeVariant = ThemeVariant.Default;
+            EasyPDF.App.Localization.Loc.SetCulture(old);
+        }
+    }
+
     [AvaloniaFact]
     public async Task GermanScreens()
     {

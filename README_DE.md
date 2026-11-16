@@ -49,7 +49,10 @@ im Kopf spielt sie ab. Aufgenommen wird sie pro Marke mit `branding/<id>/make-pr
   in jedem PDF-Betrachter durchsuchbar und kopierbar werden – offline, die Modelle werden mitgeliefert
 - **Dateigröße verkleinern** (Scans und Bilder mit unnötig hoher Auflösung), **drucken**, **per E-Mail senden** –
   immer mit den aktuellen Änderungen, auch ungespeicherten
-- Rückgängig/Wiederholen für jeden Schritt; beim Speichern bleiben Lesezeichen, Metadaten und Formulare erhalten
+- **Elektronische Rechnungen (ZUGFeRD, Factur-X, XRechnung):** eine Leiste über den Seiten weist auf das eingebettete
+  Rechnungs-XML hin, das sich mit einem Klick im Programm des Systems öffnen oder speichern lässt; **Anhänge…** listet
+  alle in die PDF eingebetteten Dateien
+- Rückgängig/Wiederholen für jeden Schritt; beim Speichern bleiben Lesezeichen, Metadaten, Formulare und Anhänge erhalten
 
 ### Bedienung
 - Ein Fenster pro Dokument; Menüleiste (auf macOS systemeigen), Ribbon, Tastenkürzel, zuletzt geöffnete Dateien,

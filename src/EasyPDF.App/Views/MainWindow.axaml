@@ -61,6 +61,8 @@
                 <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnPrint}" Icon="{StaticResource Icon.Print}" IconColor="{DynamicResource Icon.Color.Slate}" IconAccent="{StaticResource Icon.Print.Accent}" Command="{Binding PrintCommand}" />
                 <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnSendByMail}" Icon="{StaticResource Icon.Mail}" IconColor="{DynamicResource Icon.Color.Amber}" IconAccent="{StaticResource Icon.Mail.Accent}" Command="{Binding SendByMailCommand}" />
                 <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnReduceSize}" Icon="{StaticResource Icon.ReduceSize}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.ReduceSize.Accent}" Command="{Binding ReduceSizeCommand}" />
+                <!-- Files embedded in the PDF (e.g. the XML of a ZUGFeRD invoice); shown only when there are some (the tab has no room to spare otherwise) -->
+                <rb:RibbonButton x:Name="AttachmentsButton" IsLarge="True" IsVisible="{Binding HasAttachments}" Label="{loc:Tr BtnAttachments}" Icon="{StaticResource Icon.Attachment}" IconColor="{DynamicResource Icon.Color.Slate}" IconAccent="{StaticResource Icon.Attachment.Accent}" Command="{Binding ShowAttachmentsCommand}" />
               </rb:RibbonGroupPanel>
             </rb:RibbonGroup>
             <rb:RibbonGroup Caption="{loc:Tr GroupCombine}">
@@ -284,6 +286,24 @@
         <rb:RibbonButton x:Name="SearchCloseButton" Icon="{StaticResource Icon.Close}" IconSize="16"
                          Command="{Binding CloseSearchCommand}" Reduction="2" Label="{loc:Tr SearchClose}" />
       </StackPanel>
+    </Border>
+
+    <!-- The PDF contains an electronic invoice (ZUGFeRD, Factur-X, XRechnung): open the XML in the system's program or save it -->
+    <Border x:Name="EInvoiceBar" DockPanel.Dock="Top" IsVisible="{Binding EInvoiceBarVisible}" Padding="10,4" BorderThickness="0,0,0,1"
+            BorderBrush="{DynamicResource StatusBar.Border}" Background="{DynamicResource Pill.Background}">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
+        <Viewbox Width="18" Height="18" VerticalAlignment="Center">
+          <Grid Width="24" Height="24">
+            <Path Data="{StaticResource Icon.Attachment}" Stroke="{DynamicResource Pill.Foreground}" StrokeThickness="1.8" StrokeLineCap="Round" />
+            <Path Data="{StaticResource Icon.Attachment.Accent}" Stroke="{DynamicResource Brand.Accent}" StrokeThickness="1.8" StrokeLineCap="Round" />
+          </Grid>
+        </Viewbox>
+        <TextBlock Grid.Column="1" Text="{loc:Tr EInvoiceBarText}" Foreground="{DynamicResource Pill.Foreground}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+        <Button x:Name="EInvoiceOpenButton" Grid.Column="2" Classes="ribbon" Padding="10,2" Content="{loc:Tr EInvoiceOpen}" Command="{Binding OpenEInvoiceCommand}" />
+        <Button x:Name="EInvoiceSaveButton" Grid.Column="3" Classes="ribbon" Padding="10,2" Content="{loc:Tr EInvoiceSave}" Command="{Binding SaveEInvoiceCommand}" />
+        <rb:RibbonButton x:Name="EInvoiceCloseButton" Grid.Column="4" Icon="{StaticResource Icon.Close}" IconSize="16"
+                         Command="{Binding DismissEInvoiceBarCommand}" Reduction="2" Label="{loc:Tr EInvoiceBarClose}" />
+      </Grid>
     </Border>
 
     <Grid Background="{DynamicResource Content.Background}" ColumnDefinitions="Auto,*">

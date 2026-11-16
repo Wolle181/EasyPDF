@@ -109,6 +109,12 @@ Start: `dotnet run --project src/EasyPDF.App -- <file.pdf>` or the published bui
 - [ ] macOS: Mail, Outlook and Thunderbird as "Default email reader" (Mail ▸ Settings ▸ General)
 - [ ] Linux: `xdg-email` with Thunderbird and Evolution/KMail; without `xdg-utils` → error message
 
+## Attachments and electronic invoices
+- [ ] ZUGFeRD/Factur-X PDF (e.g. from a supplier or the official sample set): the bar "contains an electronic invoice" appears; **Open XML** opens it in the system's XML program (Windows: browser/editor; macOS: Xcode/TextEdit; Linux: `xdg-open`), **Save XML…** suggests `<PDF name>.xml` next to the PDF
+- [ ] [X] hides the bar; opening another invoice PDF shows it again; Home ▸ **Attachments…** lists all embedded files, Open is greyed out for an `.exe`
+- [ ] Rotate a page and save: the invoice is still embedded (bar shows again after reopening, other PDF viewers list it)
+- [ ] PDF without attachments: no bar, Attachments… disabled
+
 ## Text recognition (OCR)
 - [ ] Edit ▸ Recognize Text (OCR)… / ribbon "Recognize text…" / page context menu: dialog with pages (all, current, selected, range) and "Skip pages that already contain text"; [X] and Cancel do nothing
 - [ ] A real scan (e.g. a letter scanned at 300 dpi): status bar shows "Recognizing text: page x of y…" with progress, the window stays usable (scrolling, zoom); afterwards "Text recognized on n pages", status "Unsaved changes (text layer on n pages)"; Ctrl/Cmd+Z removes it again

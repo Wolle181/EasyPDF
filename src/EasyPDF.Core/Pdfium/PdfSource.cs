@@ -229,6 +229,14 @@ public sealed class PdfSource : IAsyncDisposable, IDisposable
     public Task<IReadOnlyList<OutlineNode>> ReadOutlineAsync(CancellationToken token = default) =>
         _worker.Run<IReadOnlyList<OutlineNode>>(() => OutlineReader.Read(Handle), PdfiumWorker.PriorityBackground, token);
 
+    /// <summary>The files embedded in the PDF (empty if it has none).</summary>
+    public Task<IReadOnlyList<PdfAttachment>> ListAttachmentsAsync(CancellationToken token = default) =>
+        _worker.Run<IReadOnlyList<PdfAttachment>>(() => PdfAttachments.List(Handle), PdfiumWorker.PriorityBackground, token);
+
+    /// <summary>The content of an embedded file (<see cref="PdfAttachment.Index"/>).</summary>
+    public Task<byte[]> ReadAttachmentAsync(int index, CancellationToken token = default) =>
+        _worker.Run(() => PdfAttachments.Read(Handle, index), PdfiumWorker.PriorityVisible, token);
+
     /// <summary>Releases the file handle but keeps the path, so the source can be reopened with <see cref="ReopenAsync"/>.</summary>
     public Task CloseAsync() => _worker.Run(CloseCore, PdfiumWorker.PriorityVisible);
 

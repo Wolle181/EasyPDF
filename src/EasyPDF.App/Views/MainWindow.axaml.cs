@@ -18,6 +18,7 @@ using EasyPDF.App.Services;
 using EasyPDF.App.Styles;
 using EasyPDF.App.ViewModels;
 using EasyPDF.Core.Documents;
+using EasyPDF.Core.Pdfium;
 using EasyPDF.Core.Settings;
 using EasyPDF.Core.Stamps;
 using EasyPDF.Core.Templates;
@@ -257,6 +258,7 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
             new Entry("MenuExtract", vm.ExtractPagesCommand),
             new Entry("MenuSplit", vm.SplitDocumentCommand),
             new Entry("MenuReduceSize", vm.ReduceSizeCommand),
+            new Entry("MenuAttachments", vm.ShowAttachmentsCommand),
             null,
             new Entry("MenuSettings", vm.ShowSettingsCommand, Key.OemComma, Primary: true),
             null,
@@ -1064,6 +1066,38 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
         });
         return file?.TryGetLocalPath();
     }
+
+    public async Task<string?> PickSaveFilePathAsync(string suggestedFileName, string? initialFolder)
+    {
+        var extension = Path.GetExtension(suggestedFileName).TrimStart('.');
+        var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = Loc.T("PickSaveTitle"),
+            SuggestedFileName = suggestedFileName,
+            DefaultExtension = extension.Length > 0 ? extension : null,
+            FileTypeChoices = extension.Length > 0
+                ? [new FilePickerFileType(Loc.F("FilterExtension", extension.ToUpperInvariant())) { Patterns = [$"*.{extension}"] }, FilePickerFileTypes.All]
+                : [FilePickerFileTypes.All],
+            SuggestedStartLocation = initialFolder != null ? await StorageProvider.TryGetFolderFromPathAsync(initialFolder) : null,
+            ShowOverwritePrompt = true,
+        });
+        return file?.TryGetLocalPath();
+    }
+
+    public async Task<bool> OpenInSystemAsync(string path)
+    {
+        try
+        {
+            return await Launcher.LaunchFileInfoAsync(new FileInfo(path));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
+        {
+            return false;
+        }
+    }
+
+    public Task<AttachmentChoice?> ShowAttachmentsAsync(IReadOnlyList<PdfAttachment> attachments) =>
+        new AttachmentsDialog(attachments).ShowDialog<AttachmentChoice?>(this);
 
     public Task<RotateResult?> ShowRotateDialogAsync(RotateDialogContext context) =>
         new RotateDialog(context).ShowDialog<RotateResult?>(this);

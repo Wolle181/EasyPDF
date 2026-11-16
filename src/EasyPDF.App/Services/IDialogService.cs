@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyPDF.Core.Documents;
+using EasyPDF.Core.Pdfium;
 
 namespace EasyPDF.App.Services;
 
@@ -91,6 +92,15 @@ public sealed record OcrDialogContext(int PageCount, int CurrentPage, IReadOnlyL
 /// <param name="SkipPagesWithText">Leave out pages that already have text (no second text layer).</param>
 public sealed record OcrRequest(IReadOnlyList<int> Pages, bool SkipPagesWithText);
 
+public enum AttachmentAction
+{
+    Open,
+    Save,
+}
+
+/// <summary>What to do with which file embedded in the PDF (answer of the attachments dialog).</summary>
+public sealed record AttachmentChoice(PdfAttachment Attachment, AttachmentAction Action);
+
 /// <summary>UI interactions the view models need; implemented by the main window.</summary>
 public interface IDialogService
 {
@@ -102,6 +112,15 @@ public interface IDialogService
 
     /// <summary>Native save dialog; returns the chosen path or null.</summary>
     Task<string?> PickSavePathAsync(string suggestedFileName, string? initialFolder);
+
+    /// <summary>Native save dialog for any kind of file (type from the suggested name); returns the chosen path or null.</summary>
+    Task<string?> PickSaveFilePathAsync(string suggestedFileName, string? initialFolder);
+
+    /// <summary>Opens a file in the program the system uses for its type; false if that did not work.</summary>
+    Task<bool> OpenInSystemAsync(string path);
+
+    /// <summary>Lists the files embedded in the PDF; null if closed without a choice.</summary>
+    Task<AttachmentChoice?> ShowAttachmentsAsync(IReadOnlyList<PdfAttachment> attachments);
 
     Task<RotateResult?> ShowRotateDialogAsync(RotateDialogContext context);
 
