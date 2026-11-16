@@ -6,6 +6,7 @@
 #   brand profile branding/<id>/ like the other installer scripts; without it EASYPDF_BRAND or the default
 #   (Directory.Build.props). Unknown parameters stop the script, so a typo never builds the default brand by mistake.
 # Pulls the newest sources first (git pull --ff-only), except on CI, with a detached HEAD or with EASYPDF_NO_PULL=1.
+# Runs all tests after cleaning (like installer/run-tests.ps1): a failing test stops the build; EASYPDF_NO_TESTS=1 skips them.
 # Deletes all bin/obj before the build (full rebuild) and, except on CI, bin/obj and the intermediate output
 # (artifacts/publish, artifacts/macos) after it, so only artifacts/installer is left.
 #
@@ -46,6 +47,13 @@ BRAND="$(dotnet msbuild "$ROOT/src/EasyPDF.App" -getProperty:Brand | tr -d '\r\n
 [ -n "$BRAND" ] || { echo "Cannot read the brand profile (EASYPDF_BRAND=${EASYPDF_BRAND:-})" >&2; exit 1; }
 export EASYPDF_BRAND="$BRAND"
 clean_build_output
+if [ -n "${EASYPDF_NO_TESTS:-}" ]; then
+  echo "== Tests skipped (EASYPDF_NO_TESTS)"
+else
+  echo "== dotnet test EasyPDF.slnx -p:Brand=$BRAND"
+  dotnet test "$ROOT/EasyPDF.slnx" -p:Brand="$BRAND" ||
+    { echo "Tests failed, no installer built. Fix them, or build anyway with EASYPDF_NO_TESTS=1." >&2; exit 1; }
+fi
 # 1.0.0.<number of commits> (Directory.Build.targets). macOS shows "Version 1.0.0 (97)": CFBundleShortVersionString
 # allows three numbers only, the build number goes into CFBundleVersion.
 VERSION="$(dotnet msbuild "$ROOT/src/EasyPDF.App" -getProperty:Version -t:SetVersionFromGit | tr -d '[:space:]')"

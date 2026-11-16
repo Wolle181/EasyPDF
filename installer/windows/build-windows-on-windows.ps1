@@ -3,17 +3,19 @@
 #   artifacts/installer/<AppDisplayName>-<version>-win-x64-portable.zip  unpack and run (folder <AppDisplayName>-<version>)
 # Needs only the .NET SDK (WiX comes as NuGet package).
 # Always pulls the newest sources first (git pull --ff-only; -NoPull skips it) and deletes all bin/obj
-# (full rebuild, no stale output from earlier builds). Afterwards it deletes bin/obj and the publish output again,
+# (full rebuild, no stale output from earlier builds). Then it runs all tests (installer/run-tests.ps1): a failing test
+# stops the build; -NoTests (or EASYPDF_NO_TESTS=1) skips them. Afterwards it deletes bin/obj and the publish output again,
 # so only artifacts/installer is left.
 # -Brand <id> builds that brand profile (branding/<id>/); also written -p:<id>, -p:Brand=<id> (like msbuild) or just <id>.
 # Without it EASYPDF_BRAND or the default (Directory.Build.props). Unknown parameters stop the script, so a typo never
 # builds the default brand by mistake.
 [CmdletBinding()]
-param([Parameter(Position = 0)] [Alias('p')] [string]$Brand, [switch]$NoPull)
+param([Parameter(Position = 0)] [Alias('p')] [string]$Brand, [switch]$NoPull, [switch]$NoTests)
 $ErrorActionPreference = 'Stop'
 $installer = Split-Path -Parent $PSScriptRoot   # the shared helper scripts
 $root = Split-Path -Parent $installer
 if ($Brand) { $env:EASYPDF_BRAND = $Brand -replace '^Brand=', '' }   # seen by every dotnet/python call below, also after a restart
+if ($NoTests) { $env:EASYPDF_NO_TESTS = '1' }                         # likewise
 
 # New commits may have changed this script too: then its new version runs
 if (-not $NoPull -and (& "$installer/update-sources.ps1")) { & $PSCommandPath -NoPull; exit $LASTEXITCODE }
@@ -22,6 +24,7 @@ if (-not $NoPull -and (& "$installer/update-sources.ps1")) { & $PSCommandPath -N
 $brand = & "$installer/selected-brand.ps1"
 
 & "$installer/clean-build-output.ps1"
+& "$installer/run-tests.ps1" -Brand $brand
 
 # 1.0.0.<number of commits> (Directory.Build.targets); app and MSI get the same
 $version = dotnet msbuild "$root/src/EasyPDF.App" -getProperty:Version -t:SetVersionFromGit -p:Brand=$brand

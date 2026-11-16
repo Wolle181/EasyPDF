@@ -75,7 +75,7 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json   # SDK version from global.json
-      - name: Build MSI and portable .zip
+      - name: Run all tests, build MSI and portable .zip
         shell: pwsh
         run: ./installer/windows/build-windows-on-windows.ps1
       - name: "Upgrade test: per user, same version replaces, older is refused, uninstall cleans up"
@@ -188,6 +188,8 @@ jobs:
           global-json-file: global.json   # SDK version from global.json
       - name: Build the portable AOT .zip
         shell: pwsh
+        env:
+          EASYPDF_NO_TESTS: 1   # all tests run in the job windows already
         run: ./installer/windows/build-aot-windows-on-windows.ps1
       - name: "AOT .zip: unpack and start the app"
         shell: pwsh
@@ -322,6 +324,8 @@ jobs:
       - name: OCR tests (ONNX Runtime on macOS)
         run: dotnet test tests/EasyPDF.Core.Tests --filter "FullyQualifiedName~Ocr"
       - name: Build .app and .dmg (Apple Silicon)
+        env:
+          EASYPDF_NO_TESTS: 1   # here only the OCR tests above; all tests run in the job windows
         run: bash installer/build-macos-on-macos.sh
       - name: Put the .dmg into the pre-release latest
         env:
