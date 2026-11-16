@@ -26,7 +26,7 @@
     <Copyright>Copyright © 2026 Wolfgang Ahting</Copyright>
     <!-- Line "Author" in Help > About (and in "Copy version info"); XML: write & as &amp;. The company logo shown there is
          icons/company-logo.svg (tools/icon/make_icon.py, option company-logo); without that file About shows none. -->
-    <AppAuthor>Wolfgang Ahting &amp; Claude</AppAuthor>
+    <AppAuthor>Wolfgang Ahting</AppAuthor>
 
     <!-- Installer ids, one of their own per brand, so two brands can be installed side by side. Never change them once a
          brand is shipped: the MSI UpgradeCode lets a newer MSI replace an older one, the bundle id identifies the macOS app. -->
