@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace EasyPDF.App.Services;
@@ -34,7 +33,7 @@ public static class MergeInstances
         {
             while (true)
             {
-                using var server = new NamedPipeServerStream(name, PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+                using var server = new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
                 using var wait = new CancellationTokenSource(quiet);
                 try
                 {
@@ -44,10 +43,15 @@ public static class MergeInstances
                 {
                     break; // nobody else for a while: done
                 }
-                using var reader = new StreamReader(server, Encoding.UTF8);
-                while (reader.ReadLine() is { } line)
-                    if (line.Length > 0)
-                        files.Add(line);
+                try
+                {
+                    if (PipeMessage.Receive(server) is { } received)
+                        files.AddRange(received);
+                }
+                catch (IOException)
+                {
+                    // A sender that broke off: it sends again
+                }
             }
         }
         finally
@@ -57,27 +61,8 @@ public static class MergeInstances
         return Sorted(files);
     }
 
-    private static bool TrySend(string name, IReadOnlyList<string> files)
-    {
-        // The collector may still be setting up its pipe (or be between two connections): retry for a few seconds
-        for (var attempt = 0; attempt < 30; attempt++)
-        {
-            try
-            {
-                using var client = new NamedPipeClientStream(".", name, PipeDirection.Out);
-                client.Connect(200);
-                using var writer = new StreamWriter(client, new UTF8Encoding(false));
-                foreach (var file in files)
-                    writer.WriteLine(file);
-                return true;
-            }
-            catch (Exception ex) when (ex is TimeoutException or IOException)
-            {
-                Thread.Sleep(50);
-            }
-        }
-        return false;
-    }
+    // The collector may still be setting up its pipe (or be between two connections): PipeMessage retries
+    private static bool TrySend(string name, IReadOnlyList<string> files) => PipeMessage.Send(name, files);
 
     private static IReadOnlyList<string> Sorted(IEnumerable<string> files)
     {

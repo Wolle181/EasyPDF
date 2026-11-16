@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 
 namespace EasyPDF.App.Services;
@@ -71,13 +70,10 @@ public sealed class InstanceChannel : IDisposable
         {
             try
             {
-                using var server = new NamedPipeServerStream(_name, PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+                using var server = new NamedPipeServerStream(_name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
                 server.WaitForConnectionAsync(_stop.Token).GetAwaiter().GetResult();
-                var lines = new List<string>();
-                using (var reader = new StreamReader(server, Encoding.UTF8))
-                    while (reader.ReadLine() is { } line)
-                        lines.Add(line);
-                Deliver(StartupArguments.Parse(lines));
+                if (PipeMessage.Receive(server) is { } lines)
+                    Deliver(StartupArguments.Parse(lines));
             }
             catch (OperationCanceledException)
             {
@@ -108,28 +104,14 @@ public sealed class InstanceChannel : IDisposable
         if (OperatingSystem.IsWindows())
             AllowSetForegroundWindow(AsfwAny);
 
-        // The running instance may be between two connections: retry for a few seconds
-        for (var attempt = 0; attempt < 30; attempt++)
-        {
-            try
-            {
-                using var client = new NamedPipeClientStream(".", name, PipeDirection.Out, PipeOptions.CurrentUserOnly);
-                client.Connect(200);
-                using var writer = new StreamWriter(client, new UTF8Encoding(false));
-                if (request.Merge)
-                    writer.WriteLine(StartupArguments.MergeOption);
-                if (request.Read)
-                    writer.WriteLine(StartupArguments.ReadOption);
-                foreach (var file in request.Files)
-                    writer.WriteLine(file);
-                return true;
-            }
-            catch (Exception ex) when (ex is TimeoutException or IOException)
-            {
-                Thread.Sleep(50);
-            }
-        }
-        return false;
+        // The running instance may be between two connections: PipeMessage retries for a few seconds
+        var lines = new List<string>();
+        if (request.Merge)
+            lines.Add(StartupArguments.MergeOption);
+        if (request.Read)
+            lines.Add(StartupArguments.ReadOption);
+        lines.AddRange(request.Files);
+        return PipeMessage.Send(name, lines, PipeOptions.CurrentUserOnly);
     }
 
     private const int AsfwAny = -1;
