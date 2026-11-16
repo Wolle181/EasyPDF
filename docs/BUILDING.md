@@ -31,7 +31,10 @@ All output goes to `artifacts/` (`publish/<rid>/` for the app, `installer/` for 
 **Native AOT (trial):** the profiles `win-x64-aot`, `linux-x64-aot` and `osx-arm64-aot` compile the app to native code
 ahead of time instead of ReadyToRun (`dotnet publish src/EasyPDF.App -p:PublishProfile=linux-x64-aot` → `artifacts/publish/<rid>-aot/`).
 They need the platform's C toolchain: Visual Studio with "Desktop development with C++" on Windows, `clang` and `zlib1g-dev`
-on Linux, Xcode command line tools on macOS. The installers still use the ReadyToRun profiles. All libraries in use compile
+on Linux, Xcode command line tools on macOS. The installers still use the ReadyToRun profiles.
+On Windows, `installer\build-aot-windows-on-windows.cmd` (or `installer/windows/build-aot-windows-on-windows.ps1`, same
+parameters as `build-windows-on-windows`) checks for the C++ build tools, does a full rebuild with the `win-x64-aot` profile and
+writes `artifacts/installer/<App>-<version>-win-x64-aot.zip`, a portable version to compare with the ReadyToRun `-portable.zip`. All libraries in use compile
 without trim/AOT warnings; the analyzers are on in both projects, so code that would break under AOT fails the build.
 
 **Brand:** every command builds the brand selected in `Directory.Build.props`; another one with
