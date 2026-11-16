@@ -37,6 +37,7 @@ public partial class QuickGuideWindow : Window
         new("Reduce", "Icon.ReduceSize", "Blue"),
         new("Print", "Icon.Print", "Slate"),
         new("Mail", "Icon.Mail", "Amber"),
+        new("Attachments", "Icon.Attachment", "Slate"),
         new("Save", "Icon.Save", null, "signal"),
         new("Settings", "Icon.Help", "Green"),
     ];
