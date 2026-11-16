@@ -5,7 +5,7 @@
 # "platform" builds only one installer (gh: -f platform=macos) and replaces only its files in the release,
 # "brand" picks the brand profile in branding/ (gh: -f brand=<id>); empty = the default in Directory.Build.props.
 # "aot" also builds the Native AOT trial versions of the chosen platforms (Windows -win-x64-aot.msi and .zip, Linux -aot.deb and
-# -linux-x64-aot.tar.gz) in jobs of their own (gh: -f aot=false switches them off).
+# -linux-x64-aot.tar.gz, macOS -macos-arm64-aot.dmg) in jobs of their own (gh: -f aot=false switches them off).
 # The workflow only ever runs when started by hand: there is no automatic trigger.
 name: Installers
 
@@ -21,7 +21,7 @@ on:
         description: Brand profile (folder in branding/; empty = default in Directory.Build.props)
         type: string
       aot:
-        description: Also build the Native AOT trial versions (Windows, Linux)
+        description: Also build the Native AOT trial versions (Windows, Linux, macOS)
         type: boolean
         default: true
   # Automatic builds are switched off. To switch them on:
@@ -350,5 +350,48 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view latest --json assets -q '.assets[].name' | { grep -E '\.dmg$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
+          # Only its own file: the -aot one belongs to the job macos-aot
+          gh release view latest --json assets -q '.assets[].name' | { grep -E -- '-macos-arm64\.dmg$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
           gh release upload latest artifacts/installer/*.dmg
+
+  # Trial: the app compiled with Native AOT in a .dmg (build-macos-on-macos.sh --aot); the runner has the Xcode
+  # command line tools Native AOT links with
+  macos-aot:
+    needs: release
+    if: ${{ inputs.aot && (inputs.platform == 'all' || inputs.platform == 'macos') }}
+    runs-on: macos-latest
+    permissions:
+      contents: write   # the AOT .dmg goes into the release "latest"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json   # SDK version from global.json
+      - name: Build the AOT .app and .dmg (Apple Silicon)
+        env:
+          EASYPDF_NO_TESTS: 1   # all tests run in the job windows
+        run: bash installer/build-macos-on-macos.sh --aot
+      - name: "AOT .dmg: mount, start the app"
+        run: |
+          APPNAME="$(dotnet msbuild src/EasyPDF.App -getProperty:AppDisplayName | tr -d '\r\n')"
+          dmg=$(ls artifacts/installer/*-macos-arm64-aot.dmg)
+          mnt="$RUNNER_TEMP/aot"
+          hdiutil attach "$dmg" -nobrowse -mountpoint "$mnt"
+          exe="$mnt/$APPNAME.app/Contents/MacOS/$APPNAME"
+          test -x "$exe"
+          file "$exe"
+          codesign --verify --deep --strict "$mnt/$APPNAME.app"
+          # Smoke test: the app must still be running after 15 s
+          "$exe" & pid=$!
+          sleep 15
+          if ! kill -0 "$pid" 2>/dev/null; then code=0; wait "$pid" || code=$?; echo "the AOT app exited with $code"; exit 1; fi
+          kill "$pid"; wait "$pid" || true
+          hdiutil detach "$mnt"
+      - name: Put the AOT .dmg into the pre-release latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view latest --json assets -q '.assets[].name' | { grep -E -- '-macos-arm64-aot\.dmg$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
+          gh release upload latest artifacts/installer/*-macos-arm64-aot.dmg
