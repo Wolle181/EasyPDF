@@ -9,7 +9,7 @@ On request the app is **white-label**: any company can switch it to its own name
 publisher), for example for internal use (see [Customization](#customization)). The original is EasyPDF; below, `<App>`
 stands for the name of the brand you use. The copyright and license notice must be kept (MIT, see [License](#license)).
 
-**Download:** installers for Windows, Linux and macOS in the pre-release
+**Download:** installers for Windows, Linux and macOS and a portable Windows version (.zip, unpack and run) in the pre-release
 [latest](../../releases/tag/latest) (built by GitHub Actions,
 [docs/BUILDING.md](docs/BUILDING.md#without-local-tools-github-actions)).
 **Introduction video:** a two-minute introduction (English and German) comes with the app: the video button in the
@@ -97,7 +97,7 @@ collected into one dialog).
 
 ## Building
 .NET 11 SDK, then `dotnet build EasyPDF.slnx` and `dotnet test EasyPDF.slnx`. Prerequisites, installers for Windows
-(MSI), Linux (.deb/.tar.gz) and macOS (.dmg), versioning and GitHub Actions: **[docs/BUILDING.md](docs/BUILDING.md)**.
+(MSI, portable .zip), Linux (.deb/.tar.gz) and macOS (.dmg), versioning and GitHub Actions: **[docs/BUILDING.md](docs/BUILDING.md)**.
 
 ## Documentation
 - [docs/BUILDING.md](docs/BUILDING.md) – building, installers, CI

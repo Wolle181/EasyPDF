@@ -1,4 +1,4 @@
-# Builds the installers for Windows (.msi), Linux (.deb, .tar.gz) and macOS (.dmg, Apple Silicon, macOS 14+) and puts
+# Builds the installers for Windows (.msi and a portable .zip), Linux (.deb, .tar.gz) and macOS (.dmg, Apple Silicon, macOS 14+) and puts
 # them into the pre-release "latest" (download: gh release download latest). Release files do not count against the
 # Actions storage quota (0.5 GB on the free plan), so there are no workflow artifacts.
 # Start manually under Actions > Installers > Run workflow (or: gh workflow run installers.yml --ref <branch>);
@@ -60,7 +60,7 @@ jobs:
     if: ${{ !inputs.platform || inputs.platform == 'all' || inputs.platform == 'windows' }}
     runs-on: windows-latest
     permissions:
-      contents: write   # the .msi goes into the release "latest"
+      contents: write   # the .msi and the portable .zip go into the release "latest"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -68,7 +68,7 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json   # SDK version from global.json
-      - name: Build MSI
+      - name: Build MSI and portable .zip
         shell: pwsh
         run: ./installer/windows/build-windows-on-windows.ps1
       - name: "Upgrade test: per user, same version replaces, older is refused, uninstall cleans up"
@@ -140,13 +140,28 @@ jobs:
           if (Test-Path "HKCU:\Software\$appName") { throw "HKCU\Software\$appName is left after uninstall" }
           if (Test-Path "HKCU:\Software\Classes\$appName.Document") { throw "the ProgId $appName.Document is left after uninstall" }
           if ($null -ne (Get-ItemProperty 'HKCU:\Software\RegisteredApplications' -Name $appName -ErrorAction SilentlyContinue)) { throw 'RegisteredApplications entry is left after uninstall' }
-      - name: Put the .msi into the pre-release latest
+      - name: "Portable .zip: unpack and start the app"
+        shell: pwsh
+        run: |
+          $appName = dotnet msbuild src/EasyPDF.App -getProperty:AppDisplayName
+          $zip = @(Get-ChildItem artifacts/installer/*-win-x64-portable.zip)
+          if ($zip.Count -ne 1) { throw "expected one portable .zip: $zip" }
+          $dir = Join-Path $env:RUNNER_TEMP portable
+          Expand-Archive $zip[0].FullName $dir
+          $exe = @(Get-ChildItem (Join-Path $dir "*\$appName.exe"))
+          if ($exe.Count -ne 1) { throw "$appName.exe not in the top folder of the .zip" }
+          # Smoke test: the app must still be running after 15 s
+          $p = Start-Process $exe[0].FullName -PassThru
+          Start-Sleep 15
+          if ($p.HasExited) { throw "the portable app exited with $($p.ExitCode)" }
+          Stop-Process -Id $p.Id -Force
+      - name: Put the .msi and .zip into the pre-release latest
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view latest --json assets -q '.assets[].name' | { grep -E '\.msi$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
-          gh release upload latest artifacts/installer/*.msi
+          gh release view latest --json assets -q '.assets[].name' | { grep -E '\.(msi|zip)$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
+          gh release upload latest artifacts/installer/*.msi artifacts/installer/*.zip
 
   linux:
     needs: release

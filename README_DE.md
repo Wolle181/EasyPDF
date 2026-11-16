@@ -11,7 +11,7 @@ Farben und Herausgeber) umstellen, etwa für den internen Einsatz (siehe [Anpass
 unten steht `<App>` für den Namen der verwendeten Marke. Der Copyright- und Lizenzhinweis muss erhalten bleiben (MIT,
 siehe [Lizenz](#lizenz)).
 
-**Download:** Installer für Windows, Linux und macOS in der Vorabversion
+**Download:** Installer für Windows, Linux und macOS sowie eine portable Windows-Version (.zip, entpacken und starten) in der Vorabversion
 [latest](../../releases/tag/latest) (gebaut von GitHub Actions,
 [docs/BUILDING.md](docs/BUILDING.md#without-local-tools-github-actions), Englisch).
 **Vorstellungsvideo:** Eine zweiminütige Vorstellung (Deutsch und Englisch) wird mit der App ausgeliefert: Der Video-Button
@@ -103,7 +103,7 @@ gleichzeitig gestarteter Prozesse landen in einem Dialog).
 
 ## Bauen
 .NET 11 SDK, dann `dotnet build EasyPDF.slnx` und `dotnet test EasyPDF.slnx`. Voraussetzungen, Installer für Windows
-(MSI), Linux (.deb/.tar.gz) und macOS (.dmg), Versionsnummern und GitHub Actions:
+(MSI, portable .zip), Linux (.deb/.tar.gz) und macOS (.dmg), Versionsnummern und GitHub Actions:
 **[docs/BUILDING.md](docs/BUILDING.md)** (Englisch).
 
 ## Dokumentation

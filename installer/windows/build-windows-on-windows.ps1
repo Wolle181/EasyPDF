@@ -1,4 +1,6 @@
-# Builds the Windows installer: artifacts/installer/<AppDisplayName>-<version>-win-x64.msi
+# Builds the Windows installer and the portable version:
+#   artifacts/installer/<AppDisplayName>-<version>-win-x64.msi           per-user installer
+#   artifacts/installer/<AppDisplayName>-<version>-win-x64-portable.zip  unpack and run (folder <AppDisplayName>-<version>)
 # Needs only the .NET SDK (WiX comes as NuGet package).
 # Always pulls the newest sources first (git pull --ff-only; -NoPull skips it) and deletes all bin/obj
 # (full rebuild, no stale output from earlier builds). Afterwards it deletes bin/obj and the publish output again,
@@ -28,6 +30,22 @@ Remove-Item -Recurse -Force "$root/artifacts/publish/win-x64" -ErrorAction Silen
 Write-Host "== dotnet publish src/EasyPDF.App -p:PublishProfile=win-x64 -p:Version=$version -p:Brand=$brand" -ForegroundColor Cyan
 dotnet publish "$root/src/EasyPDF.App" -p:PublishProfile=win-x64 -p:Version=$version -p:Brand=$brand
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+# Portable version: the publish output in a folder <AppDisplayName>-<version>, zipped (no installer, no registry entries)
+$appName = dotnet msbuild "$root/src/EasyPDF.App" -getProperty:AppDisplayName -p:Brand=$brand
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$publishDir = (Resolve-Path "$root/artifacts/publish/win-x64").Path
+New-Item -ItemType Directory -Force "$root/artifacts/installer" | Out-Null
+$zip = Join-Path (Resolve-Path "$root/artifacts/installer").Path "$appName-$version-win-x64-portable.zip"
+Write-Host "== $zip" -ForegroundColor Cyan
+Remove-Item $zip -ErrorAction SilentlyContinue
+Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
+$archive = [IO.Compression.ZipFile]::Open($zip, [IO.Compression.ZipArchiveMode]::Create)
+try {
+    foreach ($file in Get-ChildItem -Recurse -File $publishDir) {
+        $entry = "$appName-$version/" + $file.FullName.Substring($publishDir.Length).TrimStart('\', '/').Replace('\', '/')
+        [void][IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $file.FullName, $entry, [IO.Compression.CompressionLevel]::Optimal)
+    }
+} finally { $archive.Dispose() }
 Write-Host "== dotnet build installer/windows/EasyPDF.Installer.wixproj -c Release -p:Version=$version -p:Brand=$brand" -ForegroundColor Cyan
 dotnet build "$root/installer/windows/EasyPDF.Installer.wixproj" -c Release -p:Version=$version -p:Brand=$brand
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -35,4 +53,4 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if (-not $env:CI) {
     try { & "$installer/clean-build-output.ps1" -Intermediate } catch { Write-Warning "Installer built, but cleaning up failed: $_" }
 }
-Get-ChildItem "$root/artifacts/installer/*.msi"
+Get-ChildItem "$root/artifacts/installer/*.msi", "$root/artifacts/installer/*.zip"

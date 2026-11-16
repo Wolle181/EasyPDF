@@ -44,6 +44,7 @@ dotnet run --project src/EasyPDF.App -- "C:\path\file.pdf"
 dotnet publish src/EasyPDF.App -p:PublishProfile=win-x64
 
 # MSI installer (publishes first): artifacts\installer\<App>-<version>-win-x64.msi (shown name)
+# and the portable version next to it: artifacts\installer\<App>-<version>-win-x64-portable.zip
 powershell -ExecutionPolicy Bypass -File installer\windows\build-windows-on-windows.ps1   # or: pwsh installer/windows/build-windows-on-windows.ps1
 ```
 The name of each installer script says where to start it: `build-<target>-on-<system>` (`build-windows-on-windows`, `build-linux-on-windows`, `build-macos-on-macos`). All installer scripts (`installer/*/build-*.ps1`, `installer/build-macos-on-macos.sh`) first delete every `bin/` and `obj/` folder (`installer/clean-build-output.ps1`, `git clean -X`), so each installer is a full rebuild without stale output; close the IDE or a running app if a file is in use. After a successful build they delete `bin/`, `obj/` and the publish output (`artifacts/publish`) again, so only the installers in `artifacts/installer` are left (not on CI). `installer\build-windows-on-windows.cmd` and `build-linux-on-windows.cmd` then open that folder in Explorer and close; on an error they wait for a key press.
@@ -51,6 +52,7 @@ Only one version of the app is ever installed. On Windows and Linux a newer vers
 - **Windows** compares only the first three parts, so any build of 1.0.0 replaces an installed 1.0.0.x, an older build too.
 - **Linux** treats a package of the same commit as already installed; `apt install --reinstall ./file.deb` installs it anyway.
 WiX is restored as a NuGet package, nothing else has to be installed. The MSI installs per user (no administrator rights, no UAC prompt) to `%LocalAppData%\Programs\<App>` (the shown name, `AppDisplayName` of the brand profile), adds a Start menu entry and the Explorer context menu for PDFs, and registers the app as a PDF program ("Open with", Default apps). Its dialog "Preferences" offers to make it the default program: Windows does not let programs do that themselves, so Finish opens the app's page in Settings ▸ Default apps (one click on "Set default"). On Linux and macOS the app asks once at the first start; Settings ▸ "Open PDF files with …" does it on all systems.
+The **portable version** (`-win-x64-portable.zip`) is the same publish output in a folder `<App>-<version>`: unpack anywhere (e.g. a USB stick) and start `<App>.exe`, no installation and no administrator rights. It adds no Start menu entry, no Explorer context menu and no registration as a PDF program; the settings live in `%AppData%\<App>` as with the MSI. To remove it, delete the folder.
 
 ## Linux (x64)
 Running the app needs fontconfig, X11 and ICU, e.g. on Debian/Ubuntu: `sudo apt install libfontconfig1 libx11-6 libice6 libsm6 libicu74` (the ICU version depends on the distribution), and glibc 2.28 or newer for the text recognition (Debian 10, Ubuntu 20.04 and later).
@@ -88,7 +90,7 @@ xattr -cr /Applications/<App>.app
 Without Terminal: start it once, close the warning, then System Settings ▸ Privacy & Security ▸ *Open Anyway*. A copy built on the same Mac starts without warning.
 
 ## Without local tools: GitHub Actions
-The workflow *Installers* (`.github/workflows/installers.yml`) builds the `.msi`, `.deb`/`.tar.gz` and the `.dmg` on GitHub, tests the MSI and `.deb` upgrades, starts the installed app on Linux and runs the OCR tests on Linux and macOS. It runs manually (Actions ▸ Installers ▸ Run workflow, or `gh workflow run installers.yml --ref <branch>`); the automatic trigger is commented out in the workflow. *platform* builds all three (default) or only one, *brand* picks the brand profile (empty: the default in `Directory.Build.props`).
+The workflow *Installers* (`.github/workflows/installers.yml`) builds the `.msi`, the portable Windows `.zip`, `.deb`/`.tar.gz` and the `.dmg` on GitHub, tests the MSI and `.deb` upgrades, starts the installed app on Linux and the unpacked portable app on Windows and runs the OCR tests on Linux and macOS. It runs manually (Actions ▸ Installers ▸ Run workflow, or `gh workflow run installers.yml --ref <branch>`); the automatic trigger is commented out in the workflow. *platform* builds all three (default) or only one, *brand* picks the brand profile (empty: the default in `Directory.Build.props`).
 
 ### Installers in the pre-release *latest*
 All installers go into the pre-release *latest* (release files do not count against the 0.5 GB of Actions storage of the free plan, so there are no workflow artifacts). A full build creates it anew, a build of a single platform replaces only that platform's files. So there is only ever the newest build and it needs no cleanup. The repository is private: only its members can see and download it.
