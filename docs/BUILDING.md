@@ -28,6 +28,12 @@ The version number has four parts, e.g. `1.0.0.97`:
 Help ▸ About also shows the commit hash: `1.0.0.97 (3fa9c1d2)`. Warnings are treated as errors.
 All output goes to `artifacts/` (`publish/<rid>/` for the app, `installer/` for the installers).
 
+**Native AOT (trial):** the profiles `win-x64-aot`, `linux-x64-aot` and `osx-arm64-aot` compile the app to native code
+ahead of time instead of ReadyToRun (`dotnet publish src/EasyPDF.App -p:PublishProfile=linux-x64-aot` → `artifacts/publish/<rid>-aot/`).
+They need the platform's C toolchain: Visual Studio with "Desktop development with C++" on Windows, `clang` and `zlib1g-dev`
+on Linux, Xcode command line tools on macOS. The installers still use the ReadyToRun profiles. All libraries in use compile
+without trim/AOT warnings; the analyzers are on in both projects, so code that would break under AOT fails the build.
+
 **Brand:** every command builds the brand selected in `Directory.Build.props`; another one with
 `-p:Brand=<id>`, the environment variable `EASYPDF_BRAND` or `-Brand <id>` (also `-p:<id>` or just `<id>`) of the installer scripts
 ([branding/README.md](../branding/README.md)). The installer scripts print the brand at the start

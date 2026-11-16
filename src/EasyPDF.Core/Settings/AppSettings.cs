@@ -20,11 +20,6 @@ public sealed class AppSettings
 {
     public const int MaxRecentFiles = 10;
 
-    private static readonly JsonSerializerOptions _jsonOptions = new()
-    {
-        WriteIndented = true,
-        Converters = { new JsonStringEnumConverter() },
-    };
 
     public ThemeSetting Theme { get; set; } = ThemeSetting.System;
 
@@ -101,7 +96,7 @@ public sealed class AppSettings
         try
         {
             if (File.Exists(path))
-                settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(path), _jsonOptions);
+                settings = JsonSerializer.Deserialize(File.ReadAllText(path), AppSettingsJson.Default.AppSettings);
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
         {
@@ -119,7 +114,7 @@ public sealed class AppSettings
             return;
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
         var temp = path + ".tmp";
-        File.WriteAllText(temp, JsonSerializer.Serialize(this, _jsonOptions));
+        File.WriteAllText(temp, JsonSerializer.Serialize(this, AppSettingsJson.Default.AppSettings));
         File.Move(temp, path, overwrite: true);
     }
 
@@ -159,3 +154,7 @@ public sealed class AppSettings
 
     public void ClearRecentFiles() => RecentFiles = [];
 }
+
+[JsonSourceGenerationOptions(WriteIndented = true, UseStringEnumConverter = true)]
+[JsonSerializable(typeof(AppSettings))]
+internal sealed partial class AppSettingsJson : JsonSerializerContext;

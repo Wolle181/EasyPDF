@@ -21,11 +21,6 @@ public static class StampFile
     private static readonly byte[] Signature = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
     private static readonly byte[] KeywordBytes = Encoding.Latin1.GetBytes(Keyword);
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
-    };
 
     /// <summary>The definition in the file; null for a plain picture and anything unusable (a stamp stays usable without its fields).</summary>
     public static StampDefinition? ReadDefinition(ReadOnlySpan<byte> data)
@@ -52,7 +47,7 @@ public static class StampFile
         {
             // Keyword, no compression, no language, no translated keyword, then the text in UTF-8
             var content = KeywordBytes.Concat(new byte[] { 0, 0, 0, 0, 0 })
-                .Concat(JsonSerializer.SerializeToUtf8Bytes(definition, JsonOptions)).ToArray();
+                .Concat(JsonSerializer.SerializeToUtf8Bytes(definition, StampJson.Default.StampDefinition)).ToArray();
             chunk = Chunk("iTXt"u8, content);
         }
         return Replace(png, (type, content) => type.SequenceEqual("iTXt"u8) && TextOfOurChunk(content) != null, chunk);
@@ -90,7 +85,7 @@ public static class StampFile
     {
         try
         {
-            var parsed = JsonSerializer.Deserialize<StampDefinition>(json, JsonOptions);
+            var parsed = JsonSerializer.Deserialize(json, StampJson.Default.StampDefinition);
             // Null entries and fields that have no area or lie outside the picture can't be drawn
             var fields = parsed?.Fields?.Where(f => f is { Width: > 0, Height: > 0, X: >= 0, Y: >= 0, Text.Length: > 0 } && f.X + f.Width <= 1.0001 && f.Y + f.Height <= 1.0001).ToList();
             return fields is { Count: > 0 } ? new StampDefinition { Fields = fields } : null;
@@ -151,3 +146,9 @@ public static class StampFile
         return crc ^ 0xFFFFFFFF;
     }
 }
+
+internal sealed class StampAlignJsonConverter() : JsonStringEnumConverter<StampFieldAlign>(JsonNamingPolicy.CamelCase);
+
+[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase, Converters = [typeof(StampAlignJsonConverter)])]
+[JsonSerializable(typeof(StampDefinition))]
+internal sealed partial class StampJson : JsonSerializerContext;

@@ -10,6 +10,10 @@
     <!-- Icon of the .exe (Explorer, installer): the brand's (branding/<Brand>/icons, drawn by tools/icon/make_icon.py) -->
     <ApplicationIcon>$(BrandDir)icons/app.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <!-- Trim/AOT analyzers: code that would break under Native AOT is a warning, hence a build error -->
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <EnableAotAnalyzer>true</EnableAotAnalyzer>
+    <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
     <!-- File description of the .exe (Windows "Open with", Task Manager) -->
     <AssemblyTitle>$(AppDisplayName)</AssemblyTitle>
   </PropertyGroup>

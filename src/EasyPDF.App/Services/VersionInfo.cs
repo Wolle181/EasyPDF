@@ -78,7 +78,10 @@ public static class VersionInfo
     {
         try
         {
-            return System.IO.File.GetLastWriteTime(assembly.Location).ToString("yyyy-MM-dd HH:mm");
+            // The assembly's .dll; under Native AOT there is none, the program file itself is the build
+            var dll = System.IO.Path.Combine(AppContext.BaseDirectory, assembly.GetName().Name + ".dll");
+            var file = System.IO.File.Exists(dll) ? dll : Environment.ProcessPath ?? dll;
+            return System.IO.File.GetLastWriteTime(file).ToString("yyyy-MM-dd HH:mm");
         }
         catch (Exception)
         {

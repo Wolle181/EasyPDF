@@ -90,5 +90,5 @@ public sealed class TrExtension(string key) : MarkupExtension
     public string Key { get; set; } = key;
 
     public override object ProvideValue(IServiceProvider serviceProvider) =>
-        new Binding(nameof(LocString.Value)) { Source = Loc.For(Key), Mode = BindingMode.OneWay };
+        CompiledBinding.Create((LocString s) => s.Value, source: Loc.For(Key), mode: BindingMode.OneWay);
 }
