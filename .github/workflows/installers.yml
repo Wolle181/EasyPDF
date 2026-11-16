@@ -4,7 +4,7 @@
 # Start manually under Actions > Installers > Run workflow (or: gh workflow run installers.yml --ref <branch>);
 # "platform" builds only one installer (gh: -f platform=macos) and replaces only its files in the release,
 # "brand" picks the brand profile in branding/ (gh: -f brand=<id>); empty = the default in Directory.Build.props.
-# "aot" also builds the Native AOT trial versions of the chosen platforms (Windows -win-x64-aot.zip, Linux -aot.deb and
+# "aot" also builds the Native AOT trial versions of the chosen platforms (Windows -win-x64-aot.msi and .zip, Linux -aot.deb and
 # -linux-x64-aot.tar.gz) in jobs of their own (gh: -f aot=false switches them off).
 # The workflow only ever runs when started by hand: there is no automatic trigger.
 name: Installers
@@ -167,18 +167,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Only its own files: the AOT .zip belongs to the job windows-aot
-          gh release view latest --json assets -q '.assets[].name' | { grep -E '(\.msi|-portable\.zip)$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
+          # Only its own files: the AOT .msi and .zip belong to the job windows-aot
+          gh release view latest --json assets -q '.assets[].name' | { grep -E '(-win-x64\.msi|-portable\.zip)$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
           gh release upload latest artifacts/installer/*.msi artifacts/installer/*.zip
 
-  # Trial: the app compiled with Native AOT, as a portable .zip (installer/windows/build-aot-windows-on-windows.ps1).
+  # Trial: the app compiled with Native AOT, as MSI and portable .zip (installer/windows/build-aot-windows-on-windows.ps1).
   # The runner image has Visual Studio with the C++ build tools that Native AOT links with.
   windows-aot:
     needs: release
     if: ${{ inputs.aot && (inputs.platform == 'all' || inputs.platform == 'windows') }}
     runs-on: windows-latest
     permissions:
-      contents: write   # the AOT .zip goes into the release "latest"
+      contents: write   # the AOT .msi and .zip go into the release "latest"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -186,7 +186,7 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json   # SDK version from global.json
-      - name: Build the portable AOT .zip
+      - name: Build the AOT .msi and portable .zip
         shell: pwsh
         env:
           EASYPDF_NO_TESTS: 1   # all tests run in the job windows already
@@ -206,13 +206,32 @@ jobs:
           Start-Sleep 15
           if ($p.HasExited) { throw "the AOT app exited with $($p.ExitCode)" }
           Stop-Process -Id $p.Id -Force
-      - name: Put the AOT .zip into the pre-release latest
+      - name: "AOT .msi: install, start the app, uninstall"
+        shell: pwsh
+        run: |
+          $appName = dotnet msbuild src/EasyPDF.App -getProperty:AppDisplayName
+          $msi = @(Get-ChildItem artifacts/installer/*-win-x64-aot.msi)
+          if ($msi.Count -ne 1) { throw "expected one AOT .msi: $msi" }
+          $code = (Start-Process msiexec -ArgumentList '/i', "`"$($msi[0].FullName)`"", '/qn' -Wait -PassThru).ExitCode
+          if ($code -ne 0) { throw "install failed: $code" }
+          $exe = Join-Path $env:LOCALAPPDATA "Programs\$appName\$appName.exe"
+          if (-not (Test-Path $exe)) { throw "$exe not installed" }
+          # Smoke test: the app must still be running after 15 s
+          $p = Start-Process $exe -PassThru
+          Start-Sleep 15
+          if ($p.HasExited) { throw "the installed AOT app exited with $($p.ExitCode)" }
+          Stop-Process -Id $p.Id -Force
+          Start-Sleep 2
+          $code = (Start-Process msiexec -ArgumentList '/x', "`"$($msi[0].FullName)`"", '/qn' -Wait -PassThru).ExitCode
+          if ($code -ne 0) { throw "uninstall failed: $code" }
+          if (Test-Path $exe) { throw "$exe is left after uninstall" }
+      - name: Put the AOT .msi and .zip into the pre-release latest
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view latest --json assets -q '.assets[].name' | { grep -E -- '-win-x64-aot\.zip$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
-          gh release upload latest artifacts/installer/*-win-x64-aot.zip
+          gh release view latest --json assets -q '.assets[].name' | { grep -E -- '-win-x64-aot\.(msi|zip)$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
+          gh release upload latest artifacts/installer/*-win-x64-aot.msi artifacts/installer/*-win-x64-aot.zip
 
   linux:
     needs: release

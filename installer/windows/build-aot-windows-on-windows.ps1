@@ -1,7 +1,9 @@
-# Trial: builds the app with Native AOT instead of ReadyToRun, as a portable version:
+# Trial: builds the app with Native AOT instead of ReadyToRun, as installer and portable version:
+#   artifacts/installer/<AppDisplayName>-<version>-win-x64-aot.msi  per-user installer like build-windows-on-windows
 #   artifacts/installer/<AppDisplayName>-<version>-win-x64-aot.zip  unpack and run (folder <AppDisplayName>-<version>-aot)
-# No MSI: the installers keep using ReadyToRun (build-windows-on-windows). Next to that script's -portable.zip, the two
-# versions can be compared directly (start time, size, behaviour).
+# The MSI has the same UpgradeCode as the ReadyToRun one: it replaces an installed ReadyToRun version and vice versa.
+# Next to build-windows-on-windows' .msi and -portable.zip the two versions can be compared directly (start time, size,
+# behaviour).
 # Needs the .NET SDK and the C++ build tools for the native linker: Visual Studio (or the Build Tools for Visual Studio)
 # with the workload "Desktop development with C++".
 # Like the other build scripts it pulls the newest sources first (git pull --ff-only; -NoPull skips it), deletes all
@@ -48,6 +50,9 @@ dotnet publish "$root/src/EasyPDF.App" -p:PublishProfile=win-x64-aot -p:Version=
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 Write-Host ("== Native AOT build took {0:m\:ss} min" -f $watch.Elapsed) -ForegroundColor Cyan
 
+# Debug symbols of the native program (.pdb, large) are not needed to run it: neither in the .zip nor in the MSI
+Get-ChildItem -Recurse -File "$root/artifacts/publish/win-x64-aot" -Filter *.pdb | Remove-Item
+
 # Portable version: the publish output in a folder <AppDisplayName>-<version>-aot, zipped
 $appName = dotnet msbuild "$root/src/EasyPDF.App" -getProperty:AppDisplayName -p:Brand=$brand
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -62,13 +67,15 @@ Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 $archive = [IO.Compression.ZipFile]::Open($zip, [IO.Compression.ZipArchiveMode]::Create)
 try {
     foreach ($file in Get-ChildItem -Recurse -File $publishDir) {
-        # Debug symbols of the native program (.pdb) are not needed to run it
-        if ($file.Extension -eq '.pdb') { continue }
         $entry = "$appName-$version-aot/" + $file.FullName.Substring($publishDir.Length).TrimStart('\', '/').Replace('\', '/')
         [void][IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $file.FullName, $entry, [IO.Compression.CompressionLevel]::Optimal)
     }
 } finally { $archive.Dispose() }
 
-# Only the zip stays
+Write-Host "== dotnet build installer/windows/EasyPDF.Installer.wixproj -c Release -p:PublishVariant=-aot -p:Version=$version -p:Brand=$brand" -ForegroundColor Cyan
+dotnet build "$root/installer/windows/EasyPDF.Installer.wixproj" -c Release -p:PublishVariant=-aot -p:Version=$version -p:Brand=$brand
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+# Only the installers stay
 try { & "$installer/clean-build-output.ps1" -Intermediate } catch { Write-Warning "Built, but cleaning up failed: $_" }
-Get-ChildItem $zip
+Get-ChildItem "$root/artifacts/installer/*-win-x64-aot.msi", $zip

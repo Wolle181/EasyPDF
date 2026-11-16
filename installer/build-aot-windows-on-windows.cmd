@@ -1,5 +1,5 @@
 @echo off
-REM Trial: Native AOT build of the app as portable .zip (installer\windows\build-aot-windows-on-windows.ps1)
+REM Trial: Native AOT build of the app as .msi and portable .zip (installer\windows\build-aot-windows-on-windows.ps1)
 ECHO Working...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0windows\build-aot-windows-on-windows.ps1" %*
 REM Failed: keep the window open so the error can be read
