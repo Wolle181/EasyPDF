@@ -1,4 +1,4 @@
-"""Builds the Linux packages from the linux-x64 publish output, without dpkg (runs on Linux, macOS and Windows):
+"""Builds the Linux packages from the linux-x64 publish output (Native AOT), without dpkg:
 
   artifacts/installer/<package>_<version>_amd64.deb      Debian/Ubuntu (apt install ./file.deb)
   artifacts/installer/<name>-<version>-linux-x64.tar.gz  any distribution (unpack and run)
@@ -13,8 +13,6 @@ GNOME Files has no installable context menus; there "Open With <app>" on several
 The .desktop and .nemo_action files say @APPNAME@ (shown name) and @PACKAGE@ (command, icon); installed they are
 named after the package. The Maintainer is Company from the brand profile, the icons are the brand's (branding/<Brand>/icons).
 Usage: python installer/linux/build_linux.py   (after: dotnet publish src/EasyPDF.App -p:PublishProfile=linux-x64)
-Trial: --aot packages the Native AOT build instead (after: dotnet publish src/EasyPDF.App -p:PublishProfile=linux-x64-aot)
-into <package>_<version>_amd64-aot.deb and <name>-<version>-linux-x64-aot.tar.gz; same package name, so it replaces the other.
 """
 import gzip
 import io
@@ -30,7 +28,6 @@ PUBLISH = os.path.join(ROOT, "artifacts", "publish", "linux-x64")
 OUT = os.path.join(ROOT, "artifacts", "installer")
 HERE = os.path.dirname(os.path.abspath(__file__))
 EXECUTABLE = ""   # program file = shown name, set by main()
-SUFFIX = ""       # "-aot" for the Native AOT build (--aot), set by main()
 MTIME = int(time.time())
 
 
@@ -183,39 +180,34 @@ def build_deb(ver, name, package, maintainer, icons):
     control_tar = tar_gz(lambda tar: (add_dir(tar, "./"), add_bytes(tar, "./control", control_text),
                                       add_bytes(tar, "./preinst", preinst, 0o755)))
     deb = ar_archive([("debian-binary", b"2.0\n"), ("control.tar.gz", control_tar), ("data.tar.gz", data_tar)])
-    path = os.path.join(OUT, f"{package}_{ver}_amd64{SUFFIX}.deb")
+    path = os.path.join(OUT, f"{package}_{ver}_amd64.deb")
     with open(path, "wb") as f:
         f.write(deb)
     return path
 
 
 def build_tarball(ver, name, package, icons):
-    folder = f"{name}-{ver}{SUFFIX}"
+    folder = f"{name}-{ver}"
 
     def content(tar):
         add_tree(tar, folder)
         add_file(tar, f"{folder}/{package}.png", os.path.join(icons, "app-256.png"), 0o644)
 
-    path = os.path.join(OUT, f"{name}-{ver}-linux-x64{SUFFIX}.tar.gz")
+    path = os.path.join(OUT, f"{name}-{ver}-linux-x64.tar.gz")
     with open(path, "wb") as f:
         f.write(tar_gz(content))
     return path
 
 
 def main():
-    global EXECUTABLE, PUBLISH, SUFFIX
-    args = sys.argv[1:]
-    if args not in ([], ["--aot"]):
-        sys.exit(f"Unknown parameters {args}; usage: build_linux.py [--aot]")
-    profile = "linux-x64"
-    if args:
-        profile, SUFFIX = "linux-x64-aot", "-aot"
-        PUBLISH = os.path.join(ROOT, "artifacts", "publish", profile)
+    global EXECUTABLE
+    if sys.argv[1:]:
+        sys.exit(f"Unknown parameters {sys.argv[1:]}; usage: build_linux.py")
     ver, name = version(), build_property("AppDisplayName")
     package = package_name(name)
     EXECUTABLE = name
     if not os.path.isfile(os.path.join(PUBLISH, EXECUTABLE)):
-        sys.exit(f"{PUBLISH}/{EXECUTABLE} not found. Publish first: dotnet publish src/EasyPDF.App -p:PublishProfile={profile}")
+        sys.exit(f"{PUBLISH}/{EXECUTABLE} not found. Publish first: dotnet publish src/EasyPDF.App -p:PublishProfile=linux-x64")
     icons = os.path.join(build_property("BrandDir"), "icons")
     os.makedirs(OUT, exist_ok=True)
     for path in (build_deb(ver, name, package, build_property("Company"), icons), build_tarball(ver, name, package, icons)):

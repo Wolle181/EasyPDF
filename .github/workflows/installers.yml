@@ -4,8 +4,8 @@
 # Start manually under Actions > Installers > Run workflow (or: gh workflow run installers.yml --ref <branch>);
 # "platform" builds only one installer (gh: -f platform=macos) and replaces only its files in the release,
 # "brand" picks the brand profile in branding/ (gh: -f brand=<id>); empty = the default in Directory.Build.props.
-# "aot" also builds the Native AOT trial versions of the chosen platforms (Windows -win-x64-aot.msi and .zip, Linux -aot.deb and
-# -linux-x64-aot.tar.gz, macOS -macos-arm64-aot.dmg) in jobs of their own (gh: -f aot=false switches them off).
+# The app is compiled with Native AOT everywhere; each runner has the native toolchain it links with (Windows: Visual
+# Studio with the C++ build tools, Linux: clang and zlib installed below, macOS: the Xcode command line tools).
 # The workflow only ever runs when started by hand: there is no automatic trigger.
 name: Installers
 
@@ -20,10 +20,6 @@ on:
       brand:
         description: Brand profile (folder in branding/; empty = default in Directory.Build.props)
         type: string
-      aot:
-        description: Also build the Native AOT trial versions (Windows, Linux, macOS)
-        type: boolean
-        default: true
   # Automatic builds are switched off. To switch them on:
   # push:
   #   tags: ['v*']
@@ -167,71 +163,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Only its own files: the AOT .msi and .zip belong to the job windows-aot
           gh release view latest --json assets -q '.assets[].name' | { grep -E '(-win-x64\.msi|-portable\.zip)$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
           gh release upload latest artifacts/installer/*.msi artifacts/installer/*.zip
 
-  # Trial: the app compiled with Native AOT, as MSI and portable .zip (installer/windows/build-aot-windows-on-windows.ps1).
-  # The runner image has Visual Studio with the C++ build tools that Native AOT links with.
-  windows-aot:
-    needs: release
-    if: ${{ inputs.aot && (inputs.platform == 'all' || inputs.platform == 'windows') }}
-    runs-on: windows-latest
-    permissions:
-      contents: write   # the AOT .msi and .zip go into the release "latest"
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: global.json   # SDK version from global.json
-      - name: Build the AOT .msi and portable .zip
-        shell: pwsh
-        env:
-          EASYPDF_NO_TESTS: 1   # all tests run in the job windows already
-        run: ./installer/windows/build-aot-windows-on-windows.ps1
-      - name: "AOT .zip: unpack and start the app"
-        shell: pwsh
-        run: |
-          $appName = dotnet msbuild src/EasyPDF.App -getProperty:AppDisplayName
-          $zip = @(Get-ChildItem artifacts/installer/*-win-x64-aot.zip)
-          if ($zip.Count -ne 1) { throw "expected one AOT .zip: $zip" }
-          $dir = Join-Path $env:RUNNER_TEMP aot
-          Expand-Archive $zip[0].FullName $dir
-          $exe = @(Get-ChildItem (Join-Path $dir "*\$appName.exe"))
-          if ($exe.Count -ne 1) { throw "$appName.exe not in the top folder of the .zip" }
-          # Smoke test: the app must still be running after 15 s
-          $p = Start-Process $exe[0].FullName -PassThru
-          Start-Sleep 15
-          if ($p.HasExited) { throw "the AOT app exited with $($p.ExitCode)" }
-          Stop-Process -Id $p.Id -Force
-      - name: "AOT .msi: install, start the app, uninstall"
-        shell: pwsh
-        run: |
-          $appName = dotnet msbuild src/EasyPDF.App -getProperty:AppDisplayName
-          $msi = @(Get-ChildItem artifacts/installer/*-win-x64-aot.msi)
-          if ($msi.Count -ne 1) { throw "expected one AOT .msi: $msi" }
-          $code = (Start-Process msiexec -ArgumentList '/i', "`"$($msi[0].FullName)`"", '/qn' -Wait -PassThru).ExitCode
-          if ($code -ne 0) { throw "install failed: $code" }
-          $exe = Join-Path $env:LOCALAPPDATA "Programs\$appName\$appName.exe"
-          if (-not (Test-Path $exe)) { throw "$exe not installed" }
-          # Smoke test: the app must still be running after 15 s
-          $p = Start-Process $exe -PassThru
-          Start-Sleep 15
-          if ($p.HasExited) { throw "the installed AOT app exited with $($p.ExitCode)" }
-          Stop-Process -Id $p.Id -Force
-          Start-Sleep 2
-          $code = (Start-Process msiexec -ArgumentList '/x', "`"$($msi[0].FullName)`"", '/qn' -Wait -PassThru).ExitCode
-          if ($code -ne 0) { throw "uninstall failed: $code" }
-          if (Test-Path $exe) { throw "$exe is left after uninstall" }
-      - name: Put the AOT .msi and .zip into the pre-release latest
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release view latest --json assets -q '.assets[].name' | { grep -E -- '-win-x64-aot\.(msi|zip)$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
-          gh release upload latest artifacts/installer/*-win-x64-aot.msi artifacts/installer/*-win-x64-aot.zip
 
   linux:
     needs: release
@@ -248,7 +182,9 @@ jobs:
           global-json-file: global.json   # SDK version from global.json
       - name: OCR tests (ONNX Runtime on Linux)
         run: dotnet test tests/EasyPDF.Core.Tests --filter "FullyQualifiedName~Ocr"
-      - name: Publish
+      - name: Native AOT toolchain
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+      - name: Publish with Native AOT
         run: dotnet publish src/EasyPDF.App -p:PublishProfile=linux-x64
       - name: Build .deb and .tar.gz
         run: |
@@ -257,7 +193,6 @@ jobs:
           echo "PKG=$(dpkg-deb -f artifacts/installer/*_amd64.deb Package)" >> "$GITHUB_ENV"
       - name: Install the .deb and start the app
         run: |
-          sudo apt-get update
           sudo apt-get install -y xvfb ./artifacts/installer/${PKG}_*_amd64.deb
           dpkg -s "$PKG"
           test -x "/usr/bin/$PKG"
@@ -287,45 +222,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Only its own files: the -aot ones belong to the job linux-aot
-          gh release view latest --json assets -q '.assets[].name' | { grep -E '\.(deb|tar\.gz)$' | grep -v -- '-aot\.' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
+          gh release view latest --json assets -q '.assets[].name' | { grep -E '\.(deb|tar\.gz)$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
           gh release upload latest artifacts/installer/*.deb artifacts/installer/*.tar.gz
 
-  # Trial: the app compiled with Native AOT, packaged like the ReadyToRun build (build_linux.py --aot)
-  linux-aot:
-    needs: release
-    if: ${{ inputs.aot && (inputs.platform == 'all' || inputs.platform == 'linux') }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write   # the AOT .deb and .tar.gz go into the release "latest"
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: global.json   # SDK version from global.json
-      - name: Native AOT toolchain
-        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
-      - name: Publish with Native AOT
-        run: dotnet publish src/EasyPDF.App -p:PublishProfile=linux-x64-aot
-      - name: Build the AOT .deb and .tar.gz
-        run: |
-          python3 installer/linux/build_linux.py --aot
-          echo "PKG=$(dpkg-deb -f artifacts/installer/*_amd64-aot.deb Package)" >> "$GITHUB_ENV"
-      - name: Install the AOT .deb and start the app
-        run: |
-          sudo apt-get install -y xvfb ./artifacts/installer/${PKG}_*_amd64-aot.deb
-          test -x "/usr/bin/$PKG"
-          # Smoke test: the app must still be running after 15 s (timeout exits with 124)
-          code=0; xvfb-run -a timeout 15 "$PKG" || code=$?
-          test "$code" -eq 124
-      - name: Put the AOT .deb and .tar.gz into the pre-release latest
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release view latest --json assets -q '.assets[].name' | { grep -E -- '-aot\.(deb|tar\.gz)$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
-          gh release upload latest artifacts/installer/*-aot.deb artifacts/installer/*-aot.tar.gz
 
   macos:
     needs: release
@@ -346,38 +245,11 @@ jobs:
         env:
           EASYPDF_NO_TESTS: 1   # here only the OCR tests above; all tests run in the job windows
         run: bash installer/build-macos-on-macos.sh
-      - name: Put the .dmg into the pre-release latest
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # Only its own file: the -aot one belongs to the job macos-aot
-          gh release view latest --json assets -q '.assets[].name' | { grep -E -- '-macos-arm64\.dmg$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
-          gh release upload latest artifacts/installer/*.dmg
-
-  # Trial: the app compiled with Native AOT in a .dmg (build-macos-on-macos.sh --aot); the runner has the Xcode
-  # command line tools Native AOT links with
-  macos-aot:
-    needs: release
-    if: ${{ inputs.aot && (inputs.platform == 'all' || inputs.platform == 'macos') }}
-    runs-on: macos-latest
-    permissions:
-      contents: write   # the AOT .dmg goes into the release "latest"
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: global.json   # SDK version from global.json
-      - name: Build the AOT .app and .dmg (Apple Silicon)
-        env:
-          EASYPDF_NO_TESTS: 1   # all tests run in the job windows
-        run: bash installer/build-macos-on-macos.sh --aot
-      - name: "AOT .dmg: mount, start the app"
+      - name: "Mount the .dmg and start the app"
         run: |
           APPNAME="$(dotnet msbuild src/EasyPDF.App -getProperty:AppDisplayName | tr -d '\r\n')"
-          dmg=$(ls artifacts/installer/*-macos-arm64-aot.dmg)
-          mnt="$RUNNER_TEMP/aot"
+          dmg=$(ls artifacts/installer/*-macos-arm64.dmg)
+          mnt="$RUNNER_TEMP/dmg"
           hdiutil attach "$dmg" -nobrowse -mountpoint "$mnt"
           exe="$mnt/$APPNAME.app/Contents/MacOS/$APPNAME"
           test -x "$exe"
@@ -386,12 +258,13 @@ jobs:
           # Smoke test: the app must still be running after 15 s
           "$exe" & pid=$!
           sleep 15
-          if ! kill -0 "$pid" 2>/dev/null; then code=0; wait "$pid" || code=$?; echo "the AOT app exited with $code"; exit 1; fi
+          if ! kill -0 "$pid" 2>/dev/null; then code=0; wait "$pid" || code=$?; echo "the app exited with $code"; exit 1; fi
           kill "$pid"; wait "$pid" || true
           hdiutil detach "$mnt"
-      - name: Put the AOT .dmg into the pre-release latest
+      - name: Put the .dmg into the pre-release latest
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view latest --json assets -q '.assets[].name' | { grep -E -- '-macos-arm64-aot\.dmg$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
-          gh release upload latest artifacts/installer/*-macos-arm64-aot.dmg
+          gh release view latest --json assets -q '.assets[].name' | { grep -E -- '-macos-arm64\.dmg$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
+          gh release upload latest artifacts/installer/*.dmg
+

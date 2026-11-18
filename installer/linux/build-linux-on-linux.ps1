@@ -1,5 +1,6 @@
 # Builds the Linux packages: artifacts/installer/<package>_<version>_amd64.deb (package = AppDisplayName in lower case) and <AppDisplayName>-<version>-linux-x64.tar.gz
-# Runs on Windows, Linux and macOS (needs the .NET SDK and Python 3; dpkg is not required).
+# Runs on Linux x64 with PowerShell 7 (pwsh): Native AOT compiles for the system it runs on only. Needs the .NET SDK,
+# Python 3 and the native toolchain (Debian/Ubuntu: sudo apt install clang zlib1g-dev); dpkg is not required.
 # Always pulls the newest sources first (git pull --ff-only; -NoPull skips it) and deletes all bin/obj
 # (full rebuild, no stale output from earlier builds). Then it runs all tests (installer/run-tests.ps1): a failing test
 # stops the build; -NoTests (or EASYPDF_NO_TESTS=1) skips them. Afterwards it deletes bin/obj and the publish output again,
@@ -18,7 +19,11 @@ if ($NoTests) { $env:EASYPDF_NO_TESTS = '1' }                         # likewise
 # New commits may have changed this script too: then its new version runs
 if (-not $NoPull -and (& "$installer/update-sources.ps1")) { & $PSCommandPath -NoPull; exit $LASTEXITCODE }
 
-# On Windows `python3` can be a Microsoft Store stub, so pick the first one that really runs
+if (-not $IsLinux) { throw 'Native AOT builds for the system it runs on: start this script on Linux (x64).' }
+if (-not (Get-Command clang -ErrorAction SilentlyContinue)) {
+    throw 'Native AOT needs clang and zlib: sudo apt install clang zlib1g-dev (other distributions: their clang and zlib development packages).'
+}
+
 function Test-Python($name) {
     try { return ((& $name -c 'print(1)' 2>$null) -eq '1') } catch { return $false }
 }
@@ -33,8 +38,11 @@ $brand = & "$installer/selected-brand.ps1"
 
 Remove-Item -Recurse -Force "$root/artifacts/publish/linux-x64" -ErrorAction SilentlyContinue
 Write-Host "== dotnet publish src/EasyPDF.App -p:PublishProfile=linux-x64 -p:Brand=$brand" -ForegroundColor Cyan
+Write-Host '   (compiling the whole program to native code takes a few minutes)'
 dotnet publish "$root/src/EasyPDF.App" -p:PublishProfile=linux-x64 -p:Brand=$brand
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+# Debug symbols of the native program (.dbg, .pdb, large) are not needed to run it
+Get-ChildItem -Recurse -File "$root/artifacts/publish/linux-x64" -Include *.dbg, *.pdb | Remove-Item
 Write-Host "== $python installer/linux/build_linux.py   (EASYPDF_BRAND=$brand)" -ForegroundColor Cyan
 & $python "$root/installer/linux/build_linux.py"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

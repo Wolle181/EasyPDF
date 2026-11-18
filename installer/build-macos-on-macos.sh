@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Builds the macOS disk image (run on a Mac; needs the .NET SDK, codesign and hdiutil):
+# Builds the macOS disk image with the app compiled by Native AOT (run on a Mac; needs the .NET SDK, the Xcode command
+# line tools for the native linker, codesign and hdiutil):
 #   artifacts/installer/<AppDisplayName>-<version>-macos-arm64.dmg
 # Apple Silicon and macOS 14 or later only: ONNX Runtime (used by OCR) has no Intel build and needs macOS 14.
-# Usage: bash installer/build-macos-on-macos.sh [--aot] [<id> | -p:<id> | -p:Brand=<id> | -Brand <id>]
-#   --aot (trial): Native AOT instead of ReadyToRun (profile osx-arm64-aot) → <AppDisplayName>-<version>-macos-arm64-aot.dmg
+# Usage: bash installer/build-macos-on-macos.sh [<id> | -p:<id> | -p:Brand=<id> | -Brand <id>]
 #   brand profile branding/<id>/ like the other installer scripts; without it EASYPDF_BRAND or the default
 #   (Directory.Build.props). Unknown parameters stop the script, so a typo never builds the default brand by mistake.
 # Pulls the newest sources first (git pull --ff-only), except on CI, with a detached HEAD or with EASYPDF_NO_PULL=1.
@@ -17,12 +17,6 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-AOT=""
-ARGS=()
-for arg in "$@"; do
-  if [ "$arg" = --aot ]; then AOT=1; else ARGS+=("$arg"); fi
-done
-set -- ${ARGS[@]+"${ARGS[@]}"}
 case "${1:-}" in
   "") ;;
   -Brand|--brand) EASYPDF_BRAND="${2:?-Brand needs a brand id}"; shift 2 ;;
@@ -46,7 +40,7 @@ if [ -z "${CI:-}" ] && [ -z "${EASYPDF_NO_PULL:-}" ] && git -C "$ROOT" symbolic-
   echo "== git pull"
   git -C "$ROOT" pull --ff-only || { echo "git pull failed; fix it or run with EASYPDF_NO_PULL=1" >&2; exit 1; }
   if [ "$BEFORE" != "$(git -C "$ROOT" rev-parse HEAD)" ]; then
-    EASYPDF_NO_PULL=1 exec bash "$0" ${AOT:+--aot}
+    EASYPDF_NO_PULL=1 exec bash "$0"
   fi
 fi
 # Brand profile (EASYPDF_BRAND or the default in Directory.Build.props), shown with the -p parameter the publish gets
@@ -80,18 +74,15 @@ mkdir -p "$ROOT/artifacts/installer"
 
 A=arm64
 RID="osx-$A"
-SUFFIX="${AOT:+-aot}"   # Native AOT (--aot): own publish profile, work folder and disk image name
-PROFILE="$RID$SUFFIX"
+PROFILE="$RID"
 echo "== $PROFILE $VERSION"
 rm -rf "$ROOT/artifacts/publish/$PROFILE"
 echo "== dotnet publish src/EasyPDF.App -p:PublishProfile=$PROFILE -p:Version=$VERSION -p:Brand=$BRAND"
 dotnet publish "$ROOT/src/EasyPDF.App" -p:PublishProfile="$PROFILE" -p:Version="$VERSION" -p:Brand="$BRAND"
-if [ -n "$AOT" ]; then
-  # Debug symbols of the native program (.dSYM, .pdb) are not needed to run it
-  find "$ROOT/artifacts/publish/$PROFILE" \( -name '*.dSYM' -o -name '*.pdb' \) -prune -exec rm -rf {} +
-fi
+# Debug symbols of the native program (.dSYM, .pdb) are not needed to run it
+find "$ROOT/artifacts/publish/$PROFILE" \( -name '*.dSYM' -o -name '*.pdb' \) -prune -exec rm -rf {} +
 
-WORK="$ROOT/artifacts/macos/$A$SUFFIX"
+WORK="$ROOT/artifacts/macos/$A"
 APP="$WORK/stage/$APPNAME.app"
 rm -rf "$WORK"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
@@ -104,7 +95,7 @@ codesign --verify --deep --strict "$APP"
 
 # Disk image with the app and a link to /Applications for drag-and-drop installation
 ln -s /Applications "$WORK/stage/Applications"
-DMG="$ROOT/artifacts/installer/$APPNAME-$VERSION-macos-$A$SUFFIX.dmg"
+DMG="$ROOT/artifacts/installer/$APPNAME-$VERSION-macos-$A.dmg"
 rm -f "$DMG"
 for attempt in 1 2 3; do   # hdiutil occasionally fails with "Resource busy" on CI machines
   if hdiutil create -volname "$APPNAME" -srcfolder "$WORK/stage" -ov -format UDZO "$DMG"; then break; fi

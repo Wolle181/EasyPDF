@@ -4,16 +4,13 @@
     Build: installer/windows/build-windows-on-windows.ps1 (publishes the app first), or after a publish with the app's version (1.0.0.97):
       dotnet build installer/windows/EasyPDF.Installer.wixproj -c Release -p:Version=<version>
     Output: artifacts/installer/<AppDisplayName>-<Version>-win-x64.msi
-    Trial: -p:PublishVariant=-aot packages the Native AOT publish output (artifacts/publish/win-x64-aot) into
-    <AppDisplayName>-<Version>-win-x64-aot.msi (build-aot-windows-on-windows.ps1 does). Same UpgradeCode: it replaces an
-    installed ReadyToRun version and vice versa.
     The version must be passed: it is computed by a target (Directory.Build.targets), but the file name is fixed earlier.
   -->
   <PropertyGroup>
     <InstallerPlatform>x64</InstallerPlatform>
-    <OutputName>$(AppDisplayName)-$(Version)-win-x64$(PublishVariant)</OutputName>
+    <OutputName>$(AppDisplayName)-$(Version)-win-x64</OutputName>
     <OutputPath>$(MSBuildThisFileDirectory)..\..\artifacts\installer\</OutputPath>
-    <PublishDir>$(MSBuildThisFileDirectory)..\..\artifacts\publish\win-x64$(PublishVariant)</PublishDir>
+    <PublishDir>$(MSBuildThisFileDirectory)..\..\artifacts\publish\win-x64</PublishDir>
     <!-- From the brand profile (branding/<Brand>/Branding.props): AppDisplayName (shown name: installed apps, start menu, context
          menu), Company (publisher), MsiUpgradeCode and the icon -->
     <DefineConstants>PublishDir=$(PublishDir);ProductVersion=$(Version);AppDisplayName=$(AppDisplayName);Company=$(Company);UpgradeCode=$(MsiUpgradeCode);AppIcon=$(BrandDir)icons/app.ico;RepositoryUrl=$(RepositoryUrl)</DefineConstants>
@@ -35,6 +32,6 @@
     <Error Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(Version)', '^\d+\.\d+\.\d+\.\d+$'))"
            Text="Pass the app's version: -p:Version=1.0.0.97 (build-windows-on-windows.ps1 does). Got: '$(Version)'" />
     <Error Condition="!Exists('$(PublishDir)\$(AppDisplayName).exe')"
-           Text="$(PublishDir)\$(AppDisplayName).exe not found. Publish first: dotnet publish src/EasyPDF.App -p:PublishProfile=win-x64$(PublishVariant)" />
+           Text="$(PublishDir)\$(AppDisplayName).exe not found. Publish first: dotnet publish src/EasyPDF.App -p:PublishProfile=win-x64" />
   </Target>
 </Project>

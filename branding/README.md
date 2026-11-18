@@ -16,7 +16,7 @@ One brand per build. Without a choice it is `easypdf` (`<Brand>` in `Directory.B
 |---|---|
 | any `dotnet` command | `-p:Brand=<id>` |
 | for a whole machine or shell | environment variable `EASYPDF_BRAND=<id>` (Windows: `setx EASYPDF_BRAND <id>`, then open a new window) |
-| installer scripts | `installer\build-windows-on-windows.cmd -Brand <id>` (also `-p:<id>`, `-p:Brand=<id>` or just `<id>`; unknown parameters stop the script), `pwsh installer/linux/build-linux-on-windows.ps1 -Brand <id>`, `bash installer/build-macos-on-macos.sh <id>` |
+| installer scripts | `installer\build-windows-on-windows.cmd -Brand <id>` (also `-p:<id>`, `-p:Brand=<id>` or just `<id>`; unknown parameters stop the script), `pwsh installer/linux/build-linux-on-linux.ps1 -Brand <id>`, `bash installer/build-macos-on-macos.sh <id>` |
 | CI | workflow *Installers*, input `brand` (`gh workflow run installers.yml -f brand=<id>`) |
 
 After switching, build everything again (the installer scripts always do).
