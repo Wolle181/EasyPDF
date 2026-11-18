@@ -33,7 +33,8 @@ public sealed class ThumbnailGrid : Grid
     private const double BaseBoxWidth = 150;
     private const double BaseBoxHeight = 190;
     private const double NavigatorMinBoxWidth = 40;
-    private const double NavigatorBoxRatio = 1.42; // height : width of a navigator box, so upright A4 pages fill its width
+    private const double NavigatorBoxRatio = 1.42; // max. height : width of a navigator box, so upright A4 pages fill its width
+    private const double NavigatorMinBoxRatio = 0.1; // very wide banners still get a box that can be clicked
     private const double CellPad = 12;
     private const double LabelHeight = 22;
     private const double DragStartDistance = 6;
@@ -200,11 +201,67 @@ public sealed class ThumbnailGrid : Grid
         ? Math.Max(NavigatorMinBoxWidth, Viewport.Width - 2 * CellPad)
         : BaseBoxWidth * ZoomPercent / 100;
 
+    /// <summary>Box height of the uniform Organize grid; in the sidebar the largest box (see <see cref="BoxHeightOf"/>).</summary>
     private double BoxHeight => IsNavigator ? BoxWidth * NavigatorBoxRatio : BaseBoxHeight * ZoomPercent / 100;
+
+    /// <summary>
+    /// Box height of one page: the Organize grid is uniform; in the sidebar every box follows its page's shape (up to
+    /// upright A4), so landscape and unusual formats are not shown on an A4-sized card.
+    /// </summary>
+    private double BoxHeightOf(int index)
+    {
+        if (!IsNavigator)
+            return BoxHeight;
+        var size = Pages[index].DisplaySize;
+        var ratio = size.Width > 0 && size.Height > 0 ? size.Height / size.Width : NavigatorBoxRatio;
+        return Math.Round(BoxWidth * Math.Clamp(ratio, NavigatorMinBoxRatio, NavigatorBoxRatio));
+    }
 
     private double CellWidth => BoxWidth + 2 * CellPad;
 
+    /// <summary>Row height of the Organize grid; in the sidebar the tallest possible row.</summary>
     private double CellHeight => BoxHeight + LabelHeight + 2 * CellPad;
+
+    // Sidebar rows have their own heights: tops as prefix sums, rebuilt when the pages or the width change
+    private double[] _rowTops = [];
+    private IReadOnlyList<PageEntry>? _rowTopsPages;
+    private double _rowTopsWidth = -1;
+
+    private void InvalidateRowTops() => _rowTopsPages = null;
+
+    private double[] NavigatorRowTops()
+    {
+        var pages = Pages;
+        if (!ReferenceEquals(_rowTopsPages, pages) || _rowTopsWidth != BoxWidth || _rowTops.Length != pages.Count + 1)
+        {
+            var tops = new double[pages.Count + 1];
+            for (var i = 0; i < pages.Count; i++)
+                tops[i + 1] = tops[i] + BoxHeightOf(i) + LabelHeight + 2 * CellPad;
+            _rowTops = tops;
+            _rowTopsPages = pages;
+            _rowTopsWidth = BoxWidth;
+        }
+        return _rowTops;
+    }
+
+    /// <summary>Top of a row (0..Rows) in content coordinates, without the half padding above the first row.</summary>
+    private double RowTop(int row) => IsNavigator ? NavigatorRowTops()[Math.Clamp(row, 0, Pages.Count)] : row * CellHeight;
+
+    private double RowHeight(int row) => RowTop(row + 1) - RowTop(row);
+
+    /// <summary>Row at content height <paramref name="y"/> (may be negative or ≥ Rows outside the rows).</summary>
+    private int RowAt(double y)
+    {
+        if (!IsNavigator)
+            return (int)Math.Floor(y / CellHeight);
+        var tops = NavigatorRowTops();
+        if (y < 0)
+            return -1;
+        if (y >= tops[^1])
+            return Pages.Count;
+        var index = Array.BinarySearch(tops, y);
+        return index >= 0 ? index : ~index - 1;
+    }
 
     private int Columns => Math.Max(1, (int)(Viewport.Width / CellWidth));
 
@@ -212,28 +269,32 @@ public sealed class ThumbnailGrid : Grid
 
     private int Rows => (Pages.Count + Columns - 1) / Columns;
 
-    private double ContentHeight => Rows * CellHeight + CellPad;
+    private double ContentHeight => RowTop(Rows) + CellPad;
 
-    private Rect CellRect(int index) =>
-        new(OffsetX + index % Columns * CellWidth, index / Columns * CellHeight + CellPad / 2, CellWidth, CellHeight);
+    private Rect CellRect(int index)
+    {
+        var row = index / Columns;
+        return new(OffsetX + index % Columns * CellWidth, RowTop(row) + CellPad / 2, CellWidth, RowHeight(row));
+    }
 
     /// <summary>The page box inside its cell (the thumbnail fits into it, centred).</summary>
     private Rect ThumbRect(int index)
     {
         var cell = CellRect(index);
         var size = Pages[index].DisplaySize;
-        var scale = Math.Min(BoxWidth / Math.Max(1, size.Width), BoxHeight / Math.Max(1, size.Height));
+        var boxHeight = BoxHeightOf(index);
+        var scale = Math.Min(BoxWidth / Math.Max(1, size.Width), boxHeight / Math.Max(1, size.Height));
         var w = Math.Max(1, Math.Floor(size.Width * scale));
         var h = Math.Max(1, Math.Floor(size.Height * scale));
-        return new Rect(cell.X + CellPad + (BoxWidth - w) / 2, cell.Y + CellPad + (BoxHeight - h) / 2, w, h);
+        return new Rect(cell.X + CellPad + (BoxWidth - w) / 2, cell.Y + CellPad + (boxHeight - h) / 2, w, h);
     }
 
     private (int First, int Last) VisibleRange()
     {
         if (Pages.Count == 0)
             return (0, -1);
-        var first = Math.Max(0, (int)Math.Floor(_scrollY / CellHeight)) * Columns;
-        var last = Math.Min(Pages.Count - 1, ((int)Math.Floor((_scrollY + Viewport.Height) / CellHeight) + 1) * Columns - 1);
+        var first = Math.Max(0, RowAt(_scrollY)) * Columns;
+        var last = Math.Min(Pages.Count - 1, (RowAt(_scrollY + Viewport.Height) + 1) * Columns - 1);
         return (Math.Min(first, Pages.Count - 1), last);
     }
 
@@ -242,7 +303,7 @@ public sealed class ThumbnailGrid : Grid
         if (Pages.Count == 0)
             return -1;
         var col = (int)Math.Floor((p.X - OffsetX) / CellWidth);
-        var row = (int)Math.Floor((p.Y + _scrollY - CellPad / 2) / CellHeight);
+        var row = RowAt(p.Y + _scrollY - CellPad / 2);
         if (col < 0 || col >= Columns || row < 0)
             return -1;
         var index = row * Columns + col;
@@ -255,7 +316,7 @@ public sealed class ThumbnailGrid : Grid
         var n = Pages.Count;
         if (n == 0)
             return 0;
-        var row = (int)Math.Floor((p.Y + _scrollY - CellPad / 2) / CellHeight);
+        var row = RowAt(p.Y + _scrollY - CellPad / 2);
         if (row < 0)
             return 0;
         if (row >= Rows)
@@ -334,6 +395,7 @@ public sealed class ThumbnailGrid : Grid
             if (_document != null)
                 _document.Changed -= OnDocumentChanged;
             _document = change.GetNewValue<EditableDocument>();
+            InvalidateRowTops();
             if (_document != null)
                 _document.Changed += OnDocumentChanged;
             _generation++;
@@ -367,6 +429,7 @@ public sealed class ThumbnailGrid : Grid
 
     private void OnDocumentChanged(DocumentChangeKind kind)
     {
+        InvalidateRowTops();
         if (kind == DocumentChangeKind.Reloaded)
         {
             _generation++;
@@ -377,7 +440,11 @@ public sealed class ThumbnailGrid : Grid
     }
 
     /// <summary>Call after more page sizes became known.</summary>
-    public void RefreshPageSizes() => AfterLayoutChange();
+    public void RefreshPageSizes()
+    {
+        InvalidateRowTops();
+        AfterLayoutChange();
+    }
 
     private void CancelRequests()
     {

@@ -309,6 +309,29 @@ public class AppUiTests
     }
 
     [AvaloniaFact]
+    public async Task PageSidebarCardsFollowThePageShape()
+    {
+        var window = new MainWindow { Width = 1100, Height = 700 };
+        window.Show();
+        using var dir = new TempDir();
+        await window.OpenPathAsync(dir.Pdf("wide.pdf", 3, widthBase: 500)); // about 610 x 200 pt, like a folded leaflet
+        await Pump(400);
+        var sidebar = window.FindControl<EasyPDF.App.Controls.ThumbnailGrid>("SidebarView")!;
+        int RowHeight(int page) => Enumerable.Range(0, (int)sidebar.Bounds.Height).Count(v => sidebar.PageIndexAt(new Point(sidebar.Bounds.Width / 2, v)) == page);
+
+        // A card as tall as upright A4 would be about 1.42 x its width; a wide page gets a low card
+        var width = sidebar.Bounds.Width;
+        Assert.InRange(RowHeight(1), 46 + 0.2 * (width - 40), 46 + 0.5 * width);
+        Assert.Equal(1, sidebar.PageIndexAt(new Point(width / 2, RowHeight(0) + 10)));
+
+        window.ViewModel.RotateRightCommand.Execute(null);      // turned upright, the card is tall again (capped at A4)
+        await Pump(400);
+        Assert.True(RowHeight(0) > width, $"row {RowHeight(0)}, width {width}");
+        window.Close();
+        await window.ViewModel.ReleaseDocumentAsync();
+    }
+
+    [AvaloniaFact]
     public async Task StatusBarZoomButtonsAndMenuWork()
     {
         var window = new MainWindow { Width = 1100, Height = 700 };
