@@ -33,6 +33,9 @@
     <MsiUpgradeCode>BC290CBC-EFF9-4B1E-B262-0710B3E488DB</MsiUpgradeCode>
     <MacBundleId>io.github.wolle181.easypdf</MacBundleId>
 
+    <!-- Address of the brand's web version (src/EasyPDF.Server in a container), shown in Help > About; empty = none -->
+    <WebAppUrl>https://pdf.ubx.eu</WebAppUrl>
+
     <!-- Words that belong to this brand only (';'-separated, whole words, case-sensitive): a test fails if one of them, or
          the shown name of a brand other than EasyPDF, appears outside this folder -->
     <BrandWords>UBX</BrandWords>

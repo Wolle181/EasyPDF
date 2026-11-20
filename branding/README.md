@@ -25,7 +25,7 @@ After switching, build everything again (the installer scripts always do).
 
 | File | Content |
 |---|---|
-| `Branding.props` | shown name (`AppDisplayName`), brand colours, publisher (`Company`, `Copyright`), About line (`AppAuthor`), installer ids (`MsiUpgradeCode`, `MacBundleId`), `BrandWords`; every value is explained in `easypdf/Branding.props` |
+| `Branding.props` | shown name (`AppDisplayName`), brand colours, publisher (`Company`, `Copyright`), About line (`AppAuthor`), installer ids (`MsiUpgradeCode`, `MacBundleId`), address of the web version (`WebAppUrl`, optional), `BrandWords`; every value is explained in `easypdf/Branding.props` |
 | `icons/` | `app.ico`, `app.icns`, `app-<size>.png`, written by `tools/icon/make_icon.py`; with a logo also `logo.png` (+ `logo-small.png`) and `header-logo.png`; `company-logo.svg`: the company logo in Help ▸ About (optional, drawn as vector graphics) |
 | `make-presentation-videos.cmd` | records the introduction videos of this brand (German and English) into `videos/` (Windows; downloads ffmpeg for the run), see [Presentation videos](#presentation-videos) |
 | `videos/` | `introduction.de.mp4`, `introduction.en.mp4`: shipped with the app (`videos/` next to the program), the video button in the header plays the one of the UI language with the system's video player; without videos the button is hidden |

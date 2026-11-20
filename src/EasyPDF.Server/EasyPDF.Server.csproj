@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <!-- Server of the web version: the REST API that opens, renders and writes PDFs with pdfium (EasyPDF.Core) and that
+       serves the browser program (src/EasyPDF.Browser, published into wwwroot by the Dockerfile). Runs in a container. -->
+  <PropertyGroup>
+    <TargetFramework>$(AppTargetFramework)</TargetFramework>
+    <RootNamespace>EasyPDF.Server</RootNamespace>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="11.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EasyPDF.Core\EasyPDF.Core.csproj" />
+    <ProjectReference Include="..\EasyPDF.Remote\EasyPDF.Remote.csproj" />
+  </ItemGroup>
+  <!-- The product name and web address of the brand (branding/<Brand>/Branding.props) -->
+  <ItemGroup>
+    <AssemblyMetadata Include="WebAppUrl" Value="$(WebAppUrl)" />
+  </ItemGroup>
+</Project>

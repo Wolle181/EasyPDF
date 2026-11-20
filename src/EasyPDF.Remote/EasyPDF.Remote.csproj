@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The web version's contract between browser and server: the messages (source-generated JSON) and the client side
+       (RemotePdfSource, RemotePdfBackend) that the browser program uses instead of local pdfium. -->
+  <PropertyGroup>
+    <TargetFramework>$(AppTargetFramework)</TargetFramework>
+    <RootNamespace>EasyPDF.Remote</RootNamespace>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EasyPDF.Core\EasyPDF.Core.csproj" />
+  </ItemGroup>
+</Project>
