@@ -438,7 +438,7 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
     [RelayCommand(CanExecute = nameof(NotBusy))]
     private async Task OpenRecentAsync(string path)
     {
-        if (!File.Exists(path))
+        if (!PdfBackend.Current.Exists(path))
         {
             settings.RemoveRecentFile(path);
             RecentFilesChanged?.Invoke();
@@ -473,10 +473,10 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
         if (!inNewWindow && !await ConfirmDiscardAsync())
             return;
 
-        PdfSource source;
+        IPdfSource source;
         try
         {
-            source = await PdfSource.OpenAsync(path);
+            source = await PdfBackend.Current.OpenAsync(path);
         }
         catch (PdfOpenException ex)
         {
@@ -490,7 +490,7 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
             await ShowSourceAsync(source);
     }
 
-    private async Task ShowSourceAsync(PdfSource source)
+    private async Task ShowSourceAsync(IPdfSource source)
     {
         var old = Document;
         _suggestedFileName = null;
@@ -506,7 +506,7 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
         await LoadSizesAsync(source);
     }
 
-    private async Task LoadSizesAsync(PdfSource source)
+    private async Task LoadSizesAsync(IPdfSource source)
     {
         await source.LoadPageSizesAsync(new Progress<int>(_ => PageSizesLoaded?.Invoke()));
         PageSizesLoaded?.Invoke();
@@ -745,12 +745,12 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
         if (files.Count == 0)
             return;
 
-        var sources = new List<PdfSource>();
+        var sources = new List<IPdfSource>();
         foreach (var file in files)
         {
             try
             {
-                sources.Add(await PdfSource.OpenAsync(file));
+                sources.Add(await PdfBackend.Current.OpenAsync(file));
             }
             catch (PdfOpenException ex)
             {
@@ -1576,7 +1576,7 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
     public async Task OpenStartupFilesAsync(IReadOnlyList<string> args, bool merge = false)
     {
         var paths = args.Where(a => !string.IsNullOrWhiteSpace(a)).Select(a => Path.GetFullPath(a.Trim())).ToList();
-        var missing = paths.Where(p => !File.Exists(p)).ToList();
+        var missing = paths.Where(p => !PdfBackend.Current.Exists(p)).ToList();
         if (missing.Count > 0)
             await dialogs.ShowErrorAsync(Loc.T(missing.Count == 1 ? "ErrStartFileMissing" : "ErrStartFilesMissing"), string.Join(Environment.NewLine, missing));
         var files = paths.Except(missing).ToList();

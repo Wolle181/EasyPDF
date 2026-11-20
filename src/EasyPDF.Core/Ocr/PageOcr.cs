@@ -23,7 +23,7 @@ public static class PageOcr
     /// The page is recognized as shown, i.e. turned by <paramref name="extraRotation"/>: a sideways scan the user turned
     /// upright is read upright, and its words get the matching <see cref="OcrWord.Rotation"/>.
     /// </summary>
-    public static async Task<IReadOnlyList<OcrWord>> RecognizeAsync(IOcrEngine engine, PdfSource source, int pageIndex,
+    public static async Task<IReadOnlyList<OcrWord>> RecognizeAsync(IOcrEngine engine, IPdfSource source, int pageIndex,
         int extraRotation = 0, CancellationToken token = default)
     {
         extraRotation = ((extraRotation / 90 % 4) + 4) % 4 * 90;

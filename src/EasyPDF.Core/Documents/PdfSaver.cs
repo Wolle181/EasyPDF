@@ -63,7 +63,7 @@ public static class PdfSaver
     /// Returns the path of the finished temp file, located in the folder of <paramref name="targetPath"/>, and how many
     /// pictures were scaled down.
     /// </summary>
-    public static async Task<(string TempPath, int ReducedImages)> WriteDocumentAsync(IReadOnlyList<PageEntry> pages, PdfSource baseSource,
+    public static async Task<(string TempPath, int ReducedImages)> WriteDocumentAsync(IReadOnlyList<PageEntry> pages, IPdfSource baseSource,
         string targetPath, IProgress<double>? progress = null, CancellationToken token = default, ImageReduction? reduceImages = null)
     {
         if (pages.Count == 0)
@@ -73,7 +73,7 @@ public static class PdfSaver
         // Reducing pictures (after writing) takes the second half of the progress range
         var reduceShare = reduceImages == null ? 0 : 0.5;
         double At(double p) => p * (1 - reduceShare);
-        var worker = baseSource.Worker;
+        var worker = PdfSource.Local(baseSource).Worker;
         var temp = TempPathFor(targetPath);
         await using var work = await PdfSource.OpenAsync(baseSource.Path, worker, token).ConfigureAwait(false);
         try
@@ -99,7 +99,7 @@ public static class PdfSaver
                 await worker.Run(() =>
                 {
                     foreach (var entry in batch)
-                        ImportPage(work.Handle, entry.Source.Handle, entry.SourceIndex, fpdfview.FPDF_GetPageCount(work.Handle));
+                        ImportPage(work.Handle, PdfSource.Local(entry.Source).Handle, entry.SourceIndex, fpdfview.FPDF_GetPageCount(work.Handle));
                 }, PdfiumWorker.PriorityBackground, token).ConfigureAwait(false);
                 progress?.Report(At(0.4 * Math.Min(offset + ImportBatch, foreign.Count) / foreign.Count));
             }
@@ -165,7 +165,7 @@ public static class PdfSaver
         if (pages.Count == 0)
             throw new InvalidOperationException("No pages to extract.");
         RejectStamps(pages);
-        worker ??= pages[0].Source.Worker;
+        worker ??= PdfSource.Local(pages[0].Source).Worker;
         var temp = TempPathFor(targetPath);
         try
         {
@@ -178,7 +178,7 @@ public static class PdfSaver
                     await worker.Run(() =>
                     {
                         foreach (var entry in batch)
-                            ImportPage(doc, entry.Source.Handle, entry.SourceIndex, fpdfview.FPDF_GetPageCount(doc));
+                            ImportPage(doc, PdfSource.Local(entry.Source).Handle, entry.SourceIndex, fpdfview.FPDF_GetPageCount(doc));
                     }, PdfiumWorker.PriorityBackground, token).ConfigureAwait(false);
                     progress?.Report(0.8 * Math.Min(offset + ImportBatch, pages.Count) / pages.Count);
                 }

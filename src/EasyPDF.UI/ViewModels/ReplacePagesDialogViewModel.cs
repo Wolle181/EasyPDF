@@ -155,7 +155,7 @@ public partial class ReplacePagesDialogViewModel : ObservableObject, IAsyncDispo
         _fileError = "";
         try
         {
-            var source = await PdfSource.OpenAsync(path);
+            var source = await PdfBackend.Current.OpenAsync(path);
             _file = EditableDocument.FromSource(source);
         }
         catch (PdfOpenException ex)

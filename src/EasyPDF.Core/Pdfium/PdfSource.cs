@@ -13,7 +13,7 @@ namespace EasyPDF.Core.Pdfium;
 /// An open PDF file. pdfium reads it block-wise through a callback (<c>FPDF_LoadCustomDocument</c>),
 /// the file is never loaded completely into memory. All pdfium access goes through <see cref="PdfiumWorker"/>.
 /// </summary>
-public sealed class PdfSource : IAsyncDisposable, IDisposable
+public sealed class PdfSource : IPdfSource
 {
     private const int FpdfAnnot = 0x01;
     private const int SizeBatch = 256;
@@ -41,6 +41,10 @@ public sealed class PdfSource : IAsyncDisposable, IDisposable
     public bool IsOpen => _doc != null;
 
     internal PdfiumWorker Worker => _worker;
+
+    /// <summary>The local pdfium source behind <paramref name="source"/> (writing files needs one).</summary>
+    internal static PdfSource Local(IPdfSource source) => source as PdfSource
+        ?? throw new NotSupportedException($"{source.GetType().Name} is not a local pdfium source.");
 
     /// <summary>pdfium document handle; only use on the worker thread.</summary>
     internal FpdfDocumentT Handle => _doc ?? throw new ObjectDisposedException(nameof(PdfSource));

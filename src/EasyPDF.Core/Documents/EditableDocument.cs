@@ -10,7 +10,7 @@ using EasyPDF.Core.Pdfium;
 namespace EasyPDF.Core.Documents;
 
 /// <summary>One page of the edited document: a page of a source file plus an additional rotation.</summary>
-public sealed record PageEntry(int Id, PdfSource Source, int SourceIndex, int ExtraRotation)
+public sealed record PageEntry(int Id, IPdfSource Source, int SourceIndex, int ExtraRotation)
 {
     /// <summary>Size on screen: the source page size turned by <see cref="ExtraRotation"/>.</summary>
     public PageSizePt DisplaySize => BaseSize.Rotated(ExtraRotation);
@@ -59,11 +59,11 @@ public sealed class EditableDocument : IAsyncDisposable
 
     private readonly Stack<PageEntry[]> _undo = new();
     private readonly Stack<PageEntry[]> _redo = new();
-    private List<PdfSource> _sources;
+    private List<IPdfSource> _sources;
     private PageEntry[] _pages;
     private PageEntry[]? _savedState; // null = never saved
 
-    private EditableDocument(List<PdfSource> sources, PageEntry[] pages, PdfSource baseSource, bool hasFile)
+    private EditableDocument(List<IPdfSource> sources, PageEntry[] pages, IPdfSource baseSource, bool hasFile)
     {
         _sources = sources;
         _pages = pages;
@@ -73,7 +73,7 @@ public sealed class EditableDocument : IAsyncDisposable
     }
 
     /// <summary>Opens a document showing all pages of <paramref name="source"/>; takes ownership of the source.</summary>
-    public static EditableDocument FromSource(PdfSource source) =>
+    public static EditableDocument FromSource(IPdfSource source) =>
         new([source], AllPages(source), source, hasFile: true);
 
     /// <summary>
@@ -97,12 +97,12 @@ public sealed class EditableDocument : IAsyncDisposable
     public async Task<EditableDocument> CopyAsync(CancellationToken token = default)
     {
         var pages = _pages;
-        var copies = new Dictionary<PdfSource, PdfSource>();
+        var copies = new Dictionary<IPdfSource, IPdfSource>();
         try
         {
             foreach (var source in pages.Select(p => p.Source).Prepend(BaseSource).Distinct())
             {
-                var copy = await PdfSource.OpenAsync(source.Path, source.Worker, token);
+                var copy = await PdfBackend.Current.OpenAsync(source.Path, token);
                 // Blank-page files: whichever document is closed last removes the file (the other still holds it open)
                 copy.DeleteFileOnDispose = source.DeleteFileOnDispose;
                 copies[source] = copy;
@@ -118,20 +118,20 @@ public sealed class EditableDocument : IAsyncDisposable
         return new EditableDocument([.. copies.Values], copiedPages, copies[BaseSource], hasFile: false);
     }
 
-    private static PageEntry[] AllPages(PdfSource source) =>
+    private static PageEntry[] AllPages(IPdfSource source) =>
         [.. Enumerable.Range(0, source.PageCount).Select(i => NewEntry(source, i))];
 
-    private static PageEntry NewEntry(PdfSource source, int index) =>
+    private static PageEntry NewEntry(IPdfSource source, int index) =>
         new(Interlocked.Increment(ref _nextId), source, index, 0);
 
     public IReadOnlyList<PageEntry> Pages => _pages;
 
     public int PageCount => _pages.Length;
 
-    public IReadOnlyList<PdfSource> Sources => _sources;
+    public IReadOnlyList<IPdfSource> Sources => _sources;
 
     /// <summary>The file whose structure (bookmarks, metadata) is kept when saving.</summary>
-    public PdfSource BaseSource { get; private set; }
+    public IPdfSource BaseSource { get; private set; }
 
     /// <summary>False for documents that were never saved (e.g. concatenated ones).</summary>
     public bool HasFile { get; private set; }
@@ -413,14 +413,14 @@ public sealed class EditableDocument : IAsyncDisposable
     /// Inserts all pages of the given sources (in order) before <paramref name="index"/> as one undo step.
     /// Takes ownership of the sources. Returns the index of the first inserted page.
     /// </summary>
-    public int InsertFrom(IReadOnlyList<PdfSource> sources, int index) =>
+    public int InsertFrom(IReadOnlyList<IPdfSource> sources, int index) =>
         Insert(sources, sources.SelectMany(s => AllPages(s)).ToList(), index);
 
     /// <summary>
     /// Inserts only the given zero-based pages of <paramref name="source"/> (in the given order) before
     /// <paramref name="index"/> as one undo step. Takes ownership of the source. Returns the index of the first inserted page.
     /// </summary>
-    public int InsertFrom(PdfSource source, IReadOnlyList<int> sourcePages, int index)
+    public int InsertFrom(IPdfSource source, IReadOnlyList<int> sourcePages, int index)
     {
         if (sourcePages.Any(p => p < 0 || p >= source.PageCount))
             throw new ArgumentOutOfRangeException(nameof(sourcePages));
@@ -463,46 +463,11 @@ public sealed class EditableDocument : IAsyncDisposable
     {
         if (index < 0 || index > _pages.Length)
             throw new ArgumentOutOfRangeException(nameof(index));
-        var folder = AppInfo.TempFolder;
-        Directory.CreateDirectory(folder);
-        var path = Path.Combine(folder, $"blank-{Guid.NewGuid():N}.pdf");
-        string F(double v) => Math.Max(1, Math.Round(v, 2)).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
-        string[] objects =
-        [
-            "<</Type/Catalog/Pages 2 0 R>>",
-            "<</Type/Pages/Kids[3 0 R]/Count 1>>",
-            $"<</Type/Page/Parent 2 0 R/MediaBox[0 0 {F(size.Width)} {F(size.Height)}]>>",
-        ];
-        var sb = new System.Text.StringBuilder("%PDF-1.4\n");
-        var offsets = new List<int>();
-        for (var i = 0; i < objects.Length; i++)
-        {
-            offsets.Add(sb.Length);
-            sb.Append($"{i + 1} 0 obj\n{objects[i]}\nendobj\n");
-        }
-        var xref = sb.Length;
-        sb.Append($"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
-        foreach (var o in offsets)
-            sb.Append($"{o:D10} 00000 n \n");
-        sb.Append($"trailer\n<</Size {objects.Length + 1}/Root 1 0 R>>\nstartxref\n{xref}\n%%EOF\n");
-        await File.WriteAllTextAsync(path, sb.ToString(), System.Text.Encoding.ASCII);
-
-        PdfSource source;
-        try
-        {
-            source = await PdfSource.OpenAsync(path, BaseSource.Worker);
-        }
-        catch
-        {
-            TryDelete(path);
-            throw;
-        }
-        source.DeleteFileOnDispose = true;
-        await source.LoadPageSizesAsync();
+        var source = await PdfBackend.Current.CreateBlankAsync(size);
         return Insert([source], [NewEntry(source, 0)], index);
     }
 
-    private int Insert(IReadOnlyList<PdfSource> sources, List<PageEntry> inserted, int index)
+    private int Insert(IReadOnlyList<IPdfSource> sources, List<PageEntry> inserted, int index)
     {
         if (index < 0 || index > _pages.Length)
             throw new ArgumentOutOfRangeException(nameof(index));
@@ -547,35 +512,9 @@ public sealed class EditableDocument : IAsyncDisposable
     public async Task<int> SaveAsync(string path, IProgress<double>? progress = null, CancellationToken token = default,
         ImageReduction? reduceImages = null)
     {
-        path = Path.GetFullPath(path);
         var callerContext = SynchronizationContext.Current; // the continuations below leave the caller's thread
-        var (temp, reduced) = await PdfSaver.WriteDocumentAsync(_pages, BaseSource, path, progress, token, reduceImages).ConfigureAwait(false);
-        if (token.IsCancellationRequested)
-        {
-            TryDelete(temp);
-            token.ThrowIfCancellationRequested();
-        }
-
-        // The target may be open (overwriting the original): release those handles for the replace
-        var affected = _sources.Where(s => PathsEqual(s.Path, path)).ToList();
-        foreach (var s in affected)
-            await s.CloseAsync().ConfigureAwait(false);
-        try
-        {
-            File.Move(temp, path, overwrite: true);
-        }
-        catch
-        {
-            foreach (var s in affected)
-                await s.ReopenAsync().ConfigureAwait(false);
-            TryDelete(temp);
-            throw;
-        }
-
-        var fresh = await PdfSource.OpenAsync(path, BaseSource.Worker, token).ConfigureAwait(false);
-        // All sizes before the views lay out again: unknown ones would take the first page's size (landscape pages after a
-        // portrait first page came out portrait and distorted). No token: the file is already replaced.
-        await fresh.LoadPageSizesAsync().ConfigureAwait(false);
+        var (fresh, reduced) = await PdfBackend.Current.SaveAsync(_pages, BaseSource, path, _sources, progress, token, reduceImages)
+            .ConfigureAwait(false);
         var old = _sources;
         _sources = [fresh];
         BaseSource = fresh;
@@ -608,7 +547,7 @@ public sealed class EditableDocument : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         // Taken out first: a second call while this one is still closing files finds nothing left to do
-        PdfSource[] sources = [.. _sources];
+        IPdfSource[] sources = [.. _sources];
         _sources.Clear();
         foreach (var s in sources)
             await s.DisposeAsync().ConfigureAwait(false);

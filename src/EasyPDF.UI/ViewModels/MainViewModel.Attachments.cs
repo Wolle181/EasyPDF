@@ -21,7 +21,7 @@ namespace EasyPDF.App.ViewModels;
 /// </summary>
 public partial class MainViewModel
 {
-    private PdfSource? _attachmentSource;
+    private IPdfSource? _attachmentSource;
 
     /// <summary>The embedded files of the document's file (a new list on every change, so bindings update).</summary>
     [ObservableProperty]
@@ -64,7 +64,7 @@ public partial class MainViewModel
             AttachmentsLoading = LoadAttachmentsAsync(source);
     }
 
-    private async Task LoadAttachmentsAsync(PdfSource source)
+    private async Task LoadAttachmentsAsync(IPdfSource source)
     {
         IReadOnlyList<PdfAttachment> list;
         try

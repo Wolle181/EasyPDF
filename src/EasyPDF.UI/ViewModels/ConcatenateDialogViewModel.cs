@@ -17,7 +17,7 @@ namespace EasyPDF.App.ViewModels;
 /// One row of the concatenate list: a file (opened to count its pages), the current document or the document of another
 /// window (copied with its edits when it was added).
 /// </summary>
-public partial class ConcatItem(string? path, PdfSource? source, int pageCount, string? error)
+public partial class ConcatItem(string? path, IPdfSource? source, int pageCount, string? error)
     : ObservableObject
 {
     /// <summary>The entry that stands for the open document with its current edits.</summary>
@@ -49,7 +49,7 @@ public partial class ConcatItem(string? path, PdfSource? source, int pageCount, 
     public string? Path { get; } = path;
 
     /// <summary>The opened file; null for the current document and for unreadable files.</summary>
-    public PdfSource? Source { get; } = source;
+    public IPdfSource? Source { get; } = source;
 
     public int PageCount { get; } = pageCount;
 
@@ -136,7 +136,7 @@ public partial class ConcatenateDialogViewModel : ObservableObject
         {
             try
             {
-                var source = await PdfSource.OpenAsync(path);
+                var source = await PdfBackend.Current.OpenAsync(path);
                 Items.Add(new ConcatItem(path, source, source.PageCount, null));
             }
             catch (PdfOpenException ex)
