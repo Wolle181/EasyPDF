@@ -39,6 +39,13 @@ public interface IPdfBackend
 
     /// <summary>Saves the given pages (current order + rotation) as a new PDF without bookmarks.</summary>
     Task ExtractAsync(IReadOnlyList<PageEntry> pages, string targetPath, IProgress<double>? progress = null, CancellationToken token = default);
+
+    /// <summary>
+    /// Writes each part as <c>&lt;baseName&gt;_partNN.pdf</c>: locally into the folder <paramref name="target"/>, in the web
+    /// version as one ZIP file to the target the user chose. Returns the number of files.
+    /// </summary>
+    Task<int> SplitAsync(IReadOnlyList<PageEntry> pages, IReadOnlyList<SplitPart> parts, string target, string baseName,
+        IProgress<double>? progress = null, CancellationToken token = default);
 }
 
 /// <summary>The backend the program uses (local pdfium unless the web version sets its own at start-up).</summary>
@@ -119,6 +126,10 @@ public sealed class LocalPdfBackend : IPdfBackend
 
     public Task ExtractAsync(IReadOnlyList<PageEntry> pages, string targetPath, IProgress<double>? progress = null, CancellationToken token = default) =>
         PdfSaver.ExtractAsync(pages, targetPath, null, progress, token);
+
+    public async Task<int> SplitAsync(IReadOnlyList<PageEntry> pages, IReadOnlyList<SplitPart> parts, string target, string baseName,
+        IProgress<double>? progress = null, CancellationToken token = default) =>
+        (await PdfSaver.SplitAsync(pages, parts, target, baseName, progress, token).ConfigureAwait(false)).Count;
 
     private static void TryDelete(string path)
     {

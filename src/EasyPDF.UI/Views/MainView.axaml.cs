@@ -1107,7 +1107,7 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
         new PrintDialog(context).ShowDialog<PrintRequest?>(RequireWindow());
 
     public Task<SplitRequest?> ShowSplitDialogAsync(SplitDialogContext context) =>
-        new SplitDialog(context).ShowDialog<SplitRequest?>(RequireWindow());
+        ShowDialogAsync<SplitRequest?>(() => new SplitDialog(context), () => new SplitDialogView(context));
 
     public Task<OcrRequest?> ShowOcrDialogAsync(OcrDialogContext context) =>
         new OcrDialog(context).ShowDialog<OcrRequest?>(RequireWindow());

@@ -80,6 +80,24 @@ public class WebModeTests
         window.Close();
     }
 
+    [Fact]
+    public void SplittingOnTheWebNeedsNoFolder()
+    {
+        PlatformFeatures.Current = PlatformFeatures.Web((_, _) => true);
+        try
+        {
+            var vm = new EasyPDF.App.ViewModels.SplitDialogViewModel(new SplitDialogContext(10, [], "/does/not/exist", "doc"));
+            vm.PagesPerPart = "4";
+            Assert.False(vm.NeedsFolder);
+            Assert.True(vm.IsValid);                       // the folder does not exist, but none is needed
+            Assert.Equal(3, vm.BuildRequest()!.Parts.Count); // 4 + 4 + 2 pages
+        }
+        finally
+        {
+            PlatformFeatures.Current = PlatformFeatures.Desktop;
+        }
+    }
+
     private static (Window Window, DialogLayer Layer) LayerWindow()
     {
         var layer = new DialogLayer();

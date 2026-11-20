@@ -35,6 +35,9 @@ public partial class SplitDialogViewModel : ObservableObject
 
     public bool CanSplitAtSelected => _context.SelectedPages is { Count: > 0 };
 
+    /// <summary>The desktop writes into a folder; the web version downloads the parts as one ZIP file (no folder to choose).</summary>
+    public bool NeedsFolder => !Services.PlatformFeatures.Current.IsWeb;
+
     public bool AtSelected
     {
         get => !EveryN;
@@ -75,10 +78,12 @@ public partial class SplitDialogViewModel : ObservableObject
             var plan = Plan();
             if (plan == null)
                 return Loc.T("ErrSplitCount");
-            if (string.IsNullOrWhiteSpace(Folder) || !Directory.Exists(Folder))
+            if (NeedsFolder && (string.IsNullOrWhiteSpace(Folder) || !Directory.Exists(Folder)))
                 return Loc.T("ErrSplitFolder");
             if (string.IsNullOrWhiteSpace(BaseName) || BaseName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
                 return Loc.T("ErrSplitName");
+            if (!NeedsFolder)
+                return "";
             var existing = Enumerable.Range(0, plan.Count)
                 .Select(i => PdfSaver.PartFileName(BaseName.Trim(), i, plan.Count))
                 .Where(name => File.Exists(Path.Combine(Folder, name)))

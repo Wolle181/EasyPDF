@@ -8,17 +8,19 @@ using EasyPDF.App.ViewModels;
 
 namespace EasyPDF.App.Dialogs;
 
-public partial class SplitDialog : Window
+public partial class SplitDialogView : DialogView
 {
-    public SplitDialog() => InitializeComponent();
+    public SplitDialogView() => InitializeComponent();
 
-    public SplitDialog(SplitDialogContext context) : this() => DataContext = new SplitDialogViewModel(context);
+    public SplitDialogView(SplitDialogContext context) : this() => DataContext = new SplitDialogViewModel(context);
 
     private SplitDialogViewModel Model => (SplitDialogViewModel)DataContext!;
 
     private async void OnBrowse(object? sender, RoutedEventArgs e)
     {
-        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        if (Host is not { } host)
+            return;
+        var folders = await host.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
             Title = Loc.T("SplitFolder"),
             AllowMultiple = false,
@@ -31,4 +33,12 @@ public partial class SplitDialog : Window
     private void OnOk(object? sender, RoutedEventArgs e) => Close(Model.BuildRequest());
 
     private void OnCancel(object? sender, RoutedEventArgs e) => Close((SplitRequest?)null);
+}
+
+/// <summary>The dialog as a window (desktop).</summary>
+public sealed class SplitDialog : DialogWindow
+{
+    public SplitDialog(SplitDialogContext context) : base(new SplitDialogView(context))
+    {
+    }
 }

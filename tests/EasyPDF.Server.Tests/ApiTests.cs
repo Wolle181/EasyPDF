@@ -161,6 +161,40 @@ public class ApiTests
     }
 
     [Fact]
+    public async Task SplitReturnsTheZipWithAllParts()
+    {
+        await using var server = await TestServerHost.StartAsync();
+        var browser = server.NewBrowser();
+        var info = await browser.UploadDemoAsync();
+        RemotePage[] pages = [.. Enumerable.Range(0, 19).Select(i => new RemotePage(info.Id, i, 0))];
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/split")
+        {
+            Content = JsonContent.Create(new SplitDocumentRequest(pages, Core.Documents.SplitPlan.EveryN(19, 5), "../Report"),
+                RemoteJson.Default.SplitDocumentRequest),
+        };
+        var response = await browser.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        Assert.Equal("application/zip", response.Content.Headers.ContentType?.MediaType);
+        using var zip = new System.IO.Compression.ZipArchive(await response.Content.ReadAsStreamAsync());
+        Assert.Equal(["Report_part01.pdf", "Report_part02.pdf", "Report_part03.pdf", "Report_part04.pdf"], zip.Entries.Select(e => e.Name).Order());
+        Assert.Empty(Directory.EnumerateDirectories(Path.Combine(server.Folder, "files"), "split-*", SearchOption.AllDirectories));
+    }
+
+    [Fact]
+    public async Task SplitRejectsPartsOutsideThePages()
+    {
+        await using var server = await TestServerHost.StartAsync();
+        var browser = server.NewBrowser();
+        var info = await browser.UploadDemoAsync();
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/split")
+        {
+            Content = JsonContent.Create(new SplitDocumentRequest([new RemotePage(info.Id, 0, 0)], [new Core.Documents.SplitPart(0, 5)], "x"),
+                RemoteJson.Default.SplitDocumentRequest),
+        };
+        Assert.Equal(HttpStatusCode.BadRequest, (await browser.SendAsync(request)).StatusCode);
+    }
+
+    [Fact]
     public async Task BlankPageHasTheRequestedSize()
     {
         await using var server = await TestServerHost.StartAsync();

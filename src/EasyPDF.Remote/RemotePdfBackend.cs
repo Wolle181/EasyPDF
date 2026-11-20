@@ -74,6 +74,17 @@ public sealed class RemotePdfBackend(RemoteFiles files, ISaveTargets targets) : 
         progress?.Report(1);
     }
 
+    public async Task<int> SplitAsync(IReadOnlyList<PageEntry> pages, IReadOnlyList<SplitPart> parts, string target, string baseName,
+        IProgress<double>? progress = null, CancellationToken token = default)
+    {
+        progress?.Report(0.1);
+        var zip = await Files.Api.SplitAsync(new SplitDocumentRequest(ToRemote(pages), parts, baseName), token).ConfigureAwait(false);
+        progress?.Report(0.8);
+        await targets.WriteAsync(target, zip, token).ConfigureAwait(false);
+        progress?.Report(1);
+        return parts.Count;
+    }
+
     private static string IdOf(IPdfSource source) => source is RemotePdfSource remote
         ? remote.Id
         : throw new NotSupportedException($"{source.GetType().Name} is not a file on the server.");

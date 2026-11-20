@@ -1543,11 +1543,21 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
         if (request == null)
             return;
 
+        // The web version writes the parts as one ZIP file to a target chosen now
+        var target = request.Folder;
+        if (Services.PlatformFeatures.Current.IsWeb)
+        {
+            target = await dialogs.PickSaveFilePathAsync(request.BaseName + ".zip", null) ?? "";
+            if (target.Length == 0)
+                return;
+        }
+
         BeginOperation(Loc.F("BusySplitting", Loc.Files(request.Parts.Count)));
         try
         {
-            var files = await PdfSaver.SplitAsync([.. document.Pages], request.Parts, request.Folder, request.BaseName, new Progress<double>(p => Progress = p), _operation.Token);
-            ShowMessage(Loc.F("MsgSplitDone", Loc.Files(files.Count), request.Folder));
+            var count = await PdfBackend.Current.SplitAsync([.. document.Pages], request.Parts, target, request.BaseName,
+                new Progress<double>(p => Progress = p), _operation.Token);
+            ShowMessage(Loc.F("MsgSplitDone", Loc.Files(count), Services.PlatformFeatures.Current.IsWeb ? Path.GetFileName(target) : request.Folder));
         }
         catch (OperationCanceledException)
         {

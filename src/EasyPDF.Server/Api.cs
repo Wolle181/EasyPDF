@@ -47,6 +47,7 @@ public static class Api
         api.MapPost("/build", BuildAsync).RequireRateLimiting(UploadPolicy);
         api.MapPost("/extract", ExtractAsync).RequireRateLimiting(UploadPolicy);
         api.MapPost("/blank", BlankAsync).RequireRateLimiting(UploadPolicy);
+        api.MapPost("/split", SplitAsync).RequireRateLimiting(UploadPolicy);
     }
 
     private static IResult Error(string code, int status) => Results.Json(new ApiError(code), RemoteJson.Default.ApiError, statusCode: status);
@@ -274,6 +275,31 @@ public static class Api
         var target = files.NewPath(owner);
         await PdfSaver.ExtractAsync(pages, target, null, null, job.Token);
         return await RegisterAsync(owner, target, request.Name, files, documents, job.Token);
+    }
+
+    private static async Task<IResult> SplitAsync(HttpContext context, SplitDocumentRequest request, FileStore files, OpenDocuments documents)
+    {
+        var owner = OwnerKeys.Of(context);
+        using var job = Job(context);
+        var (pages, _) = await PagesAsync(context, request.Pages, files, documents, job.Token);
+        if (pages == null || request.Parts is not { Count: > 0 and <= 10_000 }
+            || request.Parts.Any(p => p.Start < 0 || p.Count < 1 || p.Start + p.Count > pages.Count))
+            return Error(ApiErrors.Invalid, StatusCodes.Status400BadRequest);
+        var baseName = Path.GetFileNameWithoutExtension(FileStore.CleanName(request.BaseName));
+        // The parts go into a folder of their own next to the owner's files, then into the ZIP; the folder is removed again
+        var folder = Path.Combine(Path.GetDirectoryName(files.NewPath(owner))!, "split-" + FileStore.NewId());
+        Directory.CreateDirectory(folder);
+        try
+        {
+            await PdfSaver.SplitAsync(pages, request.Parts, folder, baseName, null, job.Token);
+            using var zip = new MemoryStream();
+            System.IO.Compression.ZipFile.CreateFromDirectory(folder, zip, System.IO.Compression.CompressionLevel.Fastest, false);
+            return Results.Bytes(zip.ToArray(), "application/zip", baseName + ".zip");
+        }
+        finally
+        {
+            try { Directory.Delete(folder, true); } catch (IOException) { }
+        }
     }
 
     private static async Task<IResult> BlankAsync(HttpContext context, BlankRequest request, FileStore files, OpenDocuments documents)

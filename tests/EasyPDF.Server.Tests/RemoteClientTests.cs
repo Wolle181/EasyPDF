@@ -156,6 +156,19 @@ public class RemoteClientTests
     }
 
     [Fact]
+    public async Task SplittingWritesOneZipToTheTarget()
+    {
+        await using var server = await TestServerHost.StartAsync();
+        var (backend, targets) = Client(server);
+        var path = await UploadDemoAsync(backend);
+        await using var document = EditableDocument.FromSource(await backend.OpenAsync(path));
+        var count = await backend.SplitAsync(document.Pages, Core.Documents.SplitPlan.EveryN(19, 10), "/save/z/parts.zip", "Report");
+        Assert.Equal(2, count);
+        using var zip = new System.IO.Compression.ZipArchive(new MemoryStream(targets.Written["/save/z/parts.zip"]));
+        Assert.Equal(2, zip.Entries.Count);
+    }
+
+    [Fact]
     public async Task ServerErrorsArriveWithTheirCode()
     {
         await using var server = await TestServerHost.StartAsync();

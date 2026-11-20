@@ -1,10 +1,10 @@
-<Window xmlns="https://github.com/avaloniaui"
+<dlg:DialogView xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dlg="using:EasyPDF.App.Dialogs"
         xmlns:vm="using:EasyPDF.App.ViewModels"
         xmlns:loc="using:EasyPDF.App.Localization"
-        x:Class="EasyPDF.App.Dialogs.SplitDialog" x:DataType="vm:SplitDialogViewModel"
-        Title="{loc:Tr SplitTitle}" Width="480" SizeToContent="Height"
-        WindowStartupLocation="CenterOwner" CanResize="False" ShowInTaskbar="False">
+        x:Class="EasyPDF.App.Dialogs.SplitDialogView" x:DataType="vm:SplitDialogViewModel"
+        Title="{loc:Tr SplitTitle}" DialogWidth="480">
   <StackPanel Margin="20" Spacing="14">
     <StackPanel Spacing="6">
       <RadioButton GroupName="Mode" Content="{loc:Tr SplitEveryN}" IsChecked="{Binding EveryN}" />
@@ -12,8 +12,8 @@
       <RadioButton GroupName="Mode" Content="{loc:Tr SplitAtSelected}" IsChecked="{Binding AtSelected}" IsEnabled="{Binding CanSplitAtSelected}" />
     </StackPanel>
     <StackPanel Spacing="6">
-      <TextBlock Text="{loc:Tr SplitFolder}" FontWeight="SemiBold" />
-      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+      <TextBlock Text="{loc:Tr SplitFolder}" FontWeight="SemiBold" IsVisible="{Binding NeedsFolder}" />
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding NeedsFolder}">
         <TextBox Text="{Binding Folder}" />
         <Button Grid.Column="1" Click="OnBrowse" Content="{loc:Tr SplitBrowse}" />
       </Grid>
@@ -26,4 +26,4 @@
       <Button MinWidth="80" HorizontalContentAlignment="Center" IsCancel="True" Click="OnCancel" Content="{loc:Tr Cancel}" />
     </StackPanel>
   </StackPanel>
-</Window>
+</dlg:DialogView>

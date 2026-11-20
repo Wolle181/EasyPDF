@@ -109,6 +109,14 @@ public sealed class RemoteApi
         return (await response.Content.ReadFromJsonAsync(RemoteJson.Default.RemoteFileInfo, token).ConfigureAwait(false))!;
     }
 
+    /// <summary>The parts as a ZIP file.</summary>
+    public async Task<byte[]> SplitAsync(SplitDocumentRequest request, CancellationToken token)
+    {
+        using var response = await _http.PostAsJsonAsync("api/split", request, RemoteJson.Default.SplitDocumentRequest, token).ConfigureAwait(false);
+        await EnsureAsync(response, token).ConfigureAwait(false);
+        return await response.Content.ReadAsByteArrayAsync(token).ConfigureAwait(false);
+    }
+
     public async Task<RemoteFileInfo> CreateBlankAsync(PageSizePt size, CancellationToken token)
     {
         using var response = await _http.PostAsJsonAsync("api/blank", new BlankRequest(size.Width, size.Height), RemoteJson.Default.BlankRequest, token)

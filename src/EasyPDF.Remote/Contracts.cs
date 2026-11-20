@@ -17,6 +17,9 @@ public sealed record BuildRequest(string BaseFileId, string Name, IReadOnlyList<
 /// <summary>Writes the pages as a new file without bookmarks.</summary>
 public sealed record ExtractRequest(string Name, IReadOnlyList<RemotePage> Pages);
 
+/// <summary>Writes the parts of the page list as <c>&lt;BaseName&gt;_partNN.pdf</c>; the answer is a ZIP file with them.</summary>
+public sealed record SplitDocumentRequest(IReadOnlyList<RemotePage> Pages, IReadOnlyList<EasyPDF.Core.Documents.SplitPart> Parts, string BaseName);
+
 /// <summary>A new file with one empty page of this size (points).</summary>
 public sealed record BlankRequest(double Width, double Height);
 
@@ -51,6 +54,7 @@ public static class ApiHeaders
 [JsonSerializable(typeof(BuildRequest))]
 [JsonSerializable(typeof(ExtractRequest))]
 [JsonSerializable(typeof(BlankRequest))]
+[JsonSerializable(typeof(SplitDocumentRequest))]
 [JsonSerializable(typeof(ServerConfig))]
 [JsonSerializable(typeof(ApiError))]
 [JsonSerializable(typeof(IReadOnlyList<OcrWord>))]

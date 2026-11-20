@@ -315,7 +315,8 @@ header timeout; data protection keys in the volume. Container: chiseled image wi
 `--cap-drop=ALL`, `no-new-privileges`, memory limit, self health check (`--healthcheck`).
 
 **Not in the web version yet** (hidden): stamps and templates, texts, black out/white out, OCR,
-attachments, split, replace pages, reduce size, print, mail, settings, quick guide, About, several windows, recent files.
+attachments, replace pages, reduce size, print, mail, settings, quick guide, About, several windows, recent files. Split
+writes the parts as one ZIP file (no folder to choose in a browser).
 
 ## Stamps, text and templates
 
