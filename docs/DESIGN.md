@@ -50,8 +50,9 @@ src/EasyPDF.Core/          net11.0, no UI dependency
   Layout/HorizontalLayout.cs      pure layout math (FitPage, FindPageAt, VisibleRange, anchor on relayout) + zoom
   Caching/PageImageCache.cs       LRU with byte budget (never evict visible pages)
   Settings/AppSettings.cs   JSON in the per-user app-data folder: theme, language, recent files, window size/position, ribbon collapsed, last zoom
-src/EasyPDF.App/           Avalonia app
-  App.axaml, Program.cs
+src/EasyPDF.App/           desktop program (start-up only)
+src/EasyPDF.UI/            Avalonia user interface shared by desktop and web
+  App.axaml
   ViewModels/MainViewModel.cs, ReadingViewModel.cs, OrganizeViewModel.cs, OutlineViewModel.cs, AboutViewModel.cs
   Views/MainWindow.axaml    DockPanel: NativeMenu / Ribbon / content (Reading|Organize) / status bar
   Views/AboutWindow.axaml

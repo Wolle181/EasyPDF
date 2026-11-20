@@ -14,6 +14,7 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.3" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\EasyPDF.UI\EasyPDF.UI.csproj" />
     <ProjectReference Include="..\..\src\EasyPDF.App\EasyPDF.App.csproj" />
   </ItemGroup>
   <ItemGroup>

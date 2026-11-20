@@ -1,4 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <!-- The desktop program: start-up (command line, single instance, merge) around the shared user interface in
+       src/EasyPDF.UI. Installers and publish profiles (Native AOT) build this project. -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>$(AppTargetFramework)</TargetFramework>
@@ -6,10 +8,8 @@
     <!-- Program file <shown name>.exe, process name, Linux WM_CLASS (the name itself: Core's AppInfo.Name) -->
     <AssemblyName>$(AppDisplayName)</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-
     <!-- Icon of the .exe (Explorer, installer): the brand's (branding/<Brand>/icons, drawn by tools/icon/make_icon.py) -->
     <ApplicationIcon>$(BrandDir)icons/app.ico</ApplicationIcon>
-    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <!-- Trim/AOT analyzers: code that would break under Native AOT is a warning, hence a build error -->
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <EnableAotAnalyzer>true</EnableAotAnalyzer>
@@ -17,41 +17,18 @@
     <!-- File description of the .exe (Windows "Open with", Task Manager) -->
     <AssemblyTitle>$(AppDisplayName)</AssemblyTitle>
   </PropertyGroup>
-  <!-- Append the git commit hash to the informational version (shown in Help > About) -->
-  <Target Name="SetSourceRevisionFromGit" BeforeTargets="InitializeSourceControlInformation">
-    <Exec Command="git describe --long --always --dirty --exclude=* --abbrev=8" ConsoleToMSBuild="true" IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low">
-      <Output PropertyName="SourceRevisionId" TaskParameter="ConsoleOutput" />
-    </Exec>
-  </Target>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="12.1.3" />
     <PackageReference Include="Avalonia.Desktop" Version="12.1.3" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.3" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="System.Drawing.Common" Version="11.0.0" />
     <!-- RapidOcrNet (OCR, via Core) brings a second libSkiaSharp.so for Linux; keep only Avalonia's (SkiaSharp.NativeAssets.Linux),
          which matches the SkiaSharp.dll in use -->
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.1" ExcludeAssets="all" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EasyPDF.Core\EasyPDF.Core.csproj" />
+    <ProjectReference Include="..\EasyPDF.UI\EasyPDF.UI.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
-    <!-- The brand's icons: window and taskbar, About dialog, the header logo when the icon is made from a logo, the company logo in About -->
-    <AvaloniaResource Include="$(BrandDir)icons/app.ico" Link="Assets/AppIcon.ico" />
-    <AvaloniaResource Include="$(BrandDir)icons/app-128.png" Link="Assets/AppIcon-128.png" />
-    <AvaloniaResource Include="$(BrandDir)icons/header-logo.png" Link="Assets/BrandLogo.png" Condition="Exists('$(BrandDir)icons/header-logo.png')" />
-    <AvaloniaResource Include="$(BrandDir)icons/company-logo.svg" Link="Assets/CompanyLogo.svg" Condition="Exists('$(BrandDir)icons/company-logo.svg')" />
     <!-- Introduction videos of the brand (introduction.<language>.mp4): videos/ next to the program, button in the header -->
     <None Include="$(BrandDir)videos/introduction.*.mp4" Link="videos/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Visible="false" />
-  </ItemGroup>
-  <!-- Brand colours (brand profile), read by Styles/BrandColors.cs; author line, read by Services/VersionInfo.cs -->
-  <ItemGroup>
-    <AssemblyMetadata Include="AppAuthor" Value="$(AppAuthor)" />
-    <AssemblyMetadata Include="BrandPrimaryColor" Value="$(BrandPrimaryColor)" />
-    <AssemblyMetadata Include="BrandAccentColor" Value="$(BrandAccentColor)" />
-    <AssemblyMetadata Include="BrandHeaderColor" Value="$(BrandHeaderColor)" Condition="'$(BrandHeaderColor)' != ''" />
   </ItemGroup>
   <!-- License texts of the app and the bundled components, next to the program (Help > About opens the folder) -->
   <ItemGroup>

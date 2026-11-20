@@ -65,7 +65,7 @@ public class BrandColorTests
     {
         // Only white and the red of the delete icons are fixed; everything else is {st:BrandColor ...}
         var allowed = new[] { "FFFFFF", "C8312F", "F06A6A" };
-        var src = Path.Combine(RepoPaths.Root, "src", "EasyPDF.App");
+        var src = Path.Combine(RepoPaths.Root, "src");
         foreach (var file in Directory.GetFiles(src, "*.axaml", SearchOption.AllDirectories)
                      .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}") &&
                                  !f.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}")))

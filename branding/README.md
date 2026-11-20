@@ -86,7 +86,7 @@ a brand's shown name (other than EasyPDF) or one of its `BrandWords` appears out
 
 - **Colours:** set `BrandPrimaryColor` (dark: band, selection, white text on it; its hue tints the greys) and
   `BrandAccentColor` (light signal colour: line under the band, Save button; primary-coloured text on it). Every colour of
-  both themes is a shade of them (`src/EasyPDF.App/Styles/BrandColors.cs`, `{st:BrandColor …}` in `App.axaml`). Then draw
+  both themes is a shade of them (`src/EasyPDF.UI/Styles/BrandColors.cs`, `{st:BrandColor …}` in `App.axaml`). Then draw
   the icon again (`make_icon.py --brand <id>`); `MainWindowAndDialogsShowTheAppIcon` notices an icon in old colours.
   Optional `BrandHeaderColor`: top of the header gradient (it ends in the primary colour); without it the header starts in
   a slightly lighter primary colour.
@@ -95,6 +95,6 @@ a brand's shown name (other than EasyPDF) or one of its `BrandWords` appears out
   folder, start menu entry and empty settings (folders are named after the app); on Linux the old package must be removed
   by hand. Record the videos again.
 - **Drawing of the mark:** in `make_icon.py` (lines on a 24 × 24 grid) and, for the header, `BrandMark` in
-  `src/EasyPDF.App/Views/MainWindow.axaml` (geometry `Icon.Concatenate` in `Styles/Icons.axaml`); it is the same for all brands.
+  `src/EasyPDF.UI/Views/MainWindow.axaml` (geometry `Icon.Concatenate` in `Styles/Icons.axaml`); it is the same for all brands.
 
 With Claude Code the skill `branding` (`.claude/skills/branding`) does these steps including the checks.

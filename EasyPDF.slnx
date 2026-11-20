@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/EasyPDF.App/EasyPDF.App.csproj" />
     <Project Path="src/EasyPDF.Core/EasyPDF.Core.csproj" />
+    <Project Path="src/EasyPDF.UI/EasyPDF.UI.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/EasyPDF.Core.Tests/EasyPDF.Core.Tests.csproj" />

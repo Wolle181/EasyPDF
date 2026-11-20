@@ -10,7 +10,7 @@ namespace EasyPDF.App.Tests;
 
 public class LocalizationTests
 {
-    private static string ResourceDir => Path.Combine(RepoPaths.Root, "src", "EasyPDF.App", "Resources");
+    private static string ResourceDir => Path.Combine(RepoPaths.Root, "src", "EasyPDF.UI", "Resources");
 
     private static System.Collections.Generic.Dictionary<string, string> Read(string file) =>
         XDocument.Load(Path.Combine(ResourceDir, file)).Root!.Elements("data")
@@ -43,7 +43,7 @@ public class LocalizationTests
     public void EveryKeyUsedInXamlOrCodeExists()
     {
         var keys = Read("Strings.resx").Keys.ToHashSet();
-        var src = Path.Combine(RepoPaths.Root, "src", "EasyPDF.App");
+        var src = Path.Combine(RepoPaths.Root, "src");
         var used = new System.Collections.Generic.HashSet<string>();
         foreach (var file in Directory.EnumerateFiles(src, "*.*", SearchOption.AllDirectories)
                      .Where(f => (f.EndsWith(".axaml") || f.EndsWith(".cs")) && !f.EndsWith("Loc.cs") && !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}") && !f.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}")))

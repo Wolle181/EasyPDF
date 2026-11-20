@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The app's user interface, shared by the desktop program (src/EasyPDF.App) and the web version (src/EasyPDF.Browser):
+       views, controls, view models, dialogs, styles, texts. Namespaces keep the root EasyPDF.App. -->
+  <PropertyGroup>
+    <TargetFramework>$(AppTargetFramework)</TargetFramework>
+    <RootNamespace>EasyPDF.App</RootNamespace>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <!-- Trim/AOT analyzers: code that would break under Native AOT is a warning, hence a build error -->
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
+  </PropertyGroup>
+  <!-- Append the git commit hash to the informational version (shown in Help > About) -->
+  <Target Name="SetSourceRevisionFromGit" BeforeTargets="InitializeSourceControlInformation">
+    <Exec Command="git describe --long --always --dirty --exclude=* --abbrev=8" ConsoleToMSBuild="true" IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low">
+      <Output PropertyName="SourceRevisionId" TaskParameter="ConsoleOutput" />
+    </Exec>
+  </Target>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.3" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="System.Drawing.Common" Version="11.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EasyPDF.Core\EasyPDF.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+    <!-- The brand's icons: window and taskbar, About dialog, the header logo when the icon is made from a logo, the company logo in About -->
+    <AvaloniaResource Include="$(BrandDir)icons/app.ico" Link="Assets/AppIcon.ico" />
+    <AvaloniaResource Include="$(BrandDir)icons/app-128.png" Link="Assets/AppIcon-128.png" />
+    <AvaloniaResource Include="$(BrandDir)icons/header-logo.png" Link="Assets/BrandLogo.png" Condition="Exists('$(BrandDir)icons/header-logo.png')" />
+    <AvaloniaResource Include="$(BrandDir)icons/company-logo.svg" Link="Assets/CompanyLogo.svg" Condition="Exists('$(BrandDir)icons/company-logo.svg')" />
+  </ItemGroup>
+  <!-- Brand colours (brand profile), read by Styles/BrandColors.cs; author line and web address, read by Services/VersionInfo.cs -->
+  <ItemGroup>
+    <AssemblyMetadata Include="AppAuthor" Value="$(AppAuthor)" />
+    <AssemblyMetadata Include="BrandPrimaryColor" Value="$(BrandPrimaryColor)" />
+    <AssemblyMetadata Include="BrandAccentColor" Value="$(BrandAccentColor)" />
+    <AssemblyMetadata Include="BrandHeaderColor" Value="$(BrandHeaderColor)" Condition="'$(BrandHeaderColor)' != ''" />
+  </ItemGroup>
+</Project>
