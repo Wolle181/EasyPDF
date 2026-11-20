@@ -67,6 +67,7 @@ COPY --from=build /app/publish .
 # Writes only to /data (mounted: files, keys) and /tmp, so the container can run with a read-only root file system
 USER app
 EXPOSE 8080
-# Without shell or curl: the server checks itself (Docker; Podman's OCI images ignore this, start.sh sets --health-cmd)
+# Without shell or curl: the server checks itself. Exec form, because a shell form (and docker run --health-cmd, which
+# is always run by /bin/sh) cannot work without a shell. Podman keeps it only in Docker format (build --format docker).
 HEALTHCHECK --interval=60s --timeout=10s --retries=3 CMD ["/app/EasyPDF.Server", "--healthcheck"]
 ENTRYPOINT ["/app/EasyPDF.Server"]

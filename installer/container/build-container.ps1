@@ -65,7 +65,10 @@ if ($IsWindows -and $tool -eq 'podman') {
 }
 $local = "$image`:$version"
 Write-Host "== $tool build -t $local" -ForegroundColor Cyan
-& $tool build -t $local --build-arg "BRAND=$brand" --build-arg "VERSION=$version" --build-arg "COMMIT=$commit" -f "$root/Dockerfile" $root
+# Docker image format: keeps the HEALTHCHECK of the Dockerfile (Podman's default OCI format drops it), which the host's
+# Docker uses - the image has no shell, so a --health-cmd of docker run (always run by /bin/sh) cannot work
+$format = if ($tool -eq 'podman') { @('--format', 'docker') } else { [string[]]@() }
+& $tool build @format -t $local --build-arg "BRAND=$brand" --build-arg "VERSION=$version" --build-arg "COMMIT=$commit" -f "$root/Dockerfile" $root
 if ($LASTEXITCODE -ne 0) { throw "$tool build failed." }
 
 if ($NoPush) {
