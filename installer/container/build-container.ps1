@@ -74,7 +74,7 @@ if ($NoPush) {
 }
 
 # 4. push with the version and as latest
-$tlsOption = if ($tool -eq 'podman') { @('--tls-verify=false') } else { @() }
+[string[]]$tlsOption = if ($tool -eq 'podman') { @('--tls-verify=false') } else { @() }   # an array: a single string would be splatted char by char
 foreach ($tag in @($version, 'latest')) {
     $remote = "$Registry/$image`:$tag"
     & $tool tag $local $remote
