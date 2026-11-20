@@ -45,7 +45,7 @@ Write-Host "== Image $image`:$version (commit $commit, brand $brand)" -Foregroun
 Write-Host '== Checking NuGet packages for known vulnerabilities' -ForegroundColor Cyan
 $previous = $ErrorActionPreference
 $ErrorActionPreference = 'Continue'
-$report = dotnet list "$root/EasyPDF.slnx" package --vulnerable --include-transitive -p:Brand=$brand 2>&1 | Out-String
+$report = dotnet list "$root/EasyPDF.slnx" package --vulnerable --include-transitive 2>&1 | Out-String   # the brand comes from EASYPDF_BRAND
 $code = $LASTEXITCODE
 $ErrorActionPreference = $previous
 if ($code -ne 0) { throw "Vulnerability check could not run:`n$report" }
