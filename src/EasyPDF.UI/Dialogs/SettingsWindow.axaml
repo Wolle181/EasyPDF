@@ -1,10 +1,10 @@
-<Window xmlns="https://github.com/avaloniaui"
+<dlg:DialogView xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dlg="using:EasyPDF.App.Dialogs"
         xmlns:vm="using:EasyPDF.App.ViewModels"
         xmlns:loc="using:EasyPDF.App.Localization"
-        x:Class="EasyPDF.App.Dialogs.SettingsWindow" x:DataType="vm:SettingsViewModel"
-        Title="{loc:Tr SettingsTitle}" Width="400" SizeToContent="Height"
-        WindowStartupLocation="CenterOwner" CanResize="False" ShowInTaskbar="False">
+        x:Class="EasyPDF.App.Dialogs.SettingsView" x:DataType="vm:SettingsViewModel"
+        Title="{loc:Tr SettingsTitle}" DialogWidth="400">
   <StackPanel Margin="20" Spacing="16">
     <StackPanel Spacing="6">
       <TextBlock Text="{loc:Tr SettingsAppearance}" FontWeight="SemiBold" />
@@ -28,7 +28,7 @@
         <ComboBoxItem Content="Deutsch" />
       </ComboBox>
     </StackPanel>
-    <StackPanel Spacing="6">
+    <StackPanel x:Name="StampSection" Spacing="6">
       <TextBlock Text="{loc:Tr SettingsStampFolder}" FontWeight="SemiBold" />
       <TextBox x:Name="StampFolderBox" IsReadOnly="True" Text="{Binding StampFolder}" />
       <TextBlock Text="{loc:Tr StampPngHint}" TextWrapping="Wrap" Opacity="0.7" FontSize="12" />
@@ -38,7 +38,7 @@
         <Button x:Name="StampResetButton" Click="OnResetStampFolder" Content="{loc:Tr SettingsDefault}" />
       </StackPanel>
     </StackPanel>
-    <StackPanel Spacing="6">
+    <StackPanel x:Name="TemplateSection" Spacing="6">
       <TextBlock Text="{loc:Tr SettingsTemplateFolder}" FontWeight="SemiBold" />
       <TextBox x:Name="TemplateFolderBox" IsReadOnly="True" Text="{Binding TemplateFolder}" />
       <StackPanel Orientation="Horizontal" Spacing="8">
@@ -47,7 +47,7 @@
         <Button x:Name="TemplateResetButton" Click="OnResetTemplateFolder" Content="{loc:Tr SettingsDefault}" />
       </StackPanel>
     </StackPanel>
-    <StackPanel Spacing="6">
+    <StackPanel x:Name="RedactSection" Spacing="6">
       <TextBlock Text="{loc:Tr SettingsRedact}" FontWeight="SemiBold" />
       <CheckBox x:Name="WarnRedactedBox" IsChecked="{Binding WarnOverwriteRedacted}">
         <StackPanel>
@@ -56,7 +56,7 @@
         </StackPanel>
       </CheckBox>
     </StackPanel>
-    <StackPanel Spacing="6">
+    <StackPanel x:Name="PdfFilesSection" Spacing="6">
       <TextBlock Text="{loc:Tr SettingsPdfFiles}" FontWeight="SemiBold" />
       <Button x:Name="DefaultAppButton" Command="{Binding MakeDefaultCommand}" Content="{loc:Tr SettingsMakeDefault}" />
       <TextBlock x:Name="DefaultAppStatusText" Text="{Binding DefaultAppStatus}" TextWrapping="Wrap" Opacity="0.7" FontSize="12"
@@ -64,4 +64,4 @@
     </StackPanel>
     <Button HorizontalAlignment="Right" MinWidth="80" HorizontalContentAlignment="Center" IsDefault="True" IsCancel="True" Click="OnClose" Content="{loc:Tr Close}" />
   </StackPanel>
-</Window>
+</dlg:DialogView>

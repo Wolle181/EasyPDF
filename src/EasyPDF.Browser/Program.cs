@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using EasyPDF.App;
 using EasyPDF.App.Services;
 using EasyPDF.Core;
 using EasyPDF.Core.Pdfium;
+using EasyPDF.Core.Settings;
 using EasyPDF.Remote;
 
 [assembly: SupportedOSPlatform("browser")]
@@ -28,6 +30,14 @@ internal static class Program
         PlatformFeatures.Current = PlatformFeatures.Web(WebCommands.IsAvailable);
         await Interop.LoadAsync();
         Interop.SetTitle(AppInfo.Name);
+        // Settings (theme, language) from the browser's storage into the file the program reads, and back after each change
+        var stored = Interop.LoadSettings();
+        if (stored.Length > 0)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(AppSettings.DefaultPath)!);
+            File.WriteAllText(AppSettings.DefaultPath, stored);
+        }
+        AppSettings.Saved += Interop.SaveSettings;
         await BuildAvaloniaApp().StartBrowserAppAsync("out");
         Interop.RemoveSplash();
     }

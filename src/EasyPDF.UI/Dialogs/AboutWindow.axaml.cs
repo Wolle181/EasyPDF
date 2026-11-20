@@ -10,11 +10,13 @@ namespace EasyPDF.App.Dialogs;
 
 public sealed record AboutRow(string Label, string Value);
 
-public partial class AboutWindow : Window
+public partial class AboutView : DialogView
 {
-    public AboutWindow()
+    public AboutView()
     {
         InitializeComponent();
+        // The web version has no license folder next to it (the texts are in the repository)
+        LicensesButton.IsVisible = !PlatformFeatures.Current.IsWeb;
         InfoList.ItemsSource = VersionInfo.Collect().Select(i => new AboutRow(Loc.T(i.LabelKey), i.Value)).ToList();
         ShowCompanyLogo(EasyPDF.App.Styles.BrandLogo.Company);
     }
@@ -34,16 +36,28 @@ public partial class AboutWindow : Window
 
     private async void OnCopy(object? sender, RoutedEventArgs e)
     {
-        if (Clipboard != null)
-            await Clipboard.SetValueAsync(Avalonia.Input.DataFormat.Text, BuildText());
+        if (Host?.Clipboard is { } clipboard)
+            await clipboard.SetValueAsync(Avalonia.Input.DataFormat.Text, BuildText());
     }
 
     /// <summary>Opens the folder with the license texts in the file manager.</summary>
     private async void OnLicenses(object? sender, RoutedEventArgs e)
     {
-        if (System.IO.Directory.Exists(VersionInfo.LicenseFolder))
-            await Launcher.LaunchDirectoryInfoAsync(new System.IO.DirectoryInfo(VersionInfo.LicenseFolder));
+        if (System.IO.Directory.Exists(VersionInfo.LicenseFolder) && Host is { } host)
+            await host.Launcher.LaunchDirectoryInfoAsync(new System.IO.DirectoryInfo(VersionInfo.LicenseFolder));
     }
 
     private void OnClose(object? sender, RoutedEventArgs e) => Close();
+}
+
+/// <summary>Help &gt; About as a window (desktop).</summary>
+public sealed class AboutWindow : DialogWindow
+{
+    public AboutWindow() : base(new AboutView())
+    {
+    }
+
+    public void ShowCompanyLogo(Avalonia.Media.IImage? logo) => ((AboutView)DialogContent).ShowCompanyLogo(logo);
+
+    public static string BuildText() => AboutView.BuildText();
 }

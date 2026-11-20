@@ -13,4 +13,10 @@ internal static partial class Interop
 
     [JSImport("setTitle", "interop")]
     public static partial void SetTitle(string title);
+
+    [JSImport("loadSettings", "interop")]
+    public static partial string LoadSettings();
+
+    [JSImport("saveSettings", "interop")]
+    public static partial void SaveSettings(string json);
 }

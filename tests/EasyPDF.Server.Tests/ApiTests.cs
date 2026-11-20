@@ -195,6 +195,28 @@ public class ApiTests
     }
 
     [Fact]
+    public async Task ListsAndReadsAttachments()
+    {
+        await using var server = await TestServerHost.StartAsync();
+        var browser = server.NewBrowser();
+        var path = Path.Combine(server.Folder, "with-attachments.pdf");
+        Directory.CreateDirectory(server.Folder);
+        var invoice = Encoding.UTF8.GetBytes("<?xml version=\"1.0\"?><rsm:CrossIndustryInvoice/>");
+        Core.Tests.TestPdf.WithAttachments(path, ("factur-x.xml", invoice), ("notes.txt", Encoding.UTF8.GetBytes("notes")));
+        var upload = await browser.UploadAsync(await File.ReadAllBytesAsync(path));
+        upload.EnsureSuccessStatusCode();
+        var info = (await upload.Content.ReadFromJsonAsync(RemoteJson.Default.RemoteFileInfo))!;
+
+        var list = (await (await browser.GetAsync($"/api/files/{info.Id}/attachments")).Content
+            .ReadFromJsonAsync(RemoteJson.Default.IReadOnlyListPdfAttachment))!;
+        Assert.Equal(2, list.Count);
+        Assert.Contains(list, a => a.IsEInvoice);
+        var first = list.Single(a => a.Name == "factur-x.xml");
+        Assert.Equal(invoice, await (await browser.GetAsync($"/api/files/{info.Id}/attachments/{first.Index}")).Content.ReadAsByteArrayAsync());
+        Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync($"/api/files/{info.Id}/attachments/9")).StatusCode);
+    }
+
+    [Fact]
     public async Task BlankPageHasTheRequestedSize()
     {
         await using var server = await TestServerHost.StartAsync();

@@ -56,7 +56,6 @@ public class WebModeTests
             Assert.True(open.IsVisible);
             Assert.False(window.FindControl<RibbonButton>("SettingsButton")!.IsVisible);
             Assert.False(window.FindControl<NativeMenuBar>("MenuBar")!.IsVisible);
-            Assert.False(window.FindControl<Button>("StartGuideButton")!.IsVisible);
             Assert.Equal(Loc.T("BrandSubtitleWeb"), window.FindControl<TextBlock>("BrandSubtitle")!.Text);
             Assert.True(window.View.IsAvailable(window.ViewModel.SaveCommand));
             Assert.False(window.View.IsAvailable(window.ViewModel.PrintCommand));
@@ -96,6 +95,65 @@ public class WebModeTests
         {
             PlatformFeatures.Current = PlatformFeatures.Desktop;
         }
+    }
+
+    [AvaloniaFact]
+    public async Task OnTheWebSettingsOfferThemeAndLanguageOnly()
+    {
+        PlatformFeatures.Current = PlatformFeatures.Web((_, _) => true);
+        try
+        {
+            var (window, layer) = LayerWindow();
+            var shown = layer.ShowAsync(new SettingsView(new EasyPDF.Core.Settings.AppSettings(), () => { }));
+            await Pump();
+            var view = layer.GetVisualDescendants().OfType<SettingsView>().Single();
+            Assert.False(view.FindControl<StackPanel>("StampSection")!.IsVisible);
+            Assert.False(view.FindControl<StackPanel>("PdfFilesSection")!.IsVisible);
+            Assert.Equal(2, view.GetVisualDescendants().OfType<ComboBox>().Count(c => c.IsEffectivelyVisible)); // theme, language
+            window.KeyPress(Key.Escape, RawInputModifiers.None, PhysicalKey.Escape, null);
+            await Pump();
+            Assert.True(shown.IsCompleted);
+            window.Close();
+        }
+        finally
+        {
+            PlatformFeatures.Current = PlatformFeatures.Desktop;
+        }
+    }
+
+    [AvaloniaFact]
+    public async Task TheQuickGuideOnTheWebShowsWhatItOffersWithIcons()
+    {
+        PlatformFeatures.Current = PlatformFeatures.Web((vm, c) => c == vm.OpenCommand);
+        try
+        {
+            var window = new MainWindow { Width = 1200, Height = 800 };
+            window.Show();
+            await Pump();
+            // Inside the main view (as in the browser): the guide's icons are decoration, not commands to hide
+            var layer = window.FindControl<DialogLayer>("Dialogs")!;
+            _ = layer.ShowAsync(new QuickGuideView());
+            await Pump();
+            var rows = layer.GetVisualDescendants().OfType<Grid>().Where(g => g.Tag is string).Select(g => (string)g.Tag!).ToList();
+            Assert.Equal(QuickGuideView.WebTopics.Select(t => t.Key), rows);
+            Assert.DoesNotContain("Stamp", rows);
+            Assert.All(layer.GetVisualDescendants().OfType<RibbonButton>(), b => Assert.True(b.IsVisible));
+            window.Close();
+        }
+        finally
+        {
+            PlatformFeatures.Current = PlatformFeatures.Desktop;
+        }
+    }
+
+    [Fact]
+    public void AboutListsTheWebAddressOfTheBrand()
+    {
+        var rows = VersionInfo.Collect();
+        if (VersionInfo.WebAppUrl.Length > 0)
+            Assert.Contains(rows, r => r.LabelKey == "InfoWebVersion" && r.Value == VersionInfo.WebAppUrl);
+        else
+            Assert.DoesNotContain(rows, r => r.LabelKey == "InfoWebVersion");
     }
 
     private static (Window Window, DialogLayer Layer) LayerWindow()

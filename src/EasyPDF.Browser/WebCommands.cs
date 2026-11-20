@@ -25,6 +25,10 @@ internal static class WebCommands
         || command == vm.ZoomInCommand || command == vm.ZoomOutCommand || command == vm.ActualSizeCommand
         || command == vm.ApplyZoomInputCommand
         || command == vm.SelectAllCommand || command == vm.CloseDocumentCommand
+        || command == vm.ShowSettingsCommand || command == vm.ShowAboutCommand || command == vm.ShowQuickGuideCommand
+        // Attachments and e-invoice (saved as download; a browser cannot open them in a program of the system)
+        || command == vm.ShowAttachmentsCommand || command == vm.OpenEInvoiceCommand || command == vm.SaveEInvoiceCommand
+        || command == vm.DismissEInvoiceBarCommand
         // Text: the server reads the words of the text layer
         || command == vm.ToggleSelectTextToolCommand || command == vm.CopyTextCommand
         || command == vm.ShowSearchCommand || command == vm.FindNextCommand || command == vm.FindPreviousCommand

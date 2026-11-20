@@ -36,6 +36,7 @@
   <!-- Brand colours (brand profile), read by Styles/BrandColors.cs; author line and web address, read by Services/VersionInfo.cs -->
   <ItemGroup>
     <AssemblyMetadata Include="AppAuthor" Value="$(AppAuthor)" />
+    <AssemblyMetadata Include="WebAppUrl" Value="$(WebAppUrl)" />
     <AssemblyMetadata Include="BrandPrimaryColor" Value="$(BrandPrimaryColor)" />
     <AssemblyMetadata Include="BrandAccentColor" Value="$(BrandAccentColor)" />
     <AssemblyMetadata Include="BrandHeaderColor" Value="$(BrandHeaderColor)" Condition="'$(BrandHeaderColor)' != ''" />

@@ -13,13 +13,13 @@ namespace EasyPDF.App.Dialogs;
 /// The files embedded in the PDF: name, size, e-invoice marked. Open (only harmless types, also by double-click),
 /// Save, or Close; closing the window with [X] is Close (no choice).
 /// </summary>
-public partial class AttachmentsDialog : Window
+public partial class AttachmentsDialogView : DialogView
 {
     private readonly IReadOnlyList<PdfAttachment> _attachments = [];
 
-    public AttachmentsDialog() => InitializeComponent();
+    public AttachmentsDialogView() => InitializeComponent();
 
-    public AttachmentsDialog(IReadOnlyList<PdfAttachment> attachments) : this()
+    public AttachmentsDialogView(IReadOnlyList<PdfAttachment> attachments) : this()
     {
         _attachments = attachments;
         AttachmentList.ItemsSource = attachments.Select(Describe).ToList();
@@ -48,9 +48,13 @@ public partial class AttachmentsDialog : Window
     private void UpdateButtons()
     {
         var selected = Selected;
+        // The web version cannot hand a file to a program of the system: it only saves (downloads)
+        var web = PlatformFeatures.Current.IsWeb;
+        OpenButton.IsVisible = !web;
         OpenButton.IsEnabled = selected is { CanOpen: true };
         SaveButton.IsEnabled = selected != null;
-        CannotOpenText.IsVisible = selected is { CanOpen: false };
+        SaveButton.IsDefault = web;
+        CannotOpenText.IsVisible = !web && selected is { CanOpen: false };
     }
 
     private void Answer(AttachmentAction action)
@@ -65,5 +69,22 @@ public partial class AttachmentsDialog : Window
 
     private void OnClose(object? sender, RoutedEventArgs e) => Close(null);
 
-    private void OnDoubleTapped(object? sender, TappedEventArgs e) => Answer(AttachmentAction.Open);
+    private void OnDoubleTapped(object? sender, TappedEventArgs e) =>
+        Answer(PlatformFeatures.Current.IsWeb ? AttachmentAction.Save : AttachmentAction.Open);
+}
+
+/// <summary>The dialog as a window (desktop).</summary>
+public sealed class AttachmentsDialog : DialogWindow
+{
+    public AttachmentsDialog(IReadOnlyList<PdfAttachment> attachments) : base(new AttachmentsDialogView(attachments))
+    {
+        MinWidth = 380;
+        MinHeight = 240;
+    }
+
+    public PdfAttachment? Selected => ((AttachmentsDialogView)DialogContent).Selected;
+
+    public static string Describe(PdfAttachment attachment) => AttachmentsDialogView.Describe(attachment);
+
+    public static string FormatSize(long bytes) => AttachmentsDialogView.FormatSize(bytes);
 }

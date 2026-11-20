@@ -114,9 +114,14 @@ public sealed class AppSettings
             return;
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
         var temp = path + ".tmp";
-        File.WriteAllText(temp, JsonSerializer.Serialize(this, AppSettingsJson.Default.AppSettings));
+        var json = JsonSerializer.Serialize(this, AppSettingsJson.Default.AppSettings);
+        File.WriteAllText(temp, json);
         File.Move(temp, path, overwrite: true);
+        Saved?.Invoke(json);
     }
+
+    /// <summary>Raised after every <see cref="Save"/> with the written JSON (the web version keeps it in the browser's storage).</summary>
+    public static event Action<string>? Saved;
 
     /// <summary>
     /// Takes over the language and theme chosen in the installer, once per installer run: the installer writes a new

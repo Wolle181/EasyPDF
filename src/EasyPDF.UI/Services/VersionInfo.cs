@@ -18,6 +18,10 @@ public static class VersionInfo
     public static string Author { get; } = typeof(VersionInfo).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
         .FirstOrDefault(a => a.Key == "AppAuthor")?.Value ?? "";
 
+    /// <summary>Address of the brand's web version (<c>WebAppUrl</c> in the brand profile); empty if it has none.</summary>
+    public static string WebAppUrl { get; } = typeof(VersionInfo).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
+        .FirstOrDefault(a => a.Key == "WebAppUrl")?.Value ?? "";
+
     /// <summary>Publisher (<c>Company</c> in the brand profile), e.g. the name of the company logo in Help &gt; About.</summary>
     public static string Company { get; } = typeof(VersionInfo).Assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company ?? "";
 
@@ -45,7 +49,7 @@ public static class VersionInfo
         var pdfium = typeof(EasyPDF.Core.Pdfium.PdfSource).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
             .FirstOrDefault(a => a.Key == "PdfiumVersion")?.Value ?? "?";
         var buildDate = TryBuildDate(assembly);
-        return new List<(string, string)>
+        var rows = new List<(string, string)>
         {
             ("InfoVersion", Version),
             ("InfoBuildDate", buildDate),
@@ -59,6 +63,12 @@ public static class VersionInfo
             ("InfoLicense", "MIT"),
             ("InfoRepository", Repository),
         };
+        if (WebAppUrl.Length > 0)
+            rows.Add(("InfoWebVersion", WebAppUrl));
+        // In the browser there is no program file (no build date) and no text recognition yet
+        if (PlatformFeatures.Current.IsWeb)
+            rows.RemoveAll(r => r.Item1 is "InfoBuildDate" or "InfoOcr");
+        return rows;
     }
 
     /// <summary>Folder with the license texts of the app and the bundled components (copied next to the program).</summary>

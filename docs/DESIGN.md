@@ -291,7 +291,10 @@ the Emscripten of .NET 9/10 only, so the browser program takes them from SkiaSha
 - Dialogs: a dialog's content is a `DialogView` (`UserControl` with title, size and `Close(result)`). On the desktop a
   `DialogWindow` shows it (the old dialog class names remain as these windows), in the browser `DialogLayer` shows it as
   an overlay on the page; `MainView.ShowDialogAsync` picks one. While an overlay is open the page's shortcuts do nothing.
-  Converted so far: message, unsaved changes, rotate, insert range, merge; the others are windows only.
+  Converted so far: message, unsaved changes, rotate, insert range, merge, split, attachments, settings, quick guide,
+  About; the others are windows only. On the web the settings offer theme and language and are kept in the browser
+  (`localStorage`, `AppSettings.Saved`), the quick guide shows the topics of what is offered, About lists the brand's
+  web address (`WebAppUrl`, also on the desktop).
 
 **Server.** REST under `/api`: upload (`POST /files`, PDF header checked, opened with pdfium right away, all page sizes
 returned), rendered pages as PNG (own codec in Core, `PngCodec`, so neither side needs a native image library), words,
@@ -315,8 +318,9 @@ header timeout; data protection keys in the volume. Container: chiseled image wi
 `--cap-drop=ALL`, `no-new-privileges`, memory limit, self health check (`--healthcheck`).
 
 **Not in the web version yet** (hidden): stamps and templates, texts, black out/white out, OCR,
-attachments, replace pages, reduce size, print, mail, settings, quick guide, About, several windows, recent files. Split
-writes the parts as one ZIP file (no folder to choose in a browser).
+replace pages, reduce size, print, mail, several windows, recent files. Split
+writes the parts as one ZIP file (no folder to choose in a browser); attachments and the e-invoice are saved
+(downloaded), a browser cannot open them in a program of the system.
 
 ## Stamps, text and templates
 

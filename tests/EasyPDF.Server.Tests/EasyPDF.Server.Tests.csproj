@@ -17,4 +17,8 @@
     <ProjectReference Include="..\..\src\EasyPDF.Server\EasyPDF.Server.csproj" />
     <ProjectReference Include="..\..\src\EasyPDF.Remote\EasyPDF.Remote.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Hand-written test PDFs (attachments, page sizes) shared with the core tests -->
+    <Compile Include="..\EasyPDF.Core.Tests\TestPdf.cs" Link="TestPdf.cs" />
+  </ItemGroup>
 </Project>

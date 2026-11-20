@@ -63,7 +63,7 @@ public partial class SettingsViewModel(AppSettings settings, System.Action chang
     [ObservableProperty]
     private bool _showMenuBar = settings.ShowMenuBar;
 
-    public bool CanHideMenuBar { get; } = !System.OperatingSystem.IsMacOS();
+    public bool CanHideMenuBar { get; } = !System.OperatingSystem.IsMacOS() && !Services.PlatformFeatures.Current.IsWeb; // the web version has no menu bar
 
     partial void OnShowMenuBarChanged(bool value)
     {

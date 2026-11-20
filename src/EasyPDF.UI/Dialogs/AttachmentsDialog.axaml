@@ -1,9 +1,9 @@
-<Window xmlns="https://github.com/avaloniaui"
+<dlg:DialogView xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dlg="using:EasyPDF.App.Dialogs"
         xmlns:loc="using:EasyPDF.App.Localization"
-        x:Class="EasyPDF.App.Dialogs.AttachmentsDialog"
-        Title="{loc:Tr AttachmentsTitle}" Width="520" Height="360" MinWidth="380" MinHeight="240"
-        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+        x:Class="EasyPDF.App.Dialogs.AttachmentsDialogView"
+        Title="{loc:Tr AttachmentsTitle}" DialogWidth="520" DialogHeight="360" CanResize="True">
   <DockPanel Margin="20">
     <TextBlock DockPanel.Dock="Top" Text="{loc:Tr AttachmentsMessage}" TextWrapping="Wrap" Margin="0,0,0,10" />
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
@@ -16,4 +16,4 @@
                Foreground="{DynamicResource Text.Muted}" Margin="0,8,0,0" IsVisible="False" />
     <ListBox x:Name="AttachmentList" SelectionMode="Single" DoubleTapped="OnDoubleTapped" />
   </DockPanel>
-</Window>
+</dlg:DialogView>

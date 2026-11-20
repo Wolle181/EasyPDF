@@ -509,4 +509,5 @@
   <data name="WebErrTooManyRequests" xml:space="preserve"><value>Too many requests in a short time. Please wait a moment and try again.</value></data>
   <data name="WebErrServer" xml:space="preserve"><value>The server could not handle the request. Please try again later.</value></data>
   <data name="BrandSubtitleWeb" xml:space="preserve"><value>Read, organize and combine PDFs – in the browser</value></data>
+  <data name="InfoWebVersion" xml:space="preserve"><value>Web version</value></data>
 </root>

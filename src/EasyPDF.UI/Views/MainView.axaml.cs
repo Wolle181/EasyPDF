@@ -131,7 +131,7 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
         if (PlatformFeatures.Current.IsWeb)
         {
             BrandSubtitle.Text = Loc.T("BrandSubtitleWeb");
-            StartGuideButton.IsVisible = false;
+            EInvoiceOpenButton.IsVisible = false; // a browser cannot open it in a program of the system: Save downloads it
         }
         ZoomBox.LostFocus += (_, _) => _viewModel.ApplyZoomInputCommand.Execute(null);
         BuildMenuAndShortcuts();
@@ -1092,7 +1092,7 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
     }
 
     public Task<AttachmentChoice?> ShowAttachmentsAsync(IReadOnlyList<PdfAttachment> attachments) =>
-        new AttachmentsDialog(attachments).ShowDialog<AttachmentChoice?>(RequireWindow());
+        ShowDialogAsync<AttachmentChoice?>(() => new AttachmentsDialog(attachments), () => new AttachmentsDialogView(attachments));
 
     public Task<RotateResult?> ShowRotateDialogAsync(RotateDialogContext context) =>
         ShowDialogAsync<RotateResult?>(() => new RotateDialog(context), () => new RotateDialogView(context));
@@ -1123,13 +1123,15 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
         await new RedactedSaveDialog(fileName, pageCount).ShowDialog<RedactedSaveAnswer?>(RequireWindow())
         ?? new RedactedSaveAnswer(RedactedSaveChoice.Cancel, false); // closed with [X]
 
-    public Task ShowAboutAsync() => new AboutWindow().ShowDialog(RequireWindow());
+    public Task ShowAboutAsync() => ShowDialogAsync<object?>(() => new AboutWindow(), () => new AboutView());
 
     private QuickGuideWindow? _guide;
 
     /// <summary>Not modal, so the guide can stay open beside the document; a second call brings it to the front.</summary>
     public Task ShowQuickGuideAsync()
     {
+        if (OwnerWindow == null)
+            return Dialogs.ShowAsync(new QuickGuideView()); // web version: an overlay
         if (_guide != null)
             _guide.Activate();
         else
@@ -1158,7 +1160,8 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
             await new MessageDialog(Loc.T("VideoOpenFailed"), Loc.T("VideoNoPlayer")).ShowDialog(RequireWindow());
     }
 
-    public Task ShowSettingsAsync() => new SettingsWindow(_settings, OnSettingsChanged).ShowDialog(RequireWindow());
+    public Task ShowSettingsAsync() =>
+        ShowDialogAsync<object?>(() => new SettingsWindow(_settings, OnSettingsChanged), () => new SettingsView(_settings, OnSettingsChanged));
 
     public Task ShowErrorAsync(string message, string? details = null) =>
         ShowDialogAsync<object?>(() => new MessageDialog(message, details), () => new MessageDialogView(message, details));

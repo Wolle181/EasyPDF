@@ -17,6 +17,9 @@ public interface IPlatformFiles
 
     /// <summary>The path to write to for a file chosen in the save dialog, or null.</summary>
     string? ToSavePath(IStorageFile file);
+
+    /// <summary>Writes a file to a path from <see cref="ToSavePath"/> (web version: to the target the user chose).</summary>
+    Task WriteAsync(string path, byte[] content);
 }
 
 /// <summary>Local files (desktop): their own paths.</summary>
@@ -25,6 +28,8 @@ public sealed class LocalPlatformFiles : IPlatformFiles
     public Task<string?> ToOpenPathAsync(IStorageFile file) => Task.FromResult(file.TryGetLocalPath());
 
     public string? ToSavePath(IStorageFile file) => file.TryGetLocalPath();
+
+    public Task WriteAsync(string path, byte[] content) => System.IO.File.WriteAllBytesAsync(path, content);
 }
 
 /// <summary>What the program runs on: the desktop program, or the web version with the subset of features it offers.</summary>

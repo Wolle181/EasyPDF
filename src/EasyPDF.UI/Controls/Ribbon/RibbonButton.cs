@@ -134,7 +134,8 @@ public class RibbonButton : Button
     {
         base.OnAttachedToVisualTree(e);
         var provider = this.GetVisualAncestors().OfType<IShortcutProvider>().FirstOrDefault();
-        if (provider != null && !provider.IsAvailable(Command))
+        // Decorative buttons (the icons of the quick guide) take no input and are not commands to hide
+        if (provider != null && IsHitTestVisible && !provider.IsAvailable(Command))
         {
             IsVisible = false;
             // A group whose buttons are all unavailable goes as a whole (not just its caption left over)

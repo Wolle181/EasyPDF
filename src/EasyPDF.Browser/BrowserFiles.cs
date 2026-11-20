@@ -32,6 +32,8 @@ internal sealed class BrowserFiles(RemoteFiles files, BrowserSaveTargets targets
     }
 
     public string? ToSavePath(IStorageFile file) => targets.Add(file);
+
+    public Task WriteAsync(string path, byte[] content) => targets.WriteAsync(path, content, CancellationToken.None);
 }
 
 /// <summary>The files the user chose in save dialogs, by a virtual path <c>/save/&lt;id&gt;/&lt;name&gt;</c>.</summary>

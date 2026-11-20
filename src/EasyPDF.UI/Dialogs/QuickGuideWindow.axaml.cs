@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -13,7 +14,7 @@ namespace EasyPDF.App.Dialogs;
 /// Quick guide (Help ▸ Quick Guide, F1): one short section per function, each with the round icon it has in the ribbon.
 /// The texts are <c>Guide&lt;Key&gt;Title</c> / <c>Guide&lt;Key&gt;Text</c>; "{0}" in a text stands for Ctrl (Cmd on macOS).
 /// </summary>
-public partial class QuickGuideWindow : Window
+public partial class QuickGuideView : DialogView
 {
     /// <param name="Key">Resource key part of the texts.</param>
     /// <param name="Icon">Ribbon icon (also <c>&lt;Icon&gt;.Accent</c>).</param>
@@ -42,13 +43,19 @@ public partial class QuickGuideWindow : Window
         new("Settings", "Icon.Help", "Green"),
     ];
 
-    public QuickGuideWindow()
+    /// <summary>The topics of what the web version offers (the others are hidden there).</summary>
+    public static IReadOnlyList<Topic> WebTopics { get; } =
+        [.. Topics.Where(t => t.Key is "Open" or "Read" or "Organize" or "Pages" or "Concatenate" or "Extract" or "Attachments" or "Save")];
+
+    public QuickGuideView()
     {
         InitializeComponent();
         var ctrl = OperatingSystem.IsMacOS() ? "⌘" : Loc.T("GuideCtrlKey");
         IntroText.Text = Loc.T("GuideIntro");
-        foreach (var topic in Topics)
+        foreach (var topic in Services.PlatformFeatures.Current.IsWeb ? WebTopics : Topics)
             TopicList.Children.Add(BuildTopic(topic, ctrl));
+        // Starts at the top, also after the focus went to the Close button
+        Shown += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() => Scroller.Offset = default, Avalonia.Threading.DispatcherPriority.Background);
     }
 
     private Control BuildTopic(Topic topic, string ctrl)
@@ -81,7 +88,21 @@ public partial class QuickGuideWindow : Window
         return row;
     }
 
-    private T? Find<T>(string key) where T : class => this.TryFindResource(key, out var value) ? value as T : null;
+    /// <summary>A resource of the app (the view is not in a window yet while it builds its rows).</summary>
+    private T? Find<T>(string key) where T : class =>
+        this.TryFindResource(key, out var value) || (Avalonia.Application.Current?.TryFindResource(key, out value) ?? false) ? value as T : null;
 
     private void OnClose(object? sender, RoutedEventArgs e) => Close();
+}
+
+/// <summary>The quick guide as a window of its own (desktop; it stays open beside the document).</summary>
+public sealed class QuickGuideWindow : DialogWindow
+{
+    public QuickGuideWindow() : base(new QuickGuideView())
+    {
+        MinWidth = 460;
+        MinHeight = 360;
+    }
+
+    public static IReadOnlyList<QuickGuideView.Topic> Topics => QuickGuideView.Topics;
 }

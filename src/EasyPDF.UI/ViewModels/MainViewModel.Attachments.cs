@@ -107,6 +107,12 @@ public partial class MainViewModel
     /// <summary>Writes the attachment to a temporary folder and opens it in the system's program (only harmless types).</summary>
     private async Task OpenAttachmentAsync(PdfAttachment attachment)
     {
+        if (PlatformFeatures.Current.IsWeb)
+        {
+            // A browser cannot hand the file to a program of the system: it is saved (downloaded) instead
+            await SaveAttachmentAsync(attachment);
+            return;
+        }
         if (!attachment.CanOpen || _attachmentSource is not { } source)
             return;
         string path;
@@ -136,9 +142,9 @@ public partial class MainViewModel
             return;
         try
         {
-            await File.WriteAllBytesAsync(path, await source.ReadAttachmentAsync(attachment.Index));
+            await PlatformFeatures.Files.WriteAsync(path, await source.ReadAttachmentAsync(attachment.Index));
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Net.Http.HttpRequestException)
         {
             await Dialogs.ShowErrorAsync(Loc.F("ErrAttachmentSave", attachment.Name), ex.Message);
             return;
