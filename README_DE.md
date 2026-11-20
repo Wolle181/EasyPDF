@@ -67,7 +67,7 @@ Dieselbe Oberfläche läuft auch **im Browser** (WebAssembly), mit Drag & Drop v
 herunterladen. Die PDFs verarbeitet ein Server im Container (pdfium), dort liegen sie nur vorübergehend (30 Minuten nach
 der letzten Nutzung, höchstens 8 Stunden). Ohne Anmeldung für den privaten Gebrauch oder mit Single Sign-on (OpenID
 Connect: Keycloak, Entra ID, …) im Unternehmen; Bauen und Betrieb in [docs/BUILDING.md](docs/BUILDING.md#web-version-container).
-Stempel, Texte, Schwärzen, OCR, Suche und Drucken folgen später.
+Stempel, Texte, Schwärzen, OCR und Drucken folgen später; Text lässt sich markieren, kopieren und suchen.
 
 ## Anpassen
 

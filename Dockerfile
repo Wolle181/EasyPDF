@@ -11,8 +11,9 @@ ARG VERSION=1.0.0.0
 ARG COMMIT=
 WORKDIR /src
 
-# WebAssembly toolchain for the browser program (it targets .NET 10: Directory.Build.props, WebTargetFramework)
-RUN dotnet workload install wasm-tools-net10
+# WebAssembly toolchain for the browser program; its Emscripten needs Python
+RUN apt-get update && apt-get install -y --no-install-recommends python3 && rm -rf /var/lib/apt/lists/* \
+    && dotnet workload install wasm-tools
 
 # Project files first: the restore is cached as long as the dependencies do not change
 COPY global.json Directory.Build.props Directory.Build.targets EasyPDF.slnx ./

@@ -272,9 +272,9 @@ operating system). Decisions: pdfium runs on the **server**, the user interface 
 **Projects.** `EasyPDF.UI` holds the whole user interface (`MainView` = everything of one document as a `UserControl`).
 The desktop program `EasyPDF.App` shows it in a `MainWindow` (window size, closing, title) and is otherwise unchanged; the
 browser program `EasyPDF.Browser` shows it as the page (`ISingleViewApplicationLifetime`). `EasyPDF.Remote` is the contract
-(source-generated JSON) and the browser-side client; `EasyPDF.Server` the server. The browser program and the libraries it
-uses also target .NET 10 (`WebTargetFramework`): Avalonia's WebAssembly build of Skia exists only for the Emscripten version
-of .NET 9/10, linking it with .NET 11's fails.
+(source-generated JSON) and the browser-side client; `EasyPDF.Server` the server. Everything is .NET 11; Avalonia 12 brings the WebAssembly builds of Skia and HarfBuzz for
+the Emscripten of .NET 9/10 only, so the browser program takes them from SkiaSharp 4 and HarfBuzzSharp 14 (built for .NET
+11's Emscripten) and drops Avalonia's (`EasyPDF.Browser.csproj`).
 
 **Seams.**
 - `IPdfSource` (Core): what the views need of a document (page count and sizes, rendered pages, words of the text layer,
@@ -314,7 +314,7 @@ limit; a time limit per pdfium job; no details in error responses, no file names
 header timeout; data protection keys in the volume. Container: chiseled image without shell, non-root, `--read-only`,
 `--cap-drop=ALL`, `no-new-privileges`, memory limit, self health check (`--healthcheck`).
 
-**Not in the web version yet** (hidden): stamps and templates, texts, black out/white out, OCR, text selection and search,
+**Not in the web version yet** (hidden): stamps and templates, texts, black out/white out, OCR,
 attachments, split, replace pages, reduce size, print, mail, settings, quick guide, About, several windows, recent files.
 
 ## Stamps, text and templates

@@ -25,5 +25,9 @@ internal static class WebCommands
         || command == vm.ZoomInCommand || command == vm.ZoomOutCommand || command == vm.ActualSizeCommand
         || command == vm.ApplyZoomInputCommand
         || command == vm.SelectAllCommand || command == vm.CloseDocumentCommand
+        // Text: the server reads the words of the text layer
+        || command == vm.ToggleSelectTextToolCommand || command == vm.CopyTextCommand
+        || command == vm.ShowSearchCommand || command == vm.FindNextCommand || command == vm.FindPreviousCommand
+        || command == vm.CloseSearchCommand
         || command == vm.CancelOperationCommand || command == vm.CancelStampCommand;
 }

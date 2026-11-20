@@ -2,7 +2,7 @@
   <!-- The app's user interface, shared by the desktop program (src/EasyPDF.App) and the web version (src/EasyPDF.Browser):
        views, controls, view models, dialogs, styles, texts. Namespaces keep the root EasyPDF.App. -->
   <PropertyGroup>
-    <TargetFrameworks>$(AppTargetFramework);$(WebTargetFramework)</TargetFrameworks>
+    <TargetFramework>$(AppTargetFramework)</TargetFramework>
     <RootNamespace>EasyPDF.App</RootNamespace>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <!-- Trim/AOT analyzers: code that would break under Native AOT is a warning, hence a build error -->

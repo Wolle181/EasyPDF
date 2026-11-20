@@ -2,7 +2,7 @@
   <!-- The web version's browser program: the shared user interface (src/EasyPDF.UI) as .NET WebAssembly, drawn by Avalonia
        into a canvas. pdfium runs on the server (src/EasyPDF.Server serves this program and its API). -->
   <PropertyGroup>
-    <TargetFramework>$(WebTargetFramework)-browser</TargetFramework>
+    <TargetFramework>$(AppTargetFramework)-browser</TargetFramework>
     <OutputType>Exe</OutputType>
     <RootNamespace>EasyPDF.Browser</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -12,6 +12,11 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia.Browser" Version="12.1.3" />
+    <!-- Skia and HarfBuzz built for the Emscripten of .NET 11 (Avalonia 12 itself brings the builds for .NET 9/10 only) -->
+    <PackageReference Include="SkiaSharp" Version="4.157.0" />
+    <PackageReference Include="SkiaSharp.NativeAssets.WebAssembly" Version="4.157.0" />
+    <PackageReference Include="HarfBuzzSharp" Version="14.4.0.200" />
+    <PackageReference Include="HarfBuzzSharp.NativeAssets.WebAssembly" Version="14.4.0.200" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyPDF.UI\EasyPDF.UI.csproj" />
@@ -21,4 +26,11 @@
   <ItemGroup>
     <Content Include="$(BrandDir)icons/app-128.png" Link="wwwroot/favicon.png" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <!-- Avalonia.Browser adds the native libraries for the Emscripten of .NET 9/10 (3.1.56); the packages above add those for
+       .NET 11 themselves -->
+  <Target Name="DropOldEmscriptenLibraries" BeforeTargets="_BrowserWasmWriteRspForLinking;_WasmBuildNativeCore;WasmBuildApp">
+    <ItemGroup>
+      <NativeFileReference Remove="@(NativeFileReference)" Condition="$([System.String]::Copy('%(FullPath)').Contains('3.1.56'))" />
+    </ItemGroup>
+  </Target>
 </Project>

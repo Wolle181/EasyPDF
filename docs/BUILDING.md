@@ -124,9 +124,8 @@ The web version is the same user interface in the browser: `src/EasyPDF.Browser`
 a canvas) talks to `src/EasyPDF.Server` (ASP.NET Core with pdfium), which also serves the browser program. Design and
 security: [DESIGN.md "Web version"](DESIGN.md#web-version).
 
-**Prerequisites:** .NET 11 SDK, the WebAssembly workload for the browser program (it targets .NET 10, see
-`WebTargetFramework` in `Directory.Build.props`): `dotnet workload install wasm-tools-net10`; for the image PowerShell 7
-(`pwsh`) and Podman (or Docker).
+**Prerequisites:** .NET 11 SDK with the WebAssembly workload (`dotnet workload install wasm-tools`; its Emscripten needs
+Python 3); for the image PowerShell 7 (`pwsh`) and Podman (or Docker).
 
 **Image:** `./BuildContainer.sh` (Linux) or `BuildContainer.cmd` (Windows) runs `installer/container/build-container.ps1`:
 `git pull`, vulnerability check of the NuGet packages, all tests, `podman build` (the `Dockerfile` publishes server and
