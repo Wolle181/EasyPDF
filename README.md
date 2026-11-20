@@ -55,6 +55,14 @@ header plays it. It is recorded per brand with `branding/<id>/make-presentation-
 - File manager integration: *Read with <App>* and *Merge with <App>* in the right-click menu (Windows Explorer,
   Dolphin, Nemo; *Open With* in Finder and GNOME Files)
 
+### Web version
+The same user interface also runs **in the browser** (WebAssembly), with drag & drop of pages and of files from the
+desktop: open, read, organize, rotate, delete and insert pages, merge files, extract pages and download the result. The
+PDFs are processed by a server in a container (pdfium) and stay there only temporarily (30 minutes after the last use,
+at most 8 hours). Without sign-in for private use, or with single sign-on (OpenID Connect: Keycloak, Entra ID, …) in a
+company; built and run as described in [docs/BUILDING.md](docs/BUILDING.md#web-version-container). Stamps, texts,
+black out, OCR, search and printing follow later.
+
 ## Customization
 
 ### Your own brand (white-label)

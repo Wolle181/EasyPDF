@@ -264,6 +264,59 @@ Changes take effect immediately, without a restart, and are remembered for the n
 - Errors appear as a dialog with a short explanation and optional technical details; minor hints (e.g. "File no longer exists, removed from the list") appear briefly in the corner and disappear by themselves.
 - Available in English and German; further languages only need an additional translation file.
 
+## Web version
+The same user interface in the browser, with the comfort of the desktop (drag & drop of pages and of files from the
+operating system). Decisions: pdfium runs on the **server**, the user interface is the shared Avalonia code compiled to
+**WebAssembly**, both talk plain HTTPS/REST (no WebSocket, no Blazor). Hosting: one container per brand (Docker/Kubernetes).
+
+**Projects.** `EasyPDF.UI` holds the whole user interface (`MainView` = everything of one document as a `UserControl`).
+The desktop program `EasyPDF.App` shows it in a `MainWindow` (window size, closing, title) and is otherwise unchanged; the
+browser program `EasyPDF.Browser` shows it as the page (`ISingleViewApplicationLifetime`). `EasyPDF.Remote` is the contract
+(source-generated JSON) and the browser-side client; `EasyPDF.Server` the server. The browser program and the libraries it
+uses also target .NET 10 (`WebTargetFramework`): Avalonia's WebAssembly build of Skia exists only for the Emscripten version
+of .NET 9/10, linking it with .NET 11's fails.
+
+**Seams.**
+- `IPdfSource` (Core): what the views need of a document (page count and sizes, rendered pages, words of the text layer,
+  attachments). `PdfSource` is the local pdfium implementation, `RemotePdfSource` asks the server; `PageEntry` and
+  `EditableDocument` only know the interface, so editing, undo/redo and the views run unchanged in the browser.
+- `PdfBackend.Current` (Core): everything that opens or writes whole files (open, blank page, save, extract). Local by
+  default; the browser program sets `RemotePdfBackend`. Files are still addressed by path: an upload gets the virtual path
+  `/remote/<id>/<name>`, a target chosen in the save dialog `/save/<id>/<name>` (written through the browser's file API
+  or as download). Since a browser cannot write back to an uploaded file, *Save* always asks for the target there
+  (`IPdfBackend.CanOverwrite`).
+- `PlatformFeatures` (UI): `Files` turns picked/dropped files into those paths (upload in the browser), `Current` says which
+  commands the platform offers. Ribbon buttons, shortcuts and context menu entries of commands the web version does not
+  offer yet are hidden (and a ribbon group whose buttons are all hidden); the list is `EasyPDF.Browser/WebCommands.cs`.
+- Dialogs: a dialog's content is a `DialogView` (`UserControl` with title, size and `Close(result)`). On the desktop a
+  `DialogWindow` shows it (the old dialog class names remain as these windows), in the browser `DialogLayer` shows it as
+  an overlay on the page; `MainView.ShowDialogAsync` picks one. While an overlay is open the page's shortcuts do nothing.
+  Converted so far: message, unsaved changes, rotate, insert range, merge; the others are windows only.
+
+**Server.** REST under `/api`: upload (`POST /files`, PDF header checked, opened with pdfium right away, all page sizes
+returned), rendered pages as PNG (own codec in Core, `PngCodec`, so neither side needs a native image library), words,
+attachments, content, `build` (writes a page list based on a file: the snapshot of `EditableDocument`), `extract`,
+`blank`, `DELETE`. pdfium stays on its one worker thread; opened files are kept in a small LRU (`OpenDocuments`).
+
+**Owners and retention.** Every file belongs to an owner: in mode `None` an anonymous session (random id in the cookie
+`__Host-session`, `Secure`, `HttpOnly`, `SameSite=Strict`), in mode `Oidc` the signed-in user (`sub`, generic OpenID
+Connect: Keycloak, Entra ID, …; optional group or role). On disk only a hash of either. File ids are random 128-bit
+values and are only found together with their owner (otherwise 404). Files go 30 minutes after their last use, at the
+latest after 8 hours, when the document is closed in the app (the last reference) and at every start; an expired
+session takes its files with it. In mode `None` the browser keeps settings (and later stamps) itself.
+
+**Hardening** (as in the other web apps on the same host): security headers from the app (`SecurityHeadersMiddleware`:
+CSP `default-src 'self'` with `'wasm-unsafe-eval'` only, no inline scripts; `nosniff`, `Referrer-Policy`,
+`Permissions-Policy`; HSTS and `X-Frame-Options` from the reverse proxy); `X-Forwarded-*` only from loopback, the container
+gateway (read from `/proc/net/route`) and configured proxies; changing requests need the header `X-App-Request` (CSRF; no
+CORS); rate limits per client address (all API requests, uploads/writes); upload, per-owner and total quotas; render size
+limit; a time limit per pdfium job; no details in error responses, no file names in the log; no server header; Kestrel
+header timeout; data protection keys in the volume. Container: chiseled image without shell, non-root, `--read-only`,
+`--cap-drop=ALL`, `no-new-privileges`, memory limit, self health check (`--healthcheck`).
+
+**Not in the web version yet** (hidden): stamps and templates, texts, black out/white out, OCR, text selection and search,
+attachments, split, replace pages, reduce size, print, mail, settings, quick guide, About, several windows, recent files.
+
 ## Stamps, text and templates
 
 ### Insert stamp

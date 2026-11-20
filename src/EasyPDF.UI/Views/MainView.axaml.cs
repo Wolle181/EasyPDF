@@ -25,19 +25,23 @@ using EasyPDF.Core.Templates;
 
 namespace EasyPDF.App.Views;
 
-public partial class MainWindow : Window, IDialogService, IShortcutProvider
+/// <summary>
+/// The whole user interface of one document: brand header, ribbon, pages, status bar. The desktop program shows it in a
+/// <see cref="MainWindow"/>, the web version as the page itself. It is also the <see cref="IDialogService"/> of its view
+/// model: dialogs are windows on the desktop and overlays in the browser (<see cref="ShowDialogAsync{T}"/>).
+/// </summary>
+public partial class MainView : UserControl, IDialogService, IShortcutProvider
 {
     private readonly AppSettings _settings;
     private readonly WindowManager? _windows;
     private readonly MainViewModel _viewModel;
-    private bool _closeConfirmed;
 
-    public MainWindow() : this(new AppSettings())
+    public MainView() : this(new AppSettings())
     {
     }
 
-    /// <param name="windows">All main windows of the program; null: a window on its own (tests).</param>
-    public MainWindow(AppSettings settings, WindowManager? windows = null)
+    /// <param name="windows">All main windows of the program; null: a view on its own (tests, web version).</param>
+    public MainView(AppSettings settings, WindowManager? windows = null)
     {
         _settings = settings;
         _windows = windows;
@@ -63,7 +67,7 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
         // The recent files are shared: every window updates its lists
         _viewModel.RecentFilesChanged += () =>
         {
-            foreach (var window in AllWindows)
+            foreach (var window in AllViews)
                 window.RebuildRecentFiles();
         };
         _viewModel.PropertyChanged += (_, e) =>
@@ -98,8 +102,6 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
         _viewModel.RedactSelectionRequested += fill => PageView.RedactSelectedText(fill);
         PageView.AreaCopied += area => _viewModel.AreaCopied(area);
         PageView.AreaCopyFailed += ex => _ = ShowErrorAsync(Loc.T("ErrCopyAreaFailed"), ex.Message);
-        // An area copied in another window can be pasted here: the Paste command asks the shared clipboard again
-        Activated += (_, _) => _viewModel.PasteAreaCommand.NotifyCanExecuteChanged();
         PageView.StampPlaceRequested += OnStampPlaceRequested;
         PageView.TextPlaceRequested += (page, rect, text) => _viewModel.PlaceText(page, rect, text);
         PageView.TextChangeRequested += (page, id, rect, text) => _viewModel.ChangeText(page, id, rect, text);
@@ -125,14 +127,71 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
         // The splitter reports how far the pointer is from where it was pressed on it; the sidebar follows it, up to half the window
         SidebarSplitter.DragDelta += (_, e) => _viewModel.ResizePageSidebar(PageSidebar.Bounds.Width + e.Vector.X, Bounds.Width / 2);
 
-        RestoreWindowState();
         AddHandler(DragDrop.DropEvent, OnDrop);
+        if (PlatformFeatures.Current.IsWeb)
+        {
+            BrandSubtitle.Text = Loc.T("BrandSubtitleWeb");
+            StartGuideButton.IsVisible = false;
+        }
         ZoomBox.LostFocus += (_, _) => _viewModel.ApplyZoomInputCommand.Execute(null);
         BuildMenuAndShortcuts();
         RebuildRecentFiles();
     }
 
     public MainViewModel ViewModel => _viewModel;
+
+    /// <summary>The window around the view (desktop), or null (web version: the page has no windows).</summary>
+    public Window? OwnerWindow => TopLevel.GetTopLevel(this) as Window;
+
+    private TopLevel Host => TopLevel.GetTopLevel(this) ?? throw new InvalidOperationException("The view is not shown.");
+
+    /// <summary>Owner for the dialogs that exist as windows only (features the web version does not offer).</summary>
+    private Window RequireWindow() => OwnerWindow ?? throw new NotSupportedException("This dialog needs a window.");
+
+    /// <summary>The host window came to the front: an area copied in another window can be pasted here now.</summary>
+    public void OnHostActivated() => _viewModel.PasteAreaCommand.NotifyCanExecuteChanged();
+
+    /// <summary>The view wants its window closed (the user confirmed or there was nothing to confirm).</summary>
+    public event Action? CloseRequested;
+
+    private readonly List<KeyBinding> _shortcuts = [];
+    private List<KeyBinding> _appliedShortcuts = [];
+    private TopLevel? _shortcutHost;
+    private NativeMenu? _nativeMenu;
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        ApplyHostMenuAndShortcuts();
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        if (_shortcutHost != null)
+            foreach (var binding in _appliedShortcuts)
+                _shortcutHost.KeyBindings.Remove(binding);
+        _appliedShortcuts = [];
+        _shortcutHost = null;
+    }
+
+    /// <summary>
+    /// The shortcuts belong to the window (or the page), not to the view: they must work while nothing inside has the
+    /// focus. The menu goes to the window (native menu bar on macOS, NativeMenuBar elsewhere).
+    /// </summary>
+    private void ApplyHostMenuAndShortcuts()
+    {
+        if (TopLevel.GetTopLevel(this) is not { } host)
+            return;
+        if (_shortcutHost != null)
+            foreach (var binding in _appliedShortcuts)
+                _shortcutHost.KeyBindings.Remove(binding);
+        host.KeyBindings.AddRange(_shortcuts);
+        _appliedShortcuts = [.. _shortcuts];
+        _shortcutHost = host;
+        if (host is Window window && _nativeMenu != null)
+            NativeMenu.SetMenu(window, _nativeMenu);
+    }
 
     private void FocusSearchBox()
     {
@@ -166,7 +225,7 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
         e.Handled = true;
     }
 
-    private IEnumerable<MainWindow> AllWindows => _windows?.Windows ?? [this];
+    private IEnumerable<MainView> AllViews => _windows?.Windows.Select(w => w.View) ?? [this];
 
     public Task OpenPathAsync(string path) => _viewModel.OpenPathAsync(path);
 
@@ -210,7 +269,9 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
     private KeyBinding ShortcutBinding(KeyGesture gesture, ICommand command) => new()
     {
         Gesture = gesture,
-        Command = IsTextBoxGesture(gesture) ? new YieldingCommand(command, () => FocusManager?.GetFocusedElement() is TextBox) : command,
+        Command = IsTextBoxGesture(gesture)
+            ? new YieldingCommand(command, () => IsDialogOpen || TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is TextBox)
+            : new YieldingCommand(command, () => IsDialogOpen),
     };
 
     private sealed class YieldingCommand(ICommand inner, Func<bool> yield) : ICommand
@@ -241,7 +302,7 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
     {
         // Windows/Linux: the menu bar in the window can be switched off (every command is in the ribbon as well);
         // macOS has its global menu bar, which always stays
-        MenuBar.IsVisible = _settings.ShowMenuBar || OperatingSystem.IsMacOS();
+        MenuBar.IsVisible = !PlatformFeatures.Current.IsWeb && (_settings.ShowMenuBar || OperatingSystem.IsMacOS());
         var vm = _viewModel;
         var file = new[]
         {
@@ -349,12 +410,12 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
         root.Add(Top("MenuEdit", edit));
         root.Add(Top("MenuView", view));
         root.Add(Top("MenuHelp", help));
-        NativeMenu.SetMenu(this, root);
+        _nativeMenu = root;
 
-        KeyBindings.Clear();
-        var withShortcut = file.Concat(edit).Concat(view).Concat(help).OfType<Entry>().Where(e => e.Key != Key.None).ToList();
+        _shortcuts.Clear();
+        var withShortcut = file.Concat(edit).Concat(view).Concat(help).OfType<Entry>().Where(e => e.Key != Key.None && IsAvailable(e.Command)).ToList();
         foreach (var e in withShortcut)
-            KeyBindings.Add(ShortcutBinding(GestureOf(e), e.Command));
+            _shortcuts.Add(ShortcutBinding(GestureOf(e), e.Command));
         // Ribbon tooltips show the shortcut of the button's command
         // (buttons ask for it when they join the tree, because only the selected ribbon tab exists at a time)
         _shortcutTexts = withShortcut
@@ -363,11 +424,11 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
         foreach (var button in this.GetLogicalDescendants().OfType<RibbonButton>())
             button.Shortcut ??= ShortcutFor(button.Command);
         // Alternative zoom/redo shortcuts
-        KeyBindings.Add(new KeyBinding { Gesture = new KeyGesture(Key.Escape), Command = vm.CancelOperationCommand });
-        KeyBindings.Add(new KeyBinding { Gesture = new KeyGesture(Key.Escape), Command = vm.CancelStampCommand });
-        KeyBindings.Add(new KeyBinding { Gesture = new KeyGesture(Key.Add, PrimaryModifier), Command = vm.ZoomInCommand });
-        KeyBindings.Add(new KeyBinding { Gesture = new KeyGesture(Key.Subtract, PrimaryModifier), Command = vm.ZoomOutCommand });
-        KeyBindings.Add(ShortcutBinding(new KeyGesture(Key.Z, PrimaryModifier | KeyModifiers.Shift), vm.RedoCommand));
+        _shortcuts.Add(new KeyBinding { Gesture = new KeyGesture(Key.Escape), Command = new YieldingCommand(vm.CancelOperationCommand, () => IsDialogOpen) });
+        _shortcuts.Add(new KeyBinding { Gesture = new KeyGesture(Key.Escape), Command = new YieldingCommand(vm.CancelStampCommand, () => IsDialogOpen) });
+        _shortcuts.Add(new KeyBinding { Gesture = new KeyGesture(Key.Add, PrimaryModifier), Command = new YieldingCommand(vm.ZoomInCommand, () => IsDialogOpen) });
+        _shortcuts.Add(new KeyBinding { Gesture = new KeyGesture(Key.Subtract, PrimaryModifier), Command = new YieldingCommand(vm.ZoomOutCommand, () => IsDialogOpen) });
+        _shortcuts.Add(ShortcutBinding(new KeyGesture(Key.Z, PrimaryModifier | KeyModifiers.Shift), vm.RedoCommand));
         PageView.ContextMenu = BuildPageContextMenu(() => PageView.ContextPage);
         StatusZoomMenu.Flyout = BuildZoomMenu();
         StatusPageButton.Flyout = BuildGoToPageFlyout();
@@ -377,6 +438,7 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
         PageView.TemplateProvider = page => vm.ExpandPendingTemplate(page);
         OrganizeView.ContextMenu = BuildPageContextMenu(() => OrganizeView.ContextPage);
         RebuildRecentFiles();
+        ApplyHostMenuAndShortcuts();
     }
 
     /// <summary>Box above the "Page x of y" text of the status bar: type a page number, Enter jumps there.</summary>
@@ -442,7 +504,7 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
             open.Click += async (_, _) =>
             {
                 flyout.Hide();
-                await FolderLauncher.OpenAsync(this, _viewModel.TemplateFolder);
+                await FolderLauncher.OpenAsync(RequireWindow(), _viewModel.TemplateFolder);
             };
             host.Children.Add(new Separator());
             host.Children.Add(edit);
@@ -454,7 +516,7 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
     public async Task EditTemplatesAsync()
     {
         var before = _viewModel.LoadTemplates();
-        var result = await new TemplatesDialog(before).ShowDialog<List<TextTemplate>?>(this);
+        var result = await new TemplatesDialog(before).ShowDialog<List<TextTemplate>?>(RequireWindow());
         if (result != null)
             await _viewModel.SaveTemplatesAsync(before, result);
     }
@@ -567,7 +629,7 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
             await ShowErrorAsync(Loc.F("StampUnreadable", Path.GetFileName(path ?? "")));
             return;
         }
-        if (await dialog.ShowDialog<StampEditorResult?>(this) is not { } result)
+        if (await dialog.ShowDialog<StampEditorResult?>(RequireWindow()) is not { } result)
             return;
         var folder = path != null ? Path.GetDirectoryName(path)! : StampLibrary.ResolveFolder(_settings);
         try
@@ -587,7 +649,7 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
         var stamp = _viewModel.Document?.Pages.SelectMany(p => p.Stamps).FirstOrDefault(s => s.Id == stampId);
         if (stamp?.Template is not { } template)
             return;
-        var chosen = await new StampDateDialog(template.Context.Now).ShowDialog<DateTime?>(this);
+        var chosen = await new StampDateDialog(template.Context.Now).ShowDialog<DateTime?>(RequireWindow());
         if (chosen is not { } date || date.Date == template.Context.Now.Date)
             return;
         var changed = template with { Context = template.Context with { Now = date.Date + template.Context.Now.TimeOfDay } };
@@ -792,7 +854,7 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
         open.Click += async (_, _) =>
         {
             flyout.Hide();
-            await FolderLauncher.OpenAsync(this, folder);
+            await FolderLauncher.OpenAsync(RequireWindow(), folder);
         };
         host.Children.Add(open);
     }
@@ -843,6 +905,13 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
         menu.Items.Add(new Separator());
         var switchItem = Item("CtxShowOrganize", vm.SwitchModeCommand);
         menu.Items.Add(switchItem);
+
+        // The web version hides what it does not offer (and the separators that would then stand alone)
+        foreach (var item in paged.Where(i => !IsAvailable(i.Command)))
+            item.IsVisible = false;
+        if (PlatformFeatures.Current.IsWeb)
+            foreach (var separator in menu.Items.OfType<Separator>().ToList())
+                menu.Items.Remove(separator);
 
         menu.Opening += (_, _) =>
         {
@@ -895,7 +964,7 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
     /// <summary>Called after a language change: rebuild everything that is not bound live (in all windows).</summary>
     private void OnSettingsChanged()
     {
-        foreach (var window in AllWindows)
+        foreach (var window in AllViews)
         {
             window._viewModel.RefreshTexts();
             window.BuildMenuAndShortcuts();
@@ -912,117 +981,39 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
 
     #endregion
 
-    #region Window state
-
-    private void RestoreWindowState()
-    {
-        if (_settings.WindowWidth is > 300 && _settings.WindowHeight is > 200)
-        {
-            Width = _settings.WindowWidth.Value;
-            Height = _settings.WindowHeight.Value;
-        }
-        if (_settings.WindowX is { } x && _settings.WindowY is { } y && Screens.All.Any(s => s.WorkingArea.Contains(new PixelPoint(x + 50, y + 50))))
-        {
-            WindowStartupLocation = WindowStartupLocation.Manual;
-            Position = new PixelPoint(x, y);
-        }
-        if (_settings.WindowMaximized)
-            WindowState = WindowState.Maximized;
-    }
-
-    /// <summary>A new window: same size, slightly offset from <paramref name="other"/> (maximized if that one is).</summary>
-    public void PlaceNextTo(MainWindow other)
-    {
-        if (other.WindowState == WindowState.Maximized)
-        {
-            WindowState = WindowState.Maximized;
-            return;
-        }
-        WindowState = WindowState.Normal;
-        Width = other.Width;
-        Height = other.Height;
-        var offset = (int)Math.Round(30 * other.DesktopScaling);
-        var position = new PixelPoint(other.Position.X + offset, other.Position.Y + offset);
-        // Back to the top left corner of the screen once the windows would run off it
-        if (other.Screens.ScreenFromWindow(other) is { } screen && !screen.WorkingArea.Contains(position + new PixelPoint(200, 200)))
-            position = screen.WorkingArea.Position;
-        WindowStartupLocation = WindowStartupLocation.Manual;
-        Position = position;
-    }
-
-    /// <summary>Closing would lose changes the user has not decided about yet.</summary>
-    public bool NeedsCloseConfirmation => !_closeConfirmed && _viewModel.IsDirty;
-
-    /// <summary>Closes the window after asking about unsaved changes; false if the user cancelled.</summary>
-    public async Task<bool> CloseAfterConfirmAsync()
-    {
-        if (NeedsCloseConfirmation)
-        {
-            Activate();
-            if (!await _viewModel.ConfirmDiscardAsync())
-                return false;
-        }
-        CloseWindow();
-        return true;
-    }
-
-    protected override async void OnClosing(WindowClosingEventArgs e)
-    {
-        base.OnClosing(e);
-        if (NeedsCloseConfirmation)
-        {
-            e.Cancel = true;
-            if (await _viewModel.ConfirmDiscardAsync())
-            {
-                _closeConfirmed = true;
-                Close();
-            }
-            return;
-        }
-
-        _settings.WindowMaximized = WindowState == WindowState.Maximized;
-        if (WindowState == WindowState.Normal)
-        {
-            _settings.WindowWidth = Width;
-            _settings.WindowHeight = Height;
-            _settings.WindowX = Position.X;
-            _settings.WindowY = Position.Y;
-        }
-        try
-        {
-            _settings.Save();
-        }
-        catch (Exception)
-        {
-            // Not being able to save settings must never block closing
-        }
-    }
-
-    /// <summary>A closed window keeps no file open: the other windows keep the process (and so its handles) alive.</summary>
-    protected override async void OnClosed(EventArgs e)
-    {
-        base.OnClosed(e);
-        try
-        {
-            await _viewModel.ReleaseDocumentAsync();
-        }
-        catch (Exception)
-        {
-            // Nothing to tell the user: the window is gone
-        }
-    }
+    #region Drop
 
     /// <summary>Dropped files: the first one opens here (if the window is empty), each further one in its own window.</summary>
     private async void OnDrop(object? sender, DragEventArgs e)
     {
-        var paths = e.DataTransfer.TryGetFiles()?.Select(f => f.TryGetLocalPath()).OfType<string>().ToList() ?? [];
-        foreach (var path in _windows != null ? paths : paths.Take(1))
-            await _viewModel.OpenPathAsync(path);
+        if (e.Handled || IsDialogOpen)
+            return; // dropped into a dialog (web version: dialogs are part of the view)
+        var files = e.DataTransfer.TryGetFiles()?.OfType<IStorageFile>().ToList() ?? [];
+        foreach (var file in _windows != null ? files : files.Take(1))
+            if (await PlatformFeatures.Files.ToOpenPathAsync(file) is { } path)
+                await _viewModel.OpenPathAsync(path);
     }
 
     #endregion
 
     #region IDialogService
+
+    /// <summary>
+    /// Shows a dialog: as a window owned by this view's window (desktop) or as an overlay on the page (web version). Only
+    /// the one that is shown is created (<paramref name="window"/> or <paramref name="view"/>).
+    /// </summary>
+    private async Task<T?> ShowDialogAsync<T>(Func<Window> window, Func<DialogView> view)
+    {
+        if (OwnerWindow is { } owner)
+            return await window().ShowDialog<T?>(owner);
+        var result = await Dialogs.ShowAsync(view());
+        return result is T value ? value : default;
+    }
+
+    /// <summary>A dialog overlay is open (web version): the page's shortcuts must not act on the document behind it.</summary>
+    private bool IsDialogOpen => Dialogs.HasOpenDialog;
+
+    public bool IsAvailable(ICommand? command) => PlatformFeatures.Current.IsAvailable(_viewModel, command);
 
     private static FilePickerFileType PdfFilter() => new(Loc.T("FilterPdf"))
     {
@@ -1033,44 +1024,48 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
 
     public async Task<string?> PickPdfFileAsync()
     {
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        var files = await Host.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = Loc.T("PickPdfTitle"),
             AllowMultiple = false,
             FileTypeFilter = [PdfFilter()],
         });
-        return files.Count > 0 ? files[0].TryGetLocalPath() : null;
+        return files.Count > 0 ? await PlatformFeatures.Files.ToOpenPathAsync(files[0]) : null;
     }
 
     public async Task<IReadOnlyList<string>> PickPdfFilesAsync(string title)
     {
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        var files = await Host.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = title,
             AllowMultiple = true,
             FileTypeFilter = [PdfFilter()],
         });
-        return [.. files.Select(f => f.TryGetLocalPath()).OfType<string>()];
+        var paths = new List<string>();
+        foreach (var file in files)
+            if (await PlatformFeatures.Files.ToOpenPathAsync(file) is { } path)
+                paths.Add(path);
+        return paths;
     }
 
     public async Task<string?> PickSavePathAsync(string suggestedFileName, string? initialFolder)
     {
-        var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        var file = await Host.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
             Title = Loc.T("PickSaveTitle"),
             SuggestedFileName = suggestedFileName,
             DefaultExtension = "pdf",
             FileTypeChoices = [PdfFilter()],
-            SuggestedStartLocation = initialFolder != null ? await StorageProvider.TryGetFolderFromPathAsync(initialFolder) : null,
+            SuggestedStartLocation = initialFolder != null && !PlatformFeatures.Current.IsWeb ? await Host.StorageProvider.TryGetFolderFromPathAsync(initialFolder) : null,
             ShowOverwritePrompt = true,
         });
-        return file?.TryGetLocalPath();
+        return file != null ? PlatformFeatures.Files.ToSavePath(file) : null;
     }
 
     public async Task<string?> PickSaveFilePathAsync(string suggestedFileName, string? initialFolder)
     {
         var extension = Path.GetExtension(suggestedFileName).TrimStart('.');
-        var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        var file = await Host.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
             Title = Loc.T("PickSaveTitle"),
             SuggestedFileName = suggestedFileName,
@@ -1078,17 +1073,17 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
             FileTypeChoices = extension.Length > 0
                 ? [new FilePickerFileType(Loc.F("FilterExtension", extension.ToUpperInvariant())) { Patterns = [$"*.{extension}"] }, FilePickerFileTypes.All]
                 : [FilePickerFileTypes.All],
-            SuggestedStartLocation = initialFolder != null ? await StorageProvider.TryGetFolderFromPathAsync(initialFolder) : null,
+            SuggestedStartLocation = initialFolder != null && !PlatformFeatures.Current.IsWeb ? await Host.StorageProvider.TryGetFolderFromPathAsync(initialFolder) : null,
             ShowOverwritePrompt = true,
         });
-        return file?.TryGetLocalPath();
+        return file != null ? PlatformFeatures.Files.ToSavePath(file) : null;
     }
 
     public async Task<bool> OpenInSystemAsync(string path)
     {
         try
         {
-            return await Launcher.LaunchFileInfoAsync(new FileInfo(path));
+            return await Host.Launcher.LaunchFileInfoAsync(new FileInfo(path));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
         {
@@ -1097,37 +1092,38 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
     }
 
     public Task<AttachmentChoice?> ShowAttachmentsAsync(IReadOnlyList<PdfAttachment> attachments) =>
-        new AttachmentsDialog(attachments).ShowDialog<AttachmentChoice?>(this);
+        new AttachmentsDialog(attachments).ShowDialog<AttachmentChoice?>(RequireWindow());
 
     public Task<RotateResult?> ShowRotateDialogAsync(RotateDialogContext context) =>
-        new RotateDialog(context).ShowDialog<RotateResult?>(this);
+        ShowDialogAsync<RotateResult?>(() => new RotateDialog(context), () => new RotateDialogView(context));
 
     public Task<IReadOnlyList<int>?> ShowInsertRangeDialogAsync(InsertRangeContext context) =>
-        new InsertRangeDialog(context).ShowDialog<IReadOnlyList<int>?>(this);
+        ShowDialogAsync<IReadOnlyList<int>?>(() => new InsertRangeDialog(context), () => new InsertRangeDialogView(context));
 
     public Task<ReplacePagesResult?> ShowReplacePagesDialogAsync(ReplacePagesContext context) =>
-        new ReplacePagesDialog(context).ShowDialog<ReplacePagesResult?>(this);
+        new ReplacePagesDialog(context).ShowDialog<ReplacePagesResult?>(RequireWindow());
 
     public Task<PrintRequest?> ShowPrintDialogAsync(PrintDialogContext context) =>
-        new PrintDialog(context).ShowDialog<PrintRequest?>(this);
+        new PrintDialog(context).ShowDialog<PrintRequest?>(RequireWindow());
 
     public Task<SplitRequest?> ShowSplitDialogAsync(SplitDialogContext context) =>
-        new SplitDialog(context).ShowDialog<SplitRequest?>(this);
+        new SplitDialog(context).ShowDialog<SplitRequest?>(RequireWindow());
 
     public Task<OcrRequest?> ShowOcrDialogAsync(OcrDialogContext context) =>
-        new OcrDialog(context).ShowDialog<OcrRequest?>(this);
+        new OcrDialog(context).ShowDialog<OcrRequest?>(RequireWindow());
 
     public Task<ConcatenateResult?> ShowConcatenateDialogAsync(ConcatenateContext context) =>
-        new ConcatenateDialog(context, _viewModel.Document?.PageCount ?? 0).ShowDialog<ConcatenateResult?>(this);
+        ShowDialogAsync<ConcatenateResult?>(() => new ConcatenateDialog(context, _viewModel.Document?.PageCount ?? 0),
+            () => new ConcatenateDialogView(context, _viewModel.Document?.PageCount ?? 0));
 
     public Task<UnsavedChoice> AskUnsavedChangesAsync(string fileName) =>
-        new UnsavedChangesDialog(fileName).ShowDialog<UnsavedChoice>(this);
+        ShowDialogAsync<UnsavedChoice>(() => new UnsavedChangesDialog(fileName), () => new UnsavedChangesDialogView(fileName));
 
     public async Task<RedactedSaveAnswer> AskOverwriteRedactedAsync(string fileName, int pageCount) =>
-        await new RedactedSaveDialog(fileName, pageCount).ShowDialog<RedactedSaveAnswer?>(this)
+        await new RedactedSaveDialog(fileName, pageCount).ShowDialog<RedactedSaveAnswer?>(RequireWindow())
         ?? new RedactedSaveAnswer(RedactedSaveChoice.Cancel, false); // closed with [X]
 
-    public Task ShowAboutAsync() => new AboutWindow().ShowDialog(this);
+    public Task ShowAboutAsync() => new AboutWindow().ShowDialog(RequireWindow());
 
     private QuickGuideWindow? _guide;
 
@@ -1140,7 +1136,7 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
         {
             _guide = new QuickGuideWindow();
             _guide.Closed += (_, _) => _guide = null;
-            _guide.Show(this);
+            _guide.Show(RequireWindow());
         }
         return Task.CompletedTask;
     }
@@ -1152,39 +1148,36 @@ public partial class MainWindow : Window, IDialogService, IShortcutProvider
         bool played;
         try
         {
-            played = await Launcher.LaunchFileInfoAsync(new FileInfo(video));
+            played = await Host.Launcher.LaunchFileInfoAsync(new FileInfo(video));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
         {
             played = false;
         }
         if (!played)
-            await new MessageDialog(Loc.T("VideoOpenFailed"), Loc.T("VideoNoPlayer")).ShowDialog(this);
+            await new MessageDialog(Loc.T("VideoOpenFailed"), Loc.T("VideoNoPlayer")).ShowDialog(RequireWindow());
     }
 
-    public Task ShowSettingsAsync() => new SettingsWindow(_settings, OnSettingsChanged).ShowDialog(this);
+    public Task ShowSettingsAsync() => new SettingsWindow(_settings, OnSettingsChanged).ShowDialog(RequireWindow());
 
     public Task ShowErrorAsync(string message, string? details = null) =>
-        new MessageDialog(message, details).ShowDialog(this);
+        ShowDialogAsync<object?>(() => new MessageDialog(message, details), () => new MessageDialogView(message, details));
 
     public Task ShowInfoAsync(string message, string? details = null) =>
-        new MessageDialog(message, details, Loc.T("AppName")).ShowDialog(this);
+        ShowDialogAsync<object?>(() => new MessageDialog(message, details, Loc.T("AppName")),
+            () => new MessageDialogView(message, details, Loc.T("AppName")));
 
     public Task<ImageReduction?> ShowReduceSizeDialogAsync(ImageReduction last) =>
-        new ReduceSizeDialog(last).ShowDialog<ImageReduction?>(this);
+        new ReduceSizeDialog(last).ShowDialog<ImageReduction?>(RequireWindow());
 
     /// <summary>Line breaks as the platform expects them (CRLF on Windows, e.g. for Notepad and Office).</summary>
     public async Task CopyToClipboardAsync(string text)
     {
-        if (Clipboard != null)
-            await Clipboard.SetValueAsync(DataFormat.Text, text.ReplaceLineEndings());
+        if (TopLevel.GetTopLevel(this)?.Clipboard is { } clipboard)
+            await clipboard.SetValueAsync(DataFormat.Text, text.ReplaceLineEndings());
     }
 
-    public void CloseWindow()
-    {
-        _closeConfirmed = true;
-        Close();
-    }
+    public void CloseWindow() => CloseRequested?.Invoke();
 
     #endregion
 }

@@ -63,6 +63,7 @@ public partial class ConcatItem(string? path, IPdfSource? source, int pageCount,
 
     public string Folder => IsCurrent ? ""
         : IsFromWindow ? Loc.T(WasEdited ? "ConcatFromWindowEdited" : "ConcatFromWindow")
+        : Services.PlatformFeatures.Current.IsWeb ? "" // uploaded files have no folder of their own
         : System.IO.Path.GetDirectoryName(Path) ?? "";
 
     public string PagesText => HasError ? Error : Loc.Pages(PageCount);

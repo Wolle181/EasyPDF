@@ -32,6 +32,9 @@ public sealed class TestServerHost : IAsyncDisposable
 
     public IServiceProvider Services => _app.Services;
 
+    /// <summary>The in-memory server's handler, for clients of its own (the browser-side client).</summary>
+    public HttpMessageHandler Handler => _app.GetTestServer().CreateHandler();
+
     public static async Task<TestServerHost> StartAsync(params (string Key, string Value)[] settings)
     {
         var folder = Path.Combine(Path.GetTempPath(), "web-tests-" + Guid.NewGuid().ToString("N"));

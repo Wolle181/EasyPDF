@@ -1,0 +1,12 @@
+# Build context of the web version's container (Dockerfile): sources only
+**/bin/
+**/obj/
+artifacts/
+.git/
+.github/
+.vs/
+.idea/
+installer/
+tools/
+*.user
+start-claude*

@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <!-- The web version's browser program: the shared user interface (src/EasyPDF.UI) as .NET WebAssembly, drawn by Avalonia
+       into a canvas. pdfium runs on the server (src/EasyPDF.Server serves this program and its API). -->
+  <PropertyGroup>
+    <TargetFramework>$(WebTargetFramework)-browser</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>EasyPDF.Browser</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- German and English texts and number formats: the culture data is needed -->
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Browser" Version="12.1.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EasyPDF.UI\EasyPDF.UI.csproj" />
+    <ProjectReference Include="..\EasyPDF.Remote\EasyPDF.Remote.csproj" />
+  </ItemGroup>
+  <!-- The page's icon: the brand's -->
+  <ItemGroup>
+    <Content Include="$(BrandDir)icons/app-128.png" Link="wwwroot/favicon.png" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

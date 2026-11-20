@@ -1,13 +1,13 @@
-<Window xmlns="https://github.com/avaloniaui"
+<dlg:DialogView xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dlg="using:EasyPDF.App.Dialogs"
         xmlns:loc="using:EasyPDF.App.Localization"
-        x:Class="EasyPDF.App.Dialogs.MessageDialog"
-        Title="{loc:Tr ErrorTitle}" Width="460" SizeToContent="Height"
-        WindowStartupLocation="CenterOwner" CanResize="False" ShowInTaskbar="False">
+        x:Class="EasyPDF.App.Dialogs.MessageDialogView"
+        Title="{loc:Tr ErrorTitle}" DialogWidth="460" >
   <StackPanel Margin="20" Spacing="12">
     <TextBlock x:Name="MessageText" TextWrapping="Wrap" />
     <TextBlock x:Name="DetailsText" TextWrapping="Wrap" Opacity="0.7" FontSize="12" />
     <Button HorizontalAlignment="Right" MinWidth="80" HorizontalContentAlignment="Center"
             IsDefault="True" IsCancel="True" Click="OnOk" Content="{loc:Tr Ok}" />
   </StackPanel>
-</Window>
+</dlg:DialogView>

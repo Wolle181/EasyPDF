@@ -61,6 +61,14 @@ im Kopf spielt sie ab. Aufgenommen wird sie pro Marke mit `branding/<id>/make-pr
 - Einbindung in den Dateimanager: *Mit <App> lesen* und *Mit <App> zusammenführen* im Rechtsklick-Menü (Windows
   Explorer, Dolphin, Nemo; *Öffnen mit* im Finder und in GNOME Dateien)
 
+### Web-Version
+Dieselbe Oberfläche läuft auch **im Browser** (WebAssembly), mit Drag & Drop von Seiten und von Dateien vom Desktop:
+öffnen, lesen, Seiten ordnen, drehen, löschen und einfügen, Dateien zusammenführen, Seiten extrahieren und das Ergebnis
+herunterladen. Die PDFs verarbeitet ein Server im Container (pdfium), dort liegen sie nur vorübergehend (30 Minuten nach
+der letzten Nutzung, höchstens 8 Stunden). Ohne Anmeldung für den privaten Gebrauch oder mit Single Sign-on (OpenID
+Connect: Keycloak, Entra ID, …) im Unternehmen; Bauen und Betrieb in [docs/BUILDING.md](docs/BUILDING.md#web-version-container).
+Stempel, Texte, Schwärzen, OCR, Suche und Drucken folgen später.
+
 ## Anpassen
 
 ### Eigene Marke (White-Label)

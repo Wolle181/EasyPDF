@@ -1,0 +1,29 @@
+using System.Windows.Input;
+using EasyPDF.App.ViewModels;
+
+namespace EasyPDF.Browser;
+
+/// <summary>
+/// The commands the web version offers so far; the others (stamps, texts, redaction, OCR, printing, mail, settings…)
+/// are hidden until they work in the browser too.
+/// </summary>
+internal static class WebCommands
+{
+    public static bool IsAvailable(MainViewModel vm, ICommand command) =>
+        command == vm.OpenCommand || command == vm.SaveCommand || command == vm.SaveAsCommand
+        || command == vm.ConcatenateCommand || command == vm.ExtractPagesCommand
+        || command == vm.InsertBeforeCommand || command == vm.InsertAfterCommand
+        || command == vm.InsertBlankBeforeCommand || command == vm.InsertBlankAfterCommand
+        || command == vm.DeletePagesCommand || command == vm.RotatePagesCommand
+        || command == vm.RotateLeftCommand || command == vm.RotateRightCommand
+        || command == vm.UndoCommand || command == vm.RedoCommand
+        || command == vm.ShowReadingCommand || command == vm.ShowOrganizeCommand || command == vm.SwitchModeCommand
+        || command == vm.TogglePageSidebarCommand || command == vm.ToggleRibbonCommand
+        || command == vm.GoToFirstPageCommand || command == vm.GoToLastPageCommand || command == vm.ShowGoToPageCommand
+        || command == vm.GoToTypedPageCommand
+        || command == vm.FitHeightCommand || command == vm.FitWidthCommand || command == vm.FitBestCommand
+        || command == vm.ZoomInCommand || command == vm.ZoomOutCommand || command == vm.ActualSizeCommand
+        || command == vm.ApplyZoomInputCommand
+        || command == vm.SelectAllCommand || command == vm.CloseDocumentCommand
+        || command == vm.CancelOperationCommand || command == vm.CancelStampCommand;
+}

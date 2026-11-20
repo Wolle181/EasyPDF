@@ -119,6 +119,40 @@ All installers go into the pre-release *latest* (release files do not count agai
   gh release delete latest --cleanup-tag --yes
   ```
 
+## Web version (container)
+The web version is the same user interface in the browser: `src/EasyPDF.Browser` (Avalonia as .NET WebAssembly, drawn into
+a canvas) talks to `src/EasyPDF.Server` (ASP.NET Core with pdfium), which also serves the browser program. Design and
+security: [DESIGN.md "Web version"](DESIGN.md#web-version).
+
+**Prerequisites:** .NET 11 SDK, the WebAssembly workload for the browser program (it targets .NET 10, see
+`WebTargetFramework` in `Directory.Build.props`): `dotnet workload install wasm-tools-net10`; for the image PowerShell 7
+(`pwsh`) and Podman (or Docker).
+
+**Image:** `./BuildContainer.sh` (Linux) or `BuildContainer.cmd` (Windows) runs `installer/container/build-container.ps1`:
+`git pull`, vulnerability check of the NuGet packages, all tests, `podman build` (the `Dockerfile` publishes server and
+browser program inside the SDK container and runs the core and server tests once more), then pushes
+`<name>-web:<version>` and `:latest` (name = shown name of the brand in lower case) to the registry (default the private one
+of the NAS, `-Registry host:port` for another). Options: `-NoPush` (trial build, local only), `-NoTests`, `-NoPull`,
+`-AllowDirty` (uncommitted changes stop it otherwise), `-Brand <id>`. The runtime image is `runtime-deps` *chiseled-extra*
+(no shell, non-root), the server is published self-contained with ReadyToRun (Native AOT is not needed on the server).
+
+**Run it locally** (development, without container):
+```
+dotnet publish src/EasyPDF.Browser -c Release -o artifacts/web-dev/browser
+ASPNETCORE_ENVIRONMENT=Development ASPNETCORE_URLS=http://localhost:5199 \
+  Web__WebRoot=$PWD/artifacts/web-dev/browser/wwwroot dotnet run --project src/EasyPDF.Server
+```
+Then open `http://localhost:5199` (browsers send the `Secure` cookies to `localhost` over HTTP, elsewhere only over HTTPS).
+
+**Configuration** (section `Web` of `appsettings.json`; in the container `/app/appsettings.Production.json`, mounted from the
+host, or environment variables `Web__…`): `Authentication:Mode` `None` (no sign-in, anonymous sessions) or `Oidc` (OpenID
+Connect: `Authority`, `ClientId`, `ClientSecret`, optional `RequiredGroup`/`RequiredRole`; callback path `/signin-oidc`),
+`Storage` (folders `/data/files`, `/data/keys`; `IdleTimeoutMinutes` 30, `MaxAgeHours` 8, upload and quota limits),
+`RateLimits`, `ReverseProxy` (`TrustContainerGateway`, `TrustedProxies`) and `AllowedHosts`. The container writes only to
+`/data` and `/tmp`, so it runs with `--read-only`; it checks its own health with `/app/EasyPDF.Server --healthcheck`.
+The start script for the NAS (volumes, hardening options, reverse proxy) lives in the ContainerZoo repository
+(folder `EasyPDFWeb`).
+
 ## Development and release repositories
 All work happens in the development repository, on `main` only; there are no brand branches. Each published brand has
 its own release repository: a clone next to the development repository, in a folder named after the brand's shown

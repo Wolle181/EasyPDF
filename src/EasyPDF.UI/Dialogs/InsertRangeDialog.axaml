@@ -1,10 +1,10 @@
-<Window xmlns="https://github.com/avaloniaui"
+<dlg:DialogView xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dlg="using:EasyPDF.App.Dialogs"
         xmlns:vm="using:EasyPDF.App.ViewModels"
         xmlns:loc="using:EasyPDF.App.Localization"
-        x:Class="EasyPDF.App.Dialogs.InsertRangeDialog" x:DataType="vm:InsertRangeDialogViewModel"
-        Title="{loc:Tr InsertRangeTitle}" Width="420" SizeToContent="Height"
-        WindowStartupLocation="CenterOwner" CanResize="False" ShowInTaskbar="False">
+        x:Class="EasyPDF.App.Dialogs.InsertRangeDialogView" x:DataType="vm:InsertRangeDialogViewModel"
+        Title="{loc:Tr InsertRangeTitle}" DialogWidth="420" >
   <StackPanel Margin="20" Spacing="14">
     <TextBlock Text="{Binding Heading}" TextWrapping="Wrap" />
     <StackPanel Spacing="6">
@@ -18,4 +18,4 @@
       <Button MinWidth="80" HorizontalContentAlignment="Center" IsCancel="True" Click="OnCancel" Content="{loc:Tr Cancel}" />
     </StackPanel>
   </StackPanel>
-</Window>
+</dlg:DialogView>

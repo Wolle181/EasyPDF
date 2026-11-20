@@ -592,7 +592,8 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
             return true;
 
         var path = document.FilePath;
-        if (saveAs || path == null)
+        // The web version cannot write back to an uploaded file: it asks for the target every time
+        if (saveAs || path == null || !PdfBackend.Current.CanOverwrite(path))
         {
             var suggested = path != null ? Path.GetFileName(path) : _suggestedFileName ?? Loc.T("DefaultFileName");
             path = await dialogs.PickSavePathAsync(suggested, path != null ? Path.GetDirectoryName(path) : null);
@@ -1379,7 +1380,7 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
         BeginOperation(Loc.F("BusyExtracting", Loc.Pages(pages.Count)));
         try
         {
-            await PdfSaver.ExtractAsync(pages, path, null, new Progress<double>(p => Progress = p), _operation.Token);
+            await PdfBackend.Current.ExtractAsync(pages, path, new Progress<double>(p => Progress = p), _operation.Token);
             ShowMessage(Loc.F("MsgExtracted", pages.Count, Path.GetFileName(path)));
         }
         catch (OperationCanceledException)

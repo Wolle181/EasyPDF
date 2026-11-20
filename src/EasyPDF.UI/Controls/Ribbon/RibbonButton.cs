@@ -1,6 +1,9 @@
+using System.Linq;
 using System;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.VisualTree;
+using Avalonia.LogicalTree;
 using Avalonia.Controls.Shapes;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -11,6 +14,9 @@ namespace EasyPDF.App.Controls.Ribbon;
 public interface IShortcutProvider
 {
     string? ShortcutFor(System.Windows.Input.ICommand? command);
+
+    /// <summary>False for commands the platform does not offer (web version): their buttons are hidden.</summary>
+    bool IsAvailable(System.Windows.Input.ICommand? command) => true;
 }
 
 /// <summary>
@@ -127,7 +133,16 @@ public class RibbonButton : Button
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
-        if (Shortcut == null && TopLevel.GetTopLevel(this) is IShortcutProvider provider)
+        var provider = this.GetVisualAncestors().OfType<IShortcutProvider>().FirstOrDefault();
+        if (provider != null && !provider.IsAvailable(Command))
+        {
+            IsVisible = false;
+            // A group whose buttons are all unavailable goes as a whole (not just its caption left over)
+            if (this.FindAncestorOfType<RibbonGroup>() is { } group
+                && group.GetLogicalDescendants().OfType<RibbonButton>().All(b => !provider.IsAvailable(b.Command)))
+                group.IsVisible = false;
+        }
+        if (Shortcut == null && provider != null)
             Shortcut = provider.ShortcutFor(Command);
     }
 

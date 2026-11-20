@@ -90,6 +90,13 @@ public class App : Application
                         _ = OpenFilesAsync(new StartupArguments([.. items.Select(i => i.TryGetLocalPath()).OfType<string>()], false));
                 };
         }
+        else if (ApplicationLifetime is ISingleViewApplicationLifetime single)
+        {
+            // Web version: one view, the page itself; settings live in the browser's memory for this visit
+            var settings = AppSettings.Load();
+            AppEnvironment.Apply(settings);
+            single.MainView = new MainView(settings);
+        }
         base.OnFrameworkInitializationCompleted();
     }
 

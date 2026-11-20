@@ -39,7 +39,7 @@ public class TextToolTests
         Assert.Equal("#000000", vm.TextColor);
 
         // The next session starts with the remembered style
-        var next = new EasyPDF.App.ViewModels.MainViewModel(settings, window);
+        var next = new EasyPDF.App.ViewModels.MainViewModel(settings, window.View);
         Assert.Equal("Times", next.TextFont);
 
         window.Close();

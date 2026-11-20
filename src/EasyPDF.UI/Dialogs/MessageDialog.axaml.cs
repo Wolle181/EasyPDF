@@ -3,12 +3,12 @@ using Avalonia.Interactivity;
 
 namespace EasyPDF.App.Dialogs;
 
-public partial class MessageDialog : Window
+public partial class MessageDialogView : DialogView
 {
-    public MessageDialog() => InitializeComponent();
+    public MessageDialogView() => InitializeComponent();
 
     /// <param name="title">Window title; "Error" (from the XAML) if null.</param>
-    public MessageDialog(string message, string? details, string? title = null) : this()
+    public MessageDialogView(string message, string? details, string? title = null) : this()
     {
         if (title != null)
             Title = title;
@@ -18,4 +18,12 @@ public partial class MessageDialog : Window
     }
 
     private void OnOk(object? sender, RoutedEventArgs e) => Close();
+}
+
+/// <summary>The message as a window (desktop).</summary>
+public sealed class MessageDialog : DialogWindow
+{
+    public MessageDialog(string message, string? details, string? title = null) : base(new MessageDialogView(message, details, title))
+    {
+    }
 }

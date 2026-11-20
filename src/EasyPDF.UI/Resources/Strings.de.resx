@@ -501,4 +501,12 @@
   <data name="ErrAttachmentSave" xml:space="preserve"><value>Der Anhang „{0}“ konnte nicht gespeichert werden.</value></data>
   <data name="StatusAttachmentSaved" xml:space="preserve"><value>Gespeichert: {0}</value></data>
   <data name="FilterExtension" xml:space="preserve"><value>{0}-Datei</value></data>
+  <data name="WebErrNotPdf" xml:space="preserve"><value>Die Datei ist kein PDF-Dokument.</value></data>
+  <data name="WebErrTooLarge" xml:space="preserve"><value>Die Datei ist größer, als der Server annimmt.</value></data>
+  <data name="WebErrQuota" xml:space="preserve"><value>Auf dem Server ist kein Platz mehr für Ihre Dateien. Schließen Sie nicht mehr benötigte Dokumente und versuchen Sie es erneut.</value></data>
+  <data name="WebErrPassword" xml:space="preserve"><value>Die Datei ist kennwortgeschützt und kann nicht geöffnet werden.</value></data>
+  <data name="WebErrDamaged" xml:space="preserve"><value>Die Datei ist beschädigt oder kein gültiges PDF-Dokument.</value></data>
+  <data name="WebErrTooManyRequests" xml:space="preserve"><value>Zu viele Anfragen in kurzer Zeit. Bitte warten Sie einen Moment und versuchen Sie es erneut.</value></data>
+  <data name="WebErrServer" xml:space="preserve"><value>Der Server konnte die Anfrage nicht bearbeiten. Bitte versuchen Sie es später erneut.</value></data>
+  <data name="BrandSubtitleWeb" xml:space="preserve"><value>PDFs lesen, ordnen und zusammenführen – im Browser</value></data>
 </root>

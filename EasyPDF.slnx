@@ -4,6 +4,7 @@
     <Project Path="src/EasyPDF.Core/EasyPDF.Core.csproj" />
     <Project Path="src/EasyPDF.UI/EasyPDF.UI.csproj" />
     <Project Path="src/EasyPDF.Remote/EasyPDF.Remote.csproj" />
+    <Project Path="src/EasyPDF.Browser/EasyPDF.Browser.csproj" />
     <Project Path="src/EasyPDF.Server/EasyPDF.Server.csproj" />
   </Folder>
   <Folder Name="/tests/">

@@ -12,13 +12,13 @@ using EasyPDF.App.ViewModels;
 
 namespace EasyPDF.App.Dialogs;
 
-public partial class ConcatenateDialog : Window
+public partial class ConcatenateDialogView : DialogView
 {
     private bool _accepted;
 
-    public ConcatenateDialog() => InitializeComponent();
+    public ConcatenateDialogView() => InitializeComponent();
 
-    public ConcatenateDialog(ConcatenateContext context, int currentPageCount) : this()
+    public ConcatenateDialogView(ConcatenateContext context, int currentPageCount) : this()
     {
         DataContext = new ConcatenateDialogViewModel(context, currentPageCount);
         AddHandler(DragDrop.DropEvent, OnDrop);
@@ -28,14 +28,22 @@ public partial class ConcatenateDialog : Window
         FileList.AddHandler(PointerReleasedEvent, OnRowReleased, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
         FileList.PointerCaptureLost += (_, _) => EndRowDrag();
         if (context.InitialFiles is { Count: > 0 } files)
-            Opened += async (_, _) => await Model.AddFilesAsync(files);
+            Shown += async (_, _) => await Model.AddFilesAsync(files);
+        // Cancelled (or closed with [X]): release the opened files; on OK the caller owns them
+        Closed += async (_, _) =>
+        {
+            if (!_accepted)
+                await Model.DisposeAllAsync();
+        };
     }
 
     public ConcatenateDialogViewModel Model => (ConcatenateDialogViewModel)DataContext!;
 
     private async void OnAdd(object? sender, RoutedEventArgs e)
     {
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        if (Host is not { } host)
+            return;
+        var files = await host.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = Loc.T("ConcatAdd"),
             AllowMultiple = true,
@@ -46,14 +54,25 @@ public partial class ConcatenateDialog : Window
                 }
             ],
         });
-        await Model.AddFilesAsync(files.Select(f => f.TryGetLocalPath()).OfType<string>());
+        await Model.AddFilesAsync(await ToPathsAsync(files));
     }
 
     private async void OnDrop(object? sender, DragEventArgs e)
     {
-        var files = e.DataTransfer.TryGetFiles()?.Select(f => f.TryGetLocalPath()).OfType<string>().ToList();
-        if (files is { Count: > 0 })
+        e.Handled = true; // not also to the main view below (web version: the dialog is part of it)
+        var files = await ToPathsAsync(e.DataTransfer.TryGetFiles()?.OfType<IStorageFile>() ?? []);
+        if (files.Count > 0)
             await Model.AddFilesAsync(files);
+    }
+
+    /// <summary>Paths for picked or dropped files (local paths; uploads in the web version).</summary>
+    private static async System.Threading.Tasks.Task<System.Collections.Generic.List<string>> ToPathsAsync(System.Collections.Generic.IEnumerable<IStorageFile> files)
+    {
+        var paths = new System.Collections.Generic.List<string>();
+        foreach (var file in files)
+            if (await PlatformFeatures.Files.ToOpenPathAsync(file) is { } path)
+                paths.Add(path);
+        return paths;
     }
 
     #region Reordering by drag and drop
@@ -158,12 +177,20 @@ public partial class ConcatenateDialog : Window
     }
 
     private void OnCancel(object? sender, RoutedEventArgs e) => Close((ConcatenateResult?)null);
+}
 
-    protected override async void OnClosed(System.EventArgs e)
+/// <summary>The dialog as a window (desktop).</summary>
+public sealed class ConcatenateDialog : DialogWindow
+{
+    public ConcatenateDialog(ConcatenateContext context, int currentPageCount) : base(new ConcatenateDialogView(context, currentPageCount))
     {
-        base.OnClosed(e);
-        // Cancelled (or closed with [X]): release the opened files; on OK the caller owns them
-        if (!_accepted)
-            await Model.DisposeAllAsync();
+        MinWidth = 520;
+        MinHeight = 360;
     }
+
+    public ConcatenateDialogView View => (ConcatenateDialogView)DialogContent;
+
+    public ConcatenateDialogViewModel Model => View.Model;
+
+    public bool IsDraggingRow => View.IsDraggingRow;
 }

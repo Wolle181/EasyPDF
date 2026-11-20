@@ -501,4 +501,12 @@
   <data name="ErrAttachmentSave" xml:space="preserve"><value>The attachment "{0}" could not be saved.</value></data>
   <data name="StatusAttachmentSaved" xml:space="preserve"><value>Saved: {0}</value></data>
   <data name="FilterExtension" xml:space="preserve"><value>{0} file</value></data>
+  <data name="WebErrNotPdf" xml:space="preserve"><value>The file is not a PDF document.</value></data>
+  <data name="WebErrTooLarge" xml:space="preserve"><value>The file is larger than the server accepts.</value></data>
+  <data name="WebErrQuota" xml:space="preserve"><value>There is no more room on the server for your files. Close documents you no longer need and try again.</value></data>
+  <data name="WebErrPassword" xml:space="preserve"><value>The file is password protected and cannot be opened.</value></data>
+  <data name="WebErrDamaged" xml:space="preserve"><value>The file is damaged or is not a valid PDF document.</value></data>
+  <data name="WebErrTooManyRequests" xml:space="preserve"><value>Too many requests in a short time. Please wait a moment and try again.</value></data>
+  <data name="WebErrServer" xml:space="preserve"><value>The server could not handle the request. Please try again later.</value></data>
+  <data name="BrandSubtitleWeb" xml:space="preserve"><value>Read, organize and combine PDFs – in the browser</value></data>
 </root>

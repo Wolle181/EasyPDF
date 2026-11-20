@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>$(AppTargetFramework)</TargetFramework>
+    <TargetFrameworks>$(AppTargetFramework);$(WebTargetFramework)</TargetFrameworks>
     <RootNamespace>EasyPDF.Core</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- Trim/AOT analyzers: code that would break under Native AOT is a warning, hence a build error -->

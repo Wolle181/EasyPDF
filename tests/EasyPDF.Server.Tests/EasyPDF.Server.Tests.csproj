@@ -15,5 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\EasyPDF.Server\EasyPDF.Server.csproj" />
+    <ProjectReference Include="..\..\src\EasyPDF.Remote\EasyPDF.Remote.csproj" />
   </ItemGroup>
 </Project>

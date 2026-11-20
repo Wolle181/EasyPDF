@@ -88,7 +88,7 @@ public class MenuBarTests
         // Off by default on Windows and Linux; macOS keeps its global menu bar
         Assert.Equal(OperatingSystem.IsMacOS(), first.FindControl<NativeMenuBar>("MenuBar")!.IsVisible);
 
-        var shown = first.ShowSettingsAsync();
+        var shown = first.View.ShowSettingsAsync();
         await Pump();
         var dialog = first.OwnedWindows.OfType<SettingsWindow>().Single();
         var box = dialog.FindControl<CheckBox>("MenuBarBox")!;

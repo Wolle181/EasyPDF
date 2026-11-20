@@ -7,6 +7,10 @@
     <!-- Target framework of all projects (they use $(AppTargetFramework)); the SDK is pinned in global.json.
          Moving to a newer .NET = change both. Not TargetFramework itself, so the WiX project stays untouched. -->
     <AppTargetFramework>net11.0</AppTargetFramework>
+    <!-- Target framework of the web version's browser program (src/EasyPDF.Browser) and, in addition, of the libraries it
+         uses (Core, Remote, UI). Avalonia's WebAssembly build of Skia is made for the Emscripten version of .NET 9/10, not
+         for that of .NET 11 (the link step fails). Raise it once Avalonia supports the newer .NET in the browser. -->
+    <WebTargetFramework>net10.0</WebTargetFramework>
 	
     <!-- The project's git repository, the one place that names it: Help > About, MSI (Apps & features link),
          .deb homepage. The same for every brand. -->
