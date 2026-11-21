@@ -337,8 +337,13 @@ of subfolders, `templates/*.txt`; files above 5 MB are left out). Shared stamps 
 added unless the user has one of the same name and are kept only once changed. The web gallery's right-click menu also
 deletes the user's own stamps (there is no folder to delete them in).
 
-**Not in the web version yet** (hidden): mail, several windows, recent files. Split
-writes the parts as one ZIP file (no folder to choose in a browser); attachments and the e-invoice are saved
+**Fonts on the web:** a browser has no system fonts, so the preview of placed text would fall back to the UI font. The
+browser program brings Liberation Sans, Serif and Mono (Regular, SIL OFL, `EasyPDF.Browser/Assets/Fonts`), which have the
+widths of Arial/Helvetica, Times and Courier, the standard fonts the text is written with (`TextMetrics.EmbeddedFonts`).
+
+**Intentionally not in the web version** (hidden): mail (a browser cannot hand an attachment to the mail program; save
+and attach instead), several windows (another browser tab does the same), recent files (the files on the server are
+temporary). Split writes the parts as one ZIP file (no folder to choose in a browser); attachments and the e-invoice are saved
 (downloaded), a browser cannot open them in a program of the system.
 
 ## Stamps, text and templates

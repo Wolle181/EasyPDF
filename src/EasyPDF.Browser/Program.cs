@@ -29,6 +29,7 @@ internal static class Program
         PdfBackend.Current = new RemotePdfBackend(files, targets);
         PlatformFeatures.Files = new BrowserFiles(files, targets);
         PlatformFeatures.OcrEngineFactory = () => new ServerOcrOnly();
+        TextMetrics.EmbeddedFonts = "avares://EasyPDF.Browser/Assets/Fonts";
         PlatformFeatures.Current = PlatformFeatures.Web(WebCommands.IsAvailable, WebCommands.Buttons);
         await Interop.LoadAsync();
         Interop.SetTitle(AppInfo.Name);
