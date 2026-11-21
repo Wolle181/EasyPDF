@@ -315,7 +315,14 @@ public class ApiTests
         server.Advance(TimeSpan.FromMinutes(31));
         await cleanup.RunOnceAsync();
         Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync($"/api/files/{info.Id}/content")).StatusCode);
-        Assert.Empty(Directory.EnumerateFiles(Path.Combine(server.Folder, "files"), "*.pdf", SearchOption.AllDirectories));
+        // On Windows the file can still be open from the download a moment ago: the next passes delete it
+        var folder = Path.Combine(server.Folder, "files");
+        for (var pass = 0; pass < 50 && Directory.EnumerateFiles(folder, "*.pdf", SearchOption.AllDirectories).Any(); pass++)
+        {
+            await Task.Delay(100);
+            await cleanup.RunOnceAsync();
+        }
+        Assert.Empty(Directory.EnumerateFiles(folder, "*.pdf", SearchOption.AllDirectories));
     }
 
     [Fact]

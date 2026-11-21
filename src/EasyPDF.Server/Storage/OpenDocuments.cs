@@ -56,10 +56,10 @@ public sealed class OpenDocuments : IAsyncDisposable
     /// Closes a file the store has removed and deletes it from the disk: only after closing, Windows refuses to delete a
     /// file that is open (the store's own attempt only works on Linux and macOS).
     /// </summary>
-    public async Task ReleaseAsync(StoredFile file)
+    public async Task ReleaseAsync(StoredFile file, FileStore files)
     {
         await CloseAsync(file.Id);
-        FileStore.TryDeleteFile(file.Path);
+        files.DeleteRemoved(file);
     }
 
     public async Task CloseAsync(string id)

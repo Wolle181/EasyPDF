@@ -122,7 +122,7 @@ public sealed class FileStore
     {
         if (!_files.TryGetValue(id, out var file) || file.Owner != owner || !_files.TryRemove(id, out _))
             return null;
-        TryDeleteFile(file.Path);
+        DeleteRemoved(file);
         return file;
     }
 
@@ -135,7 +135,7 @@ public sealed class FileStore
         var expired = _files.Values.Where(f => now - f.LastAccess > idle || now - f.Created > maxAge).ToArray();
         foreach (var file in expired)
             if (_files.TryRemove(file.Id, out _))
-                TryDeleteFile(file.Path);
+                DeleteRemoved(file);
         if (expired.Length > 0)
             _logger.LogInformation("Deleted {Count} expired files", expired.Length);
         return expired;
@@ -147,7 +147,7 @@ public sealed class FileStore
         var files = _files.Values.Where(f => f.Owner == owner).ToArray();
         foreach (var file in files)
             if (_files.TryRemove(file.Id, out _))
-                TryDeleteFile(file.Path);
+                DeleteRemoved(file);
         TryDeleteDirectory(System.IO.Path.Combine(_options.Folder, owner));
         return files;
     }
@@ -173,9 +173,37 @@ public sealed class FileStore
 
     public static string NewId() => Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(16));
 
-    internal static void TryDeleteFile(string path)
+    internal static bool TryDeleteFile(string path)
     {
-        try { File.Delete(path); } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        try
+        {
+            File.Delete(path);
+            return !File.Exists(path); // Windows keeps the name of a file deleted while open until the last handle closes
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return false;
+        }
+    }
+
+    // Files of removed entries that could not be deleted yet (still open on Windows, e.g. a download in progress)
+    private readonly ConcurrentDictionary<string, byte> _undeleted = new(StringComparer.Ordinal);
+
+    /// <summary>Deletes the file of a removed entry; if it is still open, <see cref="RetryDeletes"/> tries again.</summary>
+    public void DeleteRemoved(StoredFile file)
+    {
+        if (TryDeleteFile(file.Path))
+            _undeleted.TryRemove(file.Path, out _);
+        else
+            _undeleted[file.Path] = 0;
+    }
+
+    /// <summary>Tries again to delete the files that were still open when their entries were removed (each cleanup pass).</summary>
+    public void RetryDeletes()
+    {
+        foreach (var path in _undeleted.Keys)
+            if (TryDeleteFile(path))
+                _undeleted.TryRemove(path, out _);
     }
 
     private static void TryDeleteDirectory(string path)

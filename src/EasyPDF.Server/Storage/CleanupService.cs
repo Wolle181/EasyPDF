@@ -28,13 +28,14 @@ public sealed class CleanupService(FileStore files, OpenDocuments documents, Ses
     /// <summary>One pass (also called by the tests).</summary>
     public async Task RunOnceAsync()
     {
+        files.RetryDeletes();
         foreach (var file in files.RemoveExpired())
-            await documents.ReleaseAsync(file);
+            await documents.ReleaseAsync(file, files);
         var idle = TimeSpan.FromMinutes(Math.Max(1, options.Value.Authentication.SessionIdleMinutes));
         foreach (var owner in sessions.RemoveExpired(idle))
         {
             foreach (var file in files.RemoveOwner(owner))
-                await documents.ReleaseAsync(file);
+                await documents.ReleaseAsync(file, files);
             files.DeleteOwnerFolder(owner); // again, now that its files are closed (Windows)
         }
     }
