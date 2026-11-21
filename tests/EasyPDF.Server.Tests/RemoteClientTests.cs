@@ -169,6 +169,49 @@ public class RemoteClientTests
     }
 
     [Fact]
+    public async Task TextsRedactionsAndStampsArriveInTheSavedFile()
+    {
+        await using var server = await TestServerHost.StartAsync();
+        var (backend, targets) = Client(server);
+        var path = await UploadDemoAsync(backend);
+        var source = await backend.OpenAsync(path);
+        await using var document = EditableDocument.FromSource(source);
+        // Page 2 is the table of contents: black out its heading, write a text, place a small red stamp
+        var heading = (await source.ReadWordsAsync(1)).First(w => w.Text.Equals("CONTENTS", StringComparison.OrdinalIgnoreCase));
+        document.AddRedactions([(1, heading.Box)], RedactionFill.Black);
+        document.AddText(1, "Webtext", "Helvetica", 14, "#000000", new RectPt(60, 700, 200, 20));
+        var bgra = Enumerable.Repeat(new byte[] { 0, 0, 255, 255 }, 20 * 10).SelectMany(b => b).ToArray();
+        document.AddStamp(1, [], 20, 10, new RectPt(300, 400, 40, 20), 0, bgra);
+
+        var previous = PdfBackend.Current;
+        PdfBackend.Current = backend;
+        try
+        {
+            await document.SaveAsync("/save/o/overlays.pdf");
+        }
+        finally
+        {
+            PdfBackend.Current = previous;
+        }
+        var file = Path.Combine(server.Folder, "overlays-result.pdf");
+        await File.WriteAllBytesAsync(file, targets.Written["/save/o/overlays.pdf"]);
+        await using var saved = await PdfSource.OpenAsync(file);
+        var words = (await saved.ReadWordsAsync(1)).Select(w => w.Text).ToList();
+        Assert.Contains("Webtext", words);
+        Assert.DoesNotContain(words, w => w.Equals("CONTENTS", StringComparison.OrdinalIgnoreCase)); // removed for good
+        var page = await saved.RenderAsync(1, 595, 842);
+        var red = 0;
+        for (var y = 400; y < 420; y++)
+            for (var x = 300; x < 340; x++)
+            {
+                var i = y * page.Stride + x * 4;
+                if (page.Pixels[i + 2] > 200 && page.Pixels[i + 1] < 60 && page.Pixels[i] < 60)
+                    red++;
+            }
+        Assert.True(red > 400, $"stamp not found ({red} red pixels)");
+    }
+
+    [Fact]
     public async Task ServerErrorsArriveWithTheirCode()
     {
         await using var server = await TestServerHost.StartAsync();

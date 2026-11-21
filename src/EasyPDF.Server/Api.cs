@@ -238,12 +238,32 @@ public static class Api
                 source = await documents.GetAsync(file, token);
                 sources[page.FileId] = source;
             }
-            if (page.Index < 0 || page.Index >= source.PageCount || page.Rotation % 90 != 0)
+            if (page.Index < 0 || page.Index >= source.PageCount || page.Rotation % 90 != 0 || !ValidOverlays(page))
                 return (null, null);
-            result.Add(new PageEntry(++id, source, page.Index, page.Rotation));
+            result.Add(new PageEntry(++id, source, page.Index, page.Rotation)
+            {
+                Stamps = page.Stamps == null ? [] : [.. page.Stamps.Select(s =>
+                    new StampOverlay(s.Id, [], s.PixelWidth, s.PixelHeight, s.Rect, s.Rotation, s.Bgra, s.CoversContent))],
+                Texts = page.Texts ?? [],
+                Redactions = page.Redactions ?? [],
+                OcrWords = page.OcrWords ?? [],
+            });
         }
         return (result, sources);
     }
+
+    /// <summary>Sensible limits for what a page carries (the server must not be made to allocate without end).</summary>
+    private static bool ValidOverlays(RemotePage page) =>
+        (page.Stamps?.Count ?? 0) <= 500 && (page.Texts?.Count ?? 0) <= 2000 && (page.Redactions?.Count ?? 0) <= 5000
+        && (page.OcrWords?.Count ?? 0) <= 100_000
+        && (page.Stamps ?? []).All(s => s.PixelWidth is > 0 and <= 10_000 && s.PixelHeight is > 0 and <= 10_000
+            && s.Bgra != null && s.Bgra.Length == (long)s.PixelWidth * s.PixelHeight * 4 && Finite(s.Rect))
+        && (page.Texts ?? []).All(t => t.Text != null && t.Text.Length <= 10_000 && t.FontSize is > 0 and < 2000 && Finite(t.Rect))
+        && (page.Redactions ?? []).All(r => Finite(r.Rect))
+        && (page.OcrWords ?? []).All(w => w.Text != null && w.Text.Length <= 1000 && Finite(w.Box));
+
+    private static bool Finite(RectPt r) =>
+        double.IsFinite(r.X) && double.IsFinite(r.Y) && double.IsFinite(r.Width) && double.IsFinite(r.Height) && r.Width >= 0 && r.Height >= 0;
 
     private static async Task<IResult> BuildAsync(HttpContext context, BuildRequest request, FileStore files, OpenDocuments documents)
     {
@@ -259,10 +279,12 @@ public static class Api
                 return Error(ApiErrors.Invalid, StatusCodes.Status400BadRequest);
             baseSource = await documents.GetAsync(baseFile, job.Token);
         }
+        if (request.ReduceImages is { } reduce && (reduce.MaxDpi is < 36 or > 1200 || reduce.JpegQuality is < 10 or > 100))
+            return Error(ApiErrors.Invalid, StatusCodes.Status400BadRequest);
         var target = files.NewPath(owner);
-        var (temp, _) = await PdfSaver.WriteDocumentAsync(pages, baseSource, target, null, job.Token);
+        var (temp, reduced) = await PdfSaver.WriteDocumentAsync(pages, baseSource, target, null, job.Token, request.ReduceImages);
         File.Move(temp, target, overwrite: true);
-        return await RegisterAsync(owner, target, request.Name, files, documents, job.Token);
+        return await RegisterAsync(owner, target, request.Name, files, documents, job.Token, reduced);
     }
 
     private static async Task<IResult> ExtractAsync(HttpContext context, ExtractRequest request, FileStore files, OpenDocuments documents)
@@ -314,7 +336,7 @@ public static class Api
     }
 
     private static async Task<IResult> RegisterAsync(string owner, string path, string name, FileStore files, OpenDocuments documents,
-        CancellationToken token)
+        CancellationToken token, int reducedImages = 0)
     {
         StoredFile file;
         try
@@ -325,6 +347,7 @@ public static class Api
         {
             return Error(ApiErrors.QuotaExceeded, StatusCodes.Status507InsufficientStorage);
         }
-        return Results.Json(await documents.DescribeAsync(file, token), RemoteJson.Default.RemoteFileInfo);
+        var info = await documents.DescribeAsync(file, token);
+        return Results.Json(info with { ReducedImages = reducedImages }, RemoteJson.Default.RemoteFileInfo);
     }
 }

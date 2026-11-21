@@ -1015,6 +1015,8 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
 
     public bool IsAvailable(ICommand? command) => PlatformFeatures.Current.IsAvailable(_viewModel, command);
 
+    public bool IsButtonAvailable(string? name) => PlatformFeatures.Current.IsButtonAvailable(name);
+
     private static FilePickerFileType PdfFilter() => new(Loc.T("FilterPdf"))
     {
         Patterns = ["*.pdf"],
@@ -1101,7 +1103,7 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
         ShowDialogAsync<IReadOnlyList<int>?>(() => new InsertRangeDialog(context), () => new InsertRangeDialogView(context));
 
     public Task<ReplacePagesResult?> ShowReplacePagesDialogAsync(ReplacePagesContext context) =>
-        new ReplacePagesDialog(context).ShowDialog<ReplacePagesResult?>(RequireWindow());
+        ShowDialogAsync<ReplacePagesResult?>(() => new ReplacePagesDialog(context), () => new ReplacePagesDialogView(context));
 
     public Task<PrintRequest?> ShowPrintDialogAsync(PrintDialogContext context) =>
         new PrintDialog(context).ShowDialog<PrintRequest?>(RequireWindow());
@@ -1171,7 +1173,7 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
             () => new MessageDialogView(message, details, Loc.T("AppName")));
 
     public Task<ImageReduction?> ShowReduceSizeDialogAsync(ImageReduction last) =>
-        new ReduceSizeDialog(last).ShowDialog<ImageReduction?>(RequireWindow());
+        ShowDialogAsync<ImageReduction?>(() => new ReduceSizeDialog(last), () => new ReduceSizeDialogView(last));
 
     /// <summary>Line breaks as the platform expects them (CRLF on Windows, e.g. for Notepad and Office).</summary>
     public async Task CopyToClipboardAsync(string text)

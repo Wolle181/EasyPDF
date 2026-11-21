@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Windows.Input;
 using EasyPDF.App.ViewModels;
 
@@ -12,9 +13,10 @@ internal static class WebCommands
     public static bool IsAvailable(MainViewModel vm, ICommand command) =>
         command == vm.OpenCommand || command == vm.SaveCommand || command == vm.SaveAsCommand
         || command == vm.ConcatenateCommand || command == vm.ExtractPagesCommand || command == vm.SplitDocumentCommand
+        || command == vm.ReduceSizeCommand
         || command == vm.InsertBeforeCommand || command == vm.InsertAfterCommand
         || command == vm.InsertBlankBeforeCommand || command == vm.InsertBlankAfterCommand
-        || command == vm.DeletePagesCommand || command == vm.RotatePagesCommand
+        || command == vm.DeletePagesCommand || command == vm.RotatePagesCommand || command == vm.ReplacePagesCommand
         || command == vm.RotateLeftCommand || command == vm.RotateRightCommand
         || command == vm.UndoCommand || command == vm.RedoCommand
         || command == vm.ShowReadingCommand || command == vm.ShowOrganizeCommand || command == vm.SwitchModeCommand
@@ -33,5 +35,11 @@ internal static class WebCommands
         || command == vm.ToggleSelectTextToolCommand || command == vm.CopyTextCommand
         || command == vm.ShowSearchCommand || command == vm.FindNextCommand || command == vm.FindPreviousCommand
         || command == vm.CloseSearchCommand
-        || command == vm.CancelOperationCommand || command == vm.CancelStampCommand;
+        || command == vm.CancelOperationCommand || command == vm.CancelStampCommand
+        // Black out / white out, texts, copying an area (the server writes them with the page list)
+        || command == vm.RedactCommand || command == vm.CoverCommand || command == vm.SelectTextToolCommand
+        || command == vm.ToggleCopyAreaToolCommand || command == vm.PasteAreaCommand;
+
+    /// <summary>Ribbon buttons without a command (a gallery or menu) the web version offers.</summary>
+    public static IReadOnlySet<string> Buttons { get; } = new HashSet<string> { "TextStyleButton" };
 }

@@ -36,17 +36,21 @@ public sealed class LocalPlatformFiles : IPlatformFiles
 public sealed class PlatformFeatures
 {
     private readonly Func<ViewModels.MainViewModel, ICommand, bool>? _available;
+    private readonly IReadOnlySet<string> _buttons;
 
-    private PlatformFeatures(bool isWeb, Func<ViewModels.MainViewModel, ICommand, bool>? available)
+    private PlatformFeatures(bool isWeb, Func<ViewModels.MainViewModel, ICommand, bool>? available, IReadOnlySet<string>? buttons = null)
     {
         IsWeb = isWeb;
         _available = available;
+        _buttons = buttons ?? new HashSet<string>();
     }
 
     public static PlatformFeatures Desktop { get; } = new(false, null);
 
     /// <summary>The web version; <paramref name="available"/> says which commands it offers (the others are hidden).</summary>
-    public static PlatformFeatures Web(Func<ViewModels.MainViewModel, ICommand, bool> available) => new(true, available);
+    /// <param name="buttons">Names of the ribbon buttons without a command (they open a gallery or menu) that are offered too.</param>
+    public static PlatformFeatures Web(Func<ViewModels.MainViewModel, ICommand, bool> available, IReadOnlySet<string>? buttons = null) =>
+        new(true, available, buttons);
 
     /// <summary>Set once at start-up by the web version.</summary>
     public static PlatformFeatures Current { get; set; } = Desktop;
@@ -60,4 +64,7 @@ public sealed class PlatformFeatures
     /// <remarks>Buttons without a command (stamp gallery, templates, text style, recent files) are not offered on the web yet.</remarks>
     public bool IsAvailable(ViewModels.MainViewModel viewModel, ICommand? command) =>
         _available == null || (command != null && _available(viewModel, command));
+
+    /// <summary>Whether a ribbon button without a command (by its name) is offered here.</summary>
+    public bool IsButtonAvailable(string? name) => _available == null || (name != null && _buttons.Contains(name));
 }

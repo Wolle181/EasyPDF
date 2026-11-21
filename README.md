@@ -60,8 +60,8 @@ The same user interface also runs **in the browser** (WebAssembly), with drag & 
 desktop: open, read, organize, rotate, delete and insert pages, merge files, extract pages, split a document (ZIP) and download the result. The
 PDFs are processed by a server in a container (pdfium) and stay there only temporarily (30 minutes after the last use,
 at most 8 hours). Without sign-in for private use, or with single sign-on (OpenID Connect: Keycloak, Entra ID, …) in a
-company; built and run as described in [docs/BUILDING.md](docs/BUILDING.md#web-version-container). Stamps, texts,
-black out, OCR and printing follow later; text can be selected, copied and searched.
+company; built and run as described in [docs/BUILDING.md](docs/BUILDING.md#web-version-container). Text can be selected, copied and searched, texts placed, areas blacked
+out or covered and copied; stamps, OCR and printing follow later.
 
 ## Customization
 

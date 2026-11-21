@@ -5,11 +5,11 @@ using EasyPDF.Core.Documents;
 namespace EasyPDF.App.Dialogs;
 
 /// <summary>Asks how far the pictures are scaled down ("reduce file size"); closing it with [X] means Cancel (null).</summary>
-public partial class ReduceSizeDialog : Window
+public partial class ReduceSizeDialogView : DialogView
 {
-    public ReduceSizeDialog() => InitializeComponent();
+    public ReduceSizeDialogView() => InitializeComponent();
 
-    public ReduceSizeDialog(ImageReduction last) : this()
+    public ReduceSizeDialogView(ImageReduction last) : this()
     {
         HighOption.IsChecked = last == ImageReduction.High;
         SmallOption.IsChecked = last == ImageReduction.Small;
@@ -22,4 +22,14 @@ public partial class ReduceSizeDialog : Window
     private void OnOk(object? sender, RoutedEventArgs e) => Close(Selected);
 
     private void OnCancel(object? sender, RoutedEventArgs e) => Close((ImageReduction?)null);
+}
+
+/// <summary>The dialog as a window (desktop).</summary>
+public sealed class ReduceSizeDialog : DialogWindow
+{
+    public ReduceSizeDialog(ImageReduction last) : base(new ReduceSizeDialogView(last))
+    {
+    }
+
+    public ImageReduction Selected => ((ReduceSizeDialogView)DialogContent).Selected;
 }

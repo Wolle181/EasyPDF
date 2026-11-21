@@ -650,11 +650,11 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
         if (path == null)
             return;
 
-        var before = document.FilePath is { } original && File.Exists(original) ? new FileInfo(original).Length : (long?)null;
+        var before = document.FilePath is { } original ? PdfBackend.Current.FileSize(original) : null;
         var reduced = await WriteAsync(document, path, reduction, Loc.T("BusyReducing"));
         if (reduced == null)
             return;
-        var after = new FileInfo(path).Length;
+        var after = PdfBackend.Current.FileSize(path) ?? 0;
         var message = reduced == 0 ? Loc.T("MsgReducedNothing")
             : before is { } size && size > after ? Loc.F("MsgReduced", reduced, FormatSize(size), FormatSize(after), (int)Math.Round(100.0 * (size - after) / size))
             : Loc.F("MsgReducedNoComparison", reduced, FormatSize(after));

@@ -146,6 +146,34 @@ public class ApiTests
     }
 
     [Fact]
+    public async Task BuildCanScaleDownPicturesAndTellsSizes()
+    {
+        await using var server = await TestServerHost.StartAsync();
+        var browser = server.NewBrowser();
+        var info = await browser.UploadDemoAsync();
+        Assert.Equal(new FileInfo(TestFiles.Demo).Length, info.Size);
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/build")
+        {
+            Content = JsonContent.Create(new BuildRequest(info.Id, "small.pdf", [.. Enumerable.Range(0, 19).Select(i => new RemotePage(info.Id, i, 0))],
+                Core.Documents.ImageReduction.Small), RemoteJson.Default.BuildRequest),
+        };
+        var response = await browser.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        var built = (await response.Content.ReadFromJsonAsync(RemoteJson.Default.RemoteFileInfo))!;
+        Assert.Equal(19, built.PageCount);
+        Assert.True(built.Size > 0);
+        Assert.True(built.ReducedImages >= 0);
+
+        var invalid = new HttpRequestMessage(HttpMethod.Post, "/api/build")
+        {
+            Content = JsonContent.Create(new BuildRequest(info.Id, "x.pdf", [new RemotePage(info.Id, 0, 0)], new Core.Documents.ImageReduction(1, 5)),
+                RemoteJson.Default.BuildRequest),
+        };
+        Assert.Equal(HttpStatusCode.BadRequest, (await browser.SendAsync(invalid)).StatusCode);
+    }
+
+    [Fact]
     public async Task BuildRejectsPagesOfForeignFiles()
     {
         await using var server = await TestServerHost.StartAsync();

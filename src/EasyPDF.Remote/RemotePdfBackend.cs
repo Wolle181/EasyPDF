@@ -31,6 +31,11 @@ public sealed class RemotePdfBackend(RemoteFiles files, ISaveTargets targets) : 
 
     public bool CanOverwrite(string path) => targets.Has(path);
 
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, long> _written = new(StringComparer.Ordinal);
+
+    public long? FileSize(string path) =>
+        _written.TryGetValue(path, out var size) ? size : Files.TryGet(path, out var info) && info.Size > 0 ? info.Size : null;
+
     public Task<IPdfSource> OpenAsync(string path, CancellationToken token = default)
     {
         if (!Files.TryGet(path, out var info))
@@ -50,13 +55,14 @@ public sealed class RemotePdfBackend(RemoteFiles files, ISaveTargets targets) : 
     {
         progress?.Report(0.1);
         var name = Path.GetFileName(path);
-        var info = await Files.Api.BuildAsync(new BuildRequest(IdOf(baseSource), name, ToRemote(pages)), token).ConfigureAwait(false);
+        var info = await Files.Api.BuildAsync(new BuildRequest(IdOf(baseSource), name, ToRemote(pages), reduceImages), token).ConfigureAwait(false);
         progress?.Report(0.6);
         var content = await Files.Api.DownloadAsync(info.Id, token).ConfigureAwait(false);
         progress?.Report(0.9);
         await targets.WriteAsync(path, content, token).ConfigureAwait(false);
+        _written[path] = content.Length;
         progress?.Report(1);
-        return (Files.Open(info), 0);
+        return (Files.Open(info), info.ReducedImages);
     }
 
     public async Task ExtractAsync(IReadOnlyList<PageEntry> pages, string targetPath, IProgress<double>? progress = null, CancellationToken token = default)
@@ -89,11 +95,14 @@ public sealed class RemotePdfBackend(RemoteFiles files, ISaveTargets targets) : 
         ? remote.Id
         : throw new NotSupportedException($"{source.GetType().Name} is not a file on the server.");
 
-    /// <summary>The page list as the server needs it (overlays are not part of the web version yet: the pages are written without them).</summary>
-    public static IReadOnlyList<RemotePage> ToRemote(IReadOnlyList<PageEntry> pages)
-    {
-        if (pages.Any(p => p.Stamps.Count > 0 || p.Texts.Count > 0 || p.Redactions.Count > 0 || p.OcrWords.Count > 0))
-            throw new NotSupportedException("Stamps, texts, redactions and recognized text are not supported by the web version yet.");
-        return [.. pages.Select(p => new RemotePage(IdOf(p.Source), p.SourceIndex, p.ExtraRotation))];
-    }
+    /// <summary>The page list as the server needs it, with everything placed on the pages.</summary>
+    public static IReadOnlyList<RemotePage> ToRemote(IReadOnlyList<PageEntry> pages) =>
+        [.. pages.Select(p => new RemotePage(IdOf(p.Source), p.SourceIndex, p.ExtraRotation,
+            p.Stamps.Count == 0 ? null : [.. p.Stamps.Select(ToRemote)],
+            p.Texts.Count == 0 ? null : p.Texts,
+            p.Redactions.Count == 0 ? null : p.Redactions,
+            p.OcrWords.Count == 0 ? null : p.OcrWords))];
+
+    private static RemoteStamp ToRemote(StampOverlay stamp) => new(stamp.Id, stamp.PixelWidth, stamp.PixelHeight, stamp.Rect, stamp.Rotation,
+        stamp.CoversContent, stamp.Bgra ?? throw new NotSupportedException("A placed stamp has no decoded picture and cannot be saved."));
 }

@@ -49,7 +49,7 @@ public sealed class OpenDocuments : IAsyncDisposable
     {
         var source = await GetAsync(file, token);
         var sizes = Enumerable.Range(0, source.PageCount).Select(source.GetPageSizeOrEstimate).ToArray();
-        return new RemoteFileInfo(file.Id, file.Name, source.PageCount, sizes);
+        return new RemoteFileInfo(file.Id, file.Name, source.PageCount, sizes, file.Size);
     }
 
     public async Task CloseAsync(string id)

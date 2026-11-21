@@ -291,10 +291,16 @@ the Emscripten of .NET 9/10 only, so the browser program takes them from SkiaSha
 - Dialogs: a dialog's content is a `DialogView` (`UserControl` with title, size and `Close(result)`). On the desktop a
   `DialogWindow` shows it (the old dialog class names remain as these windows), in the browser `DialogLayer` shows it as
   an overlay on the page; `MainView.ShowDialogAsync` picks one. While an overlay is open the page's shortcuts do nothing.
-  Converted so far: message, unsaved changes, rotate, insert range, merge, split, attachments, settings, quick guide,
+  Converted so far: message, unsaved changes, rotate, insert range, merge, split, replace pages, reduce size,
+  attachments, settings, quick guide,
   About; the others are windows only. On the web the settings offer theme and language and are kept in the browser
   (`localStorage`, `AppSettings.Saved`), the quick guide shows the topics of what is offered, About lists the brand's
   web address (`WebAppUrl`, also on the desktop).
+
+**Overlays.** What is placed on a page and not saved yet (texts, black out/white out boxes, pasted areas, later stamps
+and recognized words) travels with the page list (`RemotePage`); placed pictures as their decoded pixels, so the server
+needs no image decoder. The server checks counts, sizes and numbers before writing them with the same `PdfSaver`. The
+browser has none of the system fonts: the preview of a text uses a fallback font, the saved file the real one.
 
 **Server.** REST under `/api`: upload (`POST /files`, PDF header checked, opened with pdfium right away, all page sizes
 returned), rendered pages as PNG (own codec in Core, `PngCodec`, so neither side needs a native image library), words,
@@ -317,8 +323,7 @@ limit; a time limit per pdfium job; no details in error responses, no file names
 header timeout; data protection keys in the volume. Container: chiseled image without shell, non-root, `--read-only`,
 `--cap-drop=ALL`, `no-new-privileges`, memory limit, self health check (`--healthcheck`).
 
-**Not in the web version yet** (hidden): stamps and templates, texts, black out/white out, OCR,
-replace pages, reduce size, print, mail, several windows, recent files. Split
+**Not in the web version yet** (hidden): stamps and templates, OCR, print, mail, several windows, recent files. Split
 writes the parts as one ZIP file (no folder to choose in a browser); attachments and the e-invoice are saved
 (downloaded), a browser cannot open them in a program of the system.
 

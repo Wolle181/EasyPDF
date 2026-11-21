@@ -22,6 +22,9 @@ public interface IPdfBackend
     /// </summary>
     bool CanOverwrite(string path);
 
+    /// <summary>Size of the file at <paramref name="path"/> in bytes; null if unknown.</summary>
+    long? FileSize(string path);
+
     Task<IPdfSource> OpenAsync(string path, CancellationToken token = default);
 
     /// <summary>A new source with one empty page of the given size (the caller owns it).</summary>
@@ -60,6 +63,8 @@ public sealed class LocalPdfBackend : IPdfBackend
     public bool Exists(string path) => File.Exists(path);
 
     public bool CanOverwrite(string path) => true;
+
+    public long? FileSize(string path) => File.Exists(path) ? new FileInfo(path).Length : null;
 
     public async Task<IPdfSource> OpenAsync(string path, CancellationToken token = default) =>
         await PdfSource.OpenAsync(path, null, token).ConfigureAwait(false);

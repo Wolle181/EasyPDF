@@ -17,6 +17,9 @@ public interface IShortcutProvider
 
     /// <summary>False for commands the platform does not offer (web version): their buttons are hidden.</summary>
     bool IsAvailable(System.Windows.Input.ICommand? command) => true;
+
+    /// <summary>For a button without a command (gallery, menu): whether the platform offers it, by the button's name.</summary>
+    bool IsButtonAvailable(string? name) => true;
 }
 
 /// <summary>
@@ -130,17 +133,20 @@ public class RibbonButton : Button
         set => SetValue(LabelProperty, value);
     }
 
+    private static bool Offered(IShortcutProvider provider, RibbonButton button) =>
+        button.Command != null ? provider.IsAvailable(button.Command) : provider.IsButtonAvailable(button.Name);
+
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
         var provider = this.GetVisualAncestors().OfType<IShortcutProvider>().FirstOrDefault();
         // Decorative buttons (the icons of the quick guide) take no input and are not commands to hide
-        if (provider != null && IsHitTestVisible && !provider.IsAvailable(Command))
+        if (provider != null && IsHitTestVisible && !Offered(provider, this))
         {
             IsVisible = false;
             // A group whose buttons are all unavailable goes as a whole (not just its caption left over)
             if (this.FindAncestorOfType<RibbonGroup>() is { } group
-                && group.GetLogicalDescendants().OfType<RibbonButton>().All(b => !provider.IsAvailable(b.Command)))
+                && group.GetLogicalDescendants().OfType<RibbonButton>().All(b => !Offered(provider, b)))
                 group.IsVisible = false;
         }
         if (Shortcut == null && provider != null)

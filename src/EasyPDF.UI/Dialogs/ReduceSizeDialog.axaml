@@ -1,9 +1,9 @@
-<Window xmlns="https://github.com/avaloniaui"
+<dlg:DialogView xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dlg="using:EasyPDF.App.Dialogs"
         xmlns:loc="using:EasyPDF.App.Localization"
-        x:Class="EasyPDF.App.Dialogs.ReduceSizeDialog"
-        Title="{loc:Tr ReduceTitle}" Width="460" SizeToContent="Height"
-        WindowStartupLocation="CenterOwner" CanResize="False" ShowInTaskbar="False">
+        x:Class="EasyPDF.App.Dialogs.ReduceSizeDialogView"
+        Title="{loc:Tr ReduceTitle}" DialogWidth="460">
   <StackPanel Margin="20" Spacing="14">
     <TextBlock Text="{loc:Tr ReduceIntro}" TextWrapping="Wrap" Opacity="0.8" />
     <StackPanel Spacing="6">
@@ -23,4 +23,4 @@
       <Button MinWidth="80" HorizontalContentAlignment="Center" IsCancel="True" Click="OnCancel" Content="{loc:Tr Cancel}" />
     </StackPanel>
   </StackPanel>
-</Window>
+</dlg:DialogView>

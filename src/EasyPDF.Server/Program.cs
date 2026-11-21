@@ -62,7 +62,8 @@ public static class Program
         builder.WebHost.ConfigureKestrel(kestrel =>
         {
             kestrel.AddServerHeader = false;
-            kestrel.Limits.MaxRequestBodySize = 1024 * 1024; // larger only for uploads (per request in the upload endpoint)
+            // Uploads, and page lists with placed pictures (decoded pixels): up to the upload limit
+            kestrel.Limits.MaxRequestBodySize = options.Storage.MaxUploadBytes + 1024 * 1024;
             kestrel.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
         });
         builder.Services.ConfigureHttpJsonOptions(json => json.SerializerOptions.TypeInfoResolverChain.Insert(0, RemoteJson.Default));

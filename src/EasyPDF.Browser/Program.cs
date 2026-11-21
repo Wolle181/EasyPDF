@@ -27,7 +27,7 @@ internal static class Program
         var targets = new BrowserSaveTargets();
         PdfBackend.Current = new RemotePdfBackend(files, targets);
         PlatformFeatures.Files = new BrowserFiles(files, targets);
-        PlatformFeatures.Current = PlatformFeatures.Web(WebCommands.IsAvailable);
+        PlatformFeatures.Current = PlatformFeatures.Web(WebCommands.IsAvailable, WebCommands.Buttons);
         await Interop.LoadAsync();
         Interop.SetTitle(AppInfo.Name);
         // Settings (theme, language) from the browser's storage into the file the program reads, and back after each change

@@ -9,13 +9,13 @@ using EasyPDF.App.ViewModels;
 
 namespace EasyPDF.App.Dialogs;
 
-public partial class ReplacePagesDialog : Window
+public partial class ReplacePagesDialogView : DialogView
 {
     private bool _accepted;
 
-    public ReplacePagesDialog() => InitializeComponent();
+    public ReplacePagesDialogView() => InitializeComponent();
 
-    public ReplacePagesDialog(ReplacePagesContext context) : this()
+    public ReplacePagesDialogView(ReplacePagesContext context) : this()
     {
         DataContext = new ReplacePagesDialogViewModel(context);
         // A chosen file that is not used (Cancel, [X], another choice) is closed again
@@ -30,7 +30,9 @@ public partial class ReplacePagesDialog : Window
 
     private async void OnBrowse(object? sender, RoutedEventArgs e)
     {
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        if (Host is not { } host)
+            return;
+        var files = await host.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = Loc.T("ReplacePickTitle"),
             AllowMultiple = false,
@@ -41,7 +43,8 @@ public partial class ReplacePagesDialog : Window
                 }
             ],
         });
-        if (files.Select(f => f.TryGetLocalPath()).OfType<string>().FirstOrDefault() is { } path)
+        // A local path, or an upload in the web version
+        if (files.Count > 0 && await PlatformFeatures.Files.ToOpenPathAsync(files[0]) is { } path)
             await Model.SetFileAsync(path);
     }
 
@@ -56,4 +59,14 @@ public partial class ReplacePagesDialog : Window
     }
 
     private void OnCancel(object? sender, RoutedEventArgs e) => Close((ReplacePagesResult?)null);
+}
+
+/// <summary>The dialog as a window (desktop).</summary>
+public sealed class ReplacePagesDialog : DialogWindow
+{
+    public ReplacePagesDialog(ReplacePagesContext context) : base(new ReplacePagesDialogView(context))
+    {
+    }
+
+    public ReplacePagesDialogViewModel Model => ((ReplacePagesDialogView)DialogContent).Model;
 }
