@@ -71,6 +71,10 @@ $format = if ($tool -eq 'podman') { @('--format', 'docker') } else { [string[]]@
 & $tool build @format -t $local --build-arg "BRAND=$brand" --build-arg "VERSION=$version" --build-arg "COMMIT=$commit" -f "$root/Dockerfile" $root
 if ($LASTEXITCODE -ne 0) { throw "$tool build failed." }
 
+# The build stages of earlier builds (several GB each, labelled in the Dockerfile) are not needed any more; those of the
+# last two hours stay as cache for the next build
+& $tool image prune -f --filter "label=web-build-stage=1" --filter "until=2h" | Out-Null
+
 if ($NoPush) {
     Write-Host "== Trial build done: $local exists locally only (not pushed)." -ForegroundColor Green
     exit 0

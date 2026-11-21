@@ -128,6 +128,17 @@ Start: `dotnet run --project src/EasyPDF.App -- <file.pdf>` or the published bui
 - [ ] Help ▸ About: row "Text recognition" with versions; "Third-party licenses" opens the licenses folder next to the program
 - [ ] macOS (Apple Silicon, macOS 14+) and Linux: recognition works in the installed app (ONNX Runtime is found; the CI runs the OCR tests on both)
 
+## Web version (real browsers: Chrome/Edge, Firefox, Safari)
+- [ ] First visit: the splash shows, then the app; dropping a PDF from the desktop opens it (progress for big files); a ~50 MB file passes the reverse proxy
+- [ ] Organize: drag pages, rotate, delete, undo/redo; Save as… downloads (Chrome/Edge: save dialog of the system) and the file opens in the desktop app as edited
+- [ ] Print: a new tab shows the PDF; the browser's print dialog prints it (a popup blocker shows a hint instead)
+- [ ] Stamps: gallery with samples, "Shared" sections from `/volume1/docker/easypdf-web/shared/stamps`; place one, double-click → date dialog; New stamp… → editor, OK → in the gallery; right-click → Delete asks first
+- [ ] Stamps and templates survive reloading the page and closing the browser; Export… downloads a ZIP; in another browser Import… brings them back; a private window starts with the samples only
+- [ ] Templates: shared ones from `…/shared/templates` appear; an edited shared template is kept as the user's own
+- [ ] Placed text: the preview looks like the saved text (same width, Helvetica/Times/Courier)
+- [ ] Two browsers (or a private window) at the same time see only their own files; after 30 minutes idle a file is gone (the app reports it)
+- [ ] Settings: theme and language switch live and are kept after reloading
+
 ## Installers
 - [ ] Two brands side by side (e.g. `installeruild-windows.cmd` and `installeruild-windows.cmd -Brand <id>`): both MSIs install next to each other, each with its own name, icon, colours, start menu entry, context menu and settings folder; both apps run at the same time, and "Read with" of one brand opens in that brand's window
 - [ ] Windows: MSI installs per user to `%LocalAppData%\Programs\<App>` (shown name) **without a UAC prompt**, Start menu entry with icon, app starts; uninstall via Settings ▸ Apps removes it (again without a UAC prompt); a newer MSI replaces the old version; "Installed apps" shows the four-part version (1.0.0.97)

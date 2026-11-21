@@ -6,6 +6,8 @@
 
 # ---- Stage 1: test and publish ---------------------------------------------
 FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
+# Marks the build stage's images (several GB with the WebAssembly tools): build-container.ps1 removes old ones
+LABEL web-build-stage=1
 ARG BRAND=easypdf
 ARG VERSION=1.0.0.0
 ARG COMMIT=
