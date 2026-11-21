@@ -132,6 +132,7 @@ Start: `dotnet run --project src/EasyPDF.App -- <file.pdf>` or the published bui
 - [ ] First visit: the splash shows, then the app; dropping a PDF from the desktop opens it (progress for big files); a ~50 MB file passes the reverse proxy
 - [ ] Organize: drag pages, rotate, delete, undo/redo; Save as… downloads (Chrome/Edge: save dialog of the system) and the file opens in the desktop app as edited
 - [ ] Print: a new tab shows the PDF; the browser's print dialog prints it (a popup blocker shows a hint instead)
+- [ ] Send by email (Windows Chrome/Edge, macOS Safari/Chrome, phone): the share sheet opens, the email program shows a new message with the PDF attached under the document's name; a big file first shows "attachment is ready", OK opens the share sheet; on Linux the button is hidden
 - [ ] Stamps: gallery with samples, "Shared" sections from `/volume1/docker/easypdf-web/shared/stamps`; place one, double-click → date dialog; New stamp… → editor, OK → in the gallery; right-click → Delete asks first
 - [ ] Stamps and templates survive reloading the page and closing the browser; Export… downloads a ZIP; in another browser Import… brings them back; a private window starts with the samples only
 - [ ] Templates: shared ones from `…/shared/templates` appear; an edited shared template is kept as the user's own

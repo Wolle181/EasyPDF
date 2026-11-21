@@ -383,6 +383,9 @@
   <data name="BusyPreparingMail" xml:space="preserve"><value>Preparing the email attachment…</value></data>
   <data name="MsgMailOpened" xml:space="preserve"><value>Opening a new email with “{0}” attached…</value></data>
   <data name="ErrMailFailed" xml:space="preserve"><value>No email could be opened. Is an email program set up as default (e.g. Outlook, Thunderbird or Mail)?</value></data>
+  <data name="MsgShareReady" xml:space="preserve"><value>The attachment “{0}” is ready. Click OK to choose the email program.</value></data>
+  <data name="MsgShared" xml:space="preserve"><value>“{0}” was handed over for sending.</value></data>
+  <data name="ErrShareFailed" xml:space="preserve"><value>The document could not be handed to the email program. In this browser, save it and attach it to an email yourself.</value></data>
   <data name="CtxPrint" xml:space="preserve"><value>Print page(s)…</value></data>
   <data name="GroupRecognize" xml:space="preserve"><value>Recognize</value></data>
   <data name="BtnRecognizeText" xml:space="preserve"><value>Recognize text…</value></data>

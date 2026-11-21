@@ -69,7 +69,9 @@ der letzten Nutzung, höchstens 8 Stunden). Ohne Anmeldung für den privaten Geb
 Connect: Keycloak, Entra ID, …) im Unternehmen; Bauen und Betrieb in [docs/BUILDING.md](docs/BUILDING.md#web-version-container).
 Text lässt sich markieren, kopieren und suchen, Texte setzen, Bereiche schwärzen, abdecken und kopieren; Texterkennung (OCR) läuft auf dem
 Server; Stempel (mit Datumsfeldern) und Textvorlagen bleiben im Browser und lassen sich als ZIP-Datei exportieren und
-importieren, gemeinsame kommen vom Server; Drucken öffnet die PDF in einem neuen Tab.
+importieren, gemeinsame kommen vom Server; Drucken öffnet die PDF in einem neuen Tab; „Per E-Mail senden“ übergibt die PDF an das Teilen-Fenster des Systems, das
+das E-Mail-Programm mit ihr als Anhang öffnet (Windows, macOS, Android, iOS; nicht angeboten, wo der Browser keine
+Dateien teilen kann, z. B. unter Linux).
 
 ## Anpassen
 

@@ -5,7 +5,7 @@ using EasyPDF.App.ViewModels;
 namespace EasyPDF.Browser;
 
 /// <summary>
-/// The commands the web version offers so far; the others (mail, recent files, several windows…) are hidden until they
+/// The commands the web version offers so far; the others (recent files, several windows…) are hidden until they
 /// work in the browser too.
 /// </summary>
 internal static class WebCommands
@@ -45,7 +45,11 @@ internal static class WebCommands
         // Text recognition on the server
         || command == vm.RecognizeTextCommand
         // Printing: a new tab with the PDF, printed by the browser's viewer
-        || command == vm.PrintCommand;
+        || command == vm.PrintCommand
+        // Email: the system's share sheet, where the browser offers it with files (not on Linux)
+        || (command == vm.SendByMailCommand && CanShareFiles.Value);
+
+    private static readonly System.Lazy<bool> CanShareFiles = new(Interop.CanShareFiles);
 
     /// <summary>Ribbon buttons without a command (a gallery or menu) the web version offers.</summary>
     public static IReadOnlySet<string> Buttons { get; } = new HashSet<string> { "TextStyleButton", "StampButton", "TemplatesButton" };

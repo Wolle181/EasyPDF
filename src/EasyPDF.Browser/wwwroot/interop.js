@@ -79,3 +79,36 @@ export async function saveLibrary(zipBase64) {
         });
     } catch { }
 }
+
+// Send by email: the system's share sheet (Windows, macOS, Android, iOS) offers the email program, which opens a new
+// message with the PDF attached. Browsers allow it only shortly after a click: if preparing took longer, the program asks
+// for another click and calls again, the fetched file is kept for that.
+export function canShareFiles() {
+    try {
+        return !!navigator.canShare
+            && navigator.canShare({ files: [new File([new Uint8Array(1)], 'a.pdf', { type: 'application/pdf' })] });
+    } catch { return false; }
+}
+
+let pendingShare = null;
+
+export async function shareFile(url, name, title) {
+    if (pendingShare?.url !== url) {
+        const response = await fetch(url, { credentials: 'same-origin' });
+        if (!response.ok)
+            throw new Error('HTTP ' + response.status);
+        pendingShare = { url, file: new File([await response.blob()], name, { type: 'application/pdf' }) };
+    }
+    try {
+        await navigator.share({ files: [pendingShare.file], title });
+        pendingShare = null;
+        return 'shared';
+    } catch (e) {
+        if (e?.name === 'NotAllowedError')
+            return 'activation';
+        pendingShare = null;
+        if (e?.name === 'AbortError')
+            return 'cancelled';
+        throw e;
+    }
+}

@@ -140,4 +140,111 @@ public class MailTests
         window.Close();
         await window.ViewModel.ReleaseDocumentAsync();
     }
+
+    /// <summary>The web version's files: records what is prepared and shared, answers as the browser would.</summary>
+    private sealed class FakeShareFiles(params ShareOutcome[] outcomes) : IPlatformFiles
+    {
+        private readonly Queue<ShareOutcome> _outcomes = new(outcomes);
+        public readonly List<(int Pages, string Name)> Prepared = [];
+        public readonly List<string> Shared = [];
+
+        public Task<string> PrepareForSharingAsync(EasyPDF.Core.Documents.EditableDocument document, string name)
+        {
+            Prepared.Add((document.PageCount, name));
+            return Task.FromResult("api/files/abc/content");
+        }
+
+        public Task<ShareOutcome> ShareAsync(string prepared, string name)
+        {
+            Shared.Add(prepared);
+            return Task.FromResult(_outcomes.Dequeue());
+        }
+
+        public Task<string?> ToOpenPathAsync(Avalonia.Platform.Storage.IStorageFile file) => throw new NotSupportedException();
+        public string? ToSavePath(Avalonia.Platform.Storage.IStorageFile file) => throw new NotSupportedException();
+        public Task WriteAsync(string path, byte[] content) => throw new NotSupportedException();
+        public Task<bool> ShowForPrintingAsync(IReadOnlyList<EasyPDF.Core.Documents.PageEntry> pages, string name) => throw new NotSupportedException();
+    }
+
+    private static async Task<(MainViewModel Vm, FakeDialogs Dialogs, FakeMail Mail)> WebDocumentAsync(TempDir dir, IPlatformFiles files)
+    {
+        PlatformFeatures.Current = PlatformFeatures.Web((_, _) => true);
+        PlatformFeatures.Files = files;
+        var dialogs = new FakeDialogs();
+        var mail = new FakeMail();
+        var vm = new MainViewModel(new AppSettings(), dialogs, mail: mail);
+        await vm.OpenPathAsync(dir.Pdf("report.pdf", 3));
+        vm.Document!.Delete([0]);
+        return (vm, dialogs, mail);
+    }
+
+    private static void RestoreDesktop()
+    {
+        PlatformFeatures.Current = PlatformFeatures.Desktop;
+        PlatformFeatures.Files = new LocalPlatformFiles();
+    }
+
+    [Fact]
+    public async Task OnTheWebTheDocumentGoesToTheSystemsShareSheet()
+    {
+        using var dir = new TempDir();
+        var files = new FakeShareFiles(ShareOutcome.Shared);
+        try
+        {
+            var (vm, dialogs, mail) = await WebDocumentAsync(dir, files);
+            await vm.SendByMailCommand.ExecuteAsync(null);
+            Assert.Equal([(2, "report.pdf")], files.Prepared);   // as it is now, under the document's name
+            Assert.Single(files.Shared);
+            Assert.Empty(mail.Sent);                                 // not the desktop's email program
+            Assert.Empty(dialogs.Infos);
+            Assert.Empty(dialogs.Errors);
+            Assert.Equal(EasyPDF.App.Localization.Loc.F("MsgShared", "report.pdf"), vm.StatusMessage);
+            Assert.False(vm.IsBusy);
+            await vm.Document!.DisposeAsync();
+        }
+        finally
+        {
+            RestoreDesktop();
+        }
+    }
+
+    [Fact]
+    public async Task OnTheWebASlowPreparationAsksForOneMoreClick()
+    {
+        using var dir = new TempDir();
+        var files = new FakeShareFiles(ShareOutcome.NeedsClick, ShareOutcome.Shared);
+        try
+        {
+            var (vm, dialogs, _) = await WebDocumentAsync(dir, files);
+            await vm.SendByMailCommand.ExecuteAsync(null);
+            Assert.Single(files.Prepared);                           // prepared once, shared after the click
+            Assert.Equal(2, files.Shared.Count);
+            Assert.Equal([EasyPDF.App.Localization.Loc.F("MsgShareReady", "report.pdf")], dialogs.Infos);
+            Assert.Empty(dialogs.Errors);
+            await vm.Document!.DisposeAsync();
+        }
+        finally
+        {
+            RestoreDesktop();
+        }
+    }
+
+    [Fact]
+    public async Task OnTheWebClosingTheShareSheetIsNoError()
+    {
+        using var dir = new TempDir();
+        var files = new FakeShareFiles(ShareOutcome.Cancelled);
+        try
+        {
+            var (vm, dialogs, _) = await WebDocumentAsync(dir, files);
+            await vm.SendByMailCommand.ExecuteAsync(null);
+            Assert.Empty(dialogs.Errors);
+            Assert.Empty(dialogs.Infos);
+            await vm.Document!.DisposeAsync();
+        }
+        finally
+        {
+            RestoreDesktop();
+        }
+    }
 }

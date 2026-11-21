@@ -63,7 +63,8 @@ at most 8 hours). Without sign-in for private use, or with single sign-on (OpenI
 company; built and run as described in [docs/BUILDING.md](docs/BUILDING.md#web-version-container). Text can be selected, copied and searched, texts placed, areas blacked
 out or covered and copied; text is recognized (OCR) on the server; stamps (with date fields) and text templates stay in
 the browser and can be exported and imported as a ZIP file, shared ones come from the server; printing opens the PDF
-in a new tab.
+in a new tab; "Send by email" hands the PDF to the system's share sheet, which opens the email program with it attached
+(Windows, macOS, Android, iOS; not offered where the browser cannot share files, e.g. on Linux).
 
 ## Customization
 

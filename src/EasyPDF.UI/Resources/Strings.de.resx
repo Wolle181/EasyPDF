@@ -383,6 +383,9 @@
   <data name="BusyPreparingMail" xml:space="preserve"><value>E-Mail-Anhang wird vorbereitet…</value></data>
   <data name="MsgMailOpened" xml:space="preserve"><value>Neue E-Mail mit „{0}“ als Anhang wird geöffnet…</value></data>
   <data name="ErrMailFailed" xml:space="preserve"><value>Es konnte keine E-Mail geöffnet werden. Ist ein E-Mail-Programm als Standard eingerichtet (z. B. Outlook, Thunderbird oder Mail)?</value></data>
+  <data name="MsgShareReady" xml:space="preserve"><value>Der Anhang „{0}“ ist bereit. Klicken Sie auf OK, um das E-Mail-Programm zu wählen.</value></data>
+  <data name="MsgShared" xml:space="preserve"><value>„{0}“ wurde zum Senden übergeben.</value></data>
+  <data name="ErrShareFailed" xml:space="preserve"><value>Das Dokument konnte nicht an das E-Mail-Programm übergeben werden. Speichern Sie es in diesem Browser und hängen Sie es selbst an eine E-Mail an.</value></data>
   <data name="CtxPrint" xml:space="preserve"><value>Seite(n) drucken…</value></data>
   <data name="GroupRecognize" xml:space="preserve"><value>Erkennen</value></data>
   <data name="BtnRecognizeText" xml:space="preserve"><value>Text erkennen…</value></data>

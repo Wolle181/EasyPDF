@@ -341,8 +341,15 @@ deletes the user's own stamps (there is no folder to delete them in).
 browser program brings Liberation Sans, Serif and Mono (Regular, SIL OFL, `EasyPDF.Browser/Assets/Fonts`), which have the
 widths of Arial/Helvetica, Times and Courier, the standard fonts the text is written with (`TextMetrics.EmbeddedFonts`).
 
-**Intentionally not in the web version** (hidden): mail (a browser cannot hand an attachment to the mail program; save
-and attach instead), several windows (another browser tab does the same), recent files (the files on the server are
+**Send by email on the web:** a browser cannot start the email program with an attachment (`mailto:` takes no files).
+Instead the server writes the document as it is now (like saving, with bookmarks) and the browser hands it to the
+system's share sheet (Web Share API, `navigator.share` with a file), where the user picks the email program (Outlook,
+Mail, …), which opens a new message with the PDF attached. Offered only where `navigator.canShare` accepts a PDF file
+(Chrome/Edge on Windows, macOS, Android, iOS, Safari); elsewhere (Linux, Firefox on the desktop) the button is hidden.
+Browsers allow sharing only shortly after a click: if preparing took longer (`NotAllowedError`), a message says the
+attachment is ready and its OK click shares the already fetched file.
+
+**Intentionally not in the web version** (hidden): several windows (another browser tab does the same), recent files (the files on the server are
 temporary). Split writes the parts as one ZIP file (no folder to choose in a browser); attachments and the e-invoice are saved
 (downloaded), a browser cannot open them in a program of the system.
 

@@ -35,4 +35,16 @@ internal static partial class Interop
     [JSImport("saveLibrary", "interop")]
     [return: JSMarshalAs<JSType.Promise<JSType.Void>>]
     public static partial Task SaveLibrary(string zipBase64);
+
+    /// <summary>Whether the browser can hand a PDF file to the system's share sheet (Web Share API with files).</summary>
+    [JSImport("canShareFiles", "interop")]
+    public static partial bool CanShareFiles();
+
+    /// <summary>
+    /// Fetches the PDF at <paramref name="url"/> and hands it to the system's share sheet: "shared", "cancelled", or
+    /// "activation" if the browser wants a fresh click first.
+    /// </summary>
+    [JSImport("shareFile", "interop")]
+    [return: JSMarshalAs<JSType.Promise<JSType.String>>]
+    public static partial Task<string> ShareFile(string url, string name, string title);
 }

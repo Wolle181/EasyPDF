@@ -91,7 +91,7 @@ public sealed class RemotePdfBackend(RemoteFiles files, ISaveTargets targets) : 
         return parts.Count;
     }
 
-    private static string IdOf(IPdfSource source) => source is RemotePdfSource remote
+    public static string IdOf(IPdfSource source) => source is RemotePdfSource remote
         ? remote.Id
         : throw new NotSupportedException($"{source.GetType().Name} is not a file on the server.");
 

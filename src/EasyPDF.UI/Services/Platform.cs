@@ -28,6 +28,27 @@ public interface IPlatformFiles
     /// viewer prints it. False if the browser blocked the tab. The desktop prints itself and never calls this.
     /// </summary>
     Task<bool> ShowForPrintingAsync(IReadOnlyList<EasyPDF.Core.Documents.PageEntry> pages, string name);
+
+    /// <summary>
+    /// Web version: has the server write the document as it is now (like saving, with bookmarks) and returns a handle for
+    /// <see cref="ShareAsync"/>. The desktop sends emails itself and never calls this.
+    /// </summary>
+    Task<string> PrepareForSharingAsync(EasyPDF.Core.Documents.EditableDocument document, string name);
+
+    /// <summary>
+    /// Web version: hands the prepared PDF to the system's share sheet (which offers the email program, among others).
+    /// </summary>
+    Task<ShareOutcome> ShareAsync(string prepared, string name);
+}
+
+/// <summary>How handing a file to the system's share sheet ended.</summary>
+public enum ShareOutcome
+{
+    Shared,
+    /// <summary>The user closed the share sheet.</summary>
+    Cancelled,
+    /// <summary>The browser wants a fresh click first (preparing took too long after the first one).</summary>
+    NeedsClick,
 }
 
 /// <summary>Local files (desktop): their own paths.</summary>
@@ -41,6 +62,12 @@ public sealed class LocalPlatformFiles : IPlatformFiles
 
     public Task<bool> ShowForPrintingAsync(IReadOnlyList<EasyPDF.Core.Documents.PageEntry> pages, string name) =>
         throw new NotSupportedException("The desktop program prints itself.");
+
+    public Task<string> PrepareForSharingAsync(EasyPDF.Core.Documents.EditableDocument document, string name) =>
+        throw new NotSupportedException("The desktop program sends emails itself.");
+
+    public Task<ShareOutcome> ShareAsync(string prepared, string name) =>
+        throw new NotSupportedException("The desktop program sends emails itself.");
 }
 
 /// <summary>What the program runs on: the desktop program, or the web version with the subset of features it offers.</summary>

@@ -1491,6 +1491,11 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
     private async Task SendByMailAsync()
     {
         var document = OpenDocument;
+        if (Services.PlatformFeatures.Current.IsWeb)
+        {
+            await SendByMailInBrowserAsync(document);
+            return;
+        }
         var file = document.FilePath;
         if (file == null || document.IsDirty || !File.Exists(file))
         {
@@ -1506,6 +1511,51 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
         catch (Exception ex)
         {
             await dialogs.ShowErrorAsync(Loc.T("ErrMailFailed"), ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Web version: the server writes the document as it is now, the browser hands it to the system's share sheet, where
+    /// the user picks the email program. Browsers allow that only shortly after a click: if preparing took longer, a
+    /// message asks for one more click.
+    /// </summary>
+    private async Task SendByMailInBrowserAsync(EditableDocument document)
+    {
+        var files = Services.PlatformFeatures.Files;
+        var name = BaseNameOf(document) + ".pdf";
+        string prepared;
+        BeginOperation(Loc.T("BusyPreparingMail"));
+        try
+        {
+            prepared = await files.PrepareForSharingAsync(document, name);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            await dialogs.ShowErrorAsync(Loc.T("ErrShareFailed"), ex.Message);
+            return;
+        }
+        finally
+        {
+            _operation?.Dispose();
+            _operation = null;
+            IsBusy = false;
+        }
+        try
+        {
+            var outcome = await files.ShareAsync(prepared, name);
+            if (outcome == Services.ShareOutcome.NeedsClick)
+            {
+                await dialogs.ShowInfoAsync(Loc.F("MsgShareReady", name));
+                outcome = await files.ShareAsync(prepared, name);
+            }
+            if (outcome == Services.ShareOutcome.Shared)
+                ShowMessage(Loc.F("MsgShared", name));
+            else if (outcome == Services.ShareOutcome.NeedsClick)
+                await dialogs.ShowErrorAsync(Loc.T("ErrShareFailed"));
+        }
+        catch (Exception ex)
+        {
+            await dialogs.ShowErrorAsync(Loc.T("ErrShareFailed"), ex.Message);
         }
     }
 

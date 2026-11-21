@@ -43,6 +43,21 @@ internal sealed class BrowserFiles(RemoteFiles files, BrowserSaveTargets targets
         // The server's own address: the tab shows the PDF in the browser's viewer (the file expires like every other)
         return Interop.OpenTab($"api/files/{info.Id}/content?inline=true");
     }
+
+    public async Task<string> PrepareForSharingAsync(EditableDocument document, string name)
+    {
+        var request = new BuildRequest(RemotePdfBackend.IdOf(document.BaseSource), name, RemotePdfBackend.ToRemote(document.Pages));
+        var info = await files.Api.BuildAsync(request, CancellationToken.None);
+        return $"api/files/{info.Id}/content";
+    }
+
+    public async Task<ShareOutcome> ShareAsync(string prepared, string name) =>
+        await Interop.ShareFile(prepared, name, Path.GetFileNameWithoutExtension(name)) switch
+        {
+            "shared" => ShareOutcome.Shared,
+            "cancelled" => ShareOutcome.Cancelled,
+            _ => ShareOutcome.NeedsClick,
+        };
 }
 
 /// <summary>The files the user chose in save dialogs, by a virtual path <c>/save/&lt;id&gt;/&lt;name&gt;</c>.</summary>
