@@ -243,7 +243,17 @@ public static class Api
         var file = files.Get(OwnerKeys.Of(context), id);
         if (file == null)
             return NotFound();
-        return inline ? Results.File(file.Path, "application/pdf") : Results.File(file.Path, "application/pdf", file.Name);
+        // Shared for deleting: the file may expire or be deleted while it is still being sent (Windows refuses otherwise)
+        FileStream stream;
+        try
+        {
+            stream = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete, 81920, FileOptions.Asynchronous | FileOptions.SequentialScan);
+        }
+        catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
+        {
+            return NotFound();
+        }
+        return Results.Stream(stream, "application/pdf", inline ? null : file.Name, enableRangeProcessing: true);
     }
 
     private static async Task<IResult> DeleteAsync(HttpContext context, string id, FileStore files, OpenDocuments documents)
