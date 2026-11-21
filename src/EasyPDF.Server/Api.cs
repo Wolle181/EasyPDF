@@ -35,6 +35,9 @@ public static class Api
             return Results.Json(new ServerConfig(o.Authentication.Mode.ToString(), o.Storage.MaxUploadBytes, o.Storage.IdleTimeoutMinutes,
                 o.Storage.MaxAgeHours), RemoteJson.Default.ServerConfig);
         });
+        // Sample stamps and the shared stamps and templates of the installation, as one ZIP (read at start of the program)
+        api.MapGet("/library", (IOptions<ServerOptions> options) =>
+            Results.Bytes(Library.BuildZip(Library.SampleFolder, options.Value.Storage.SharedFolder), "application/zip"));
         api.MapPost("/files", UploadAsync).RequireRateLimiting(UploadPolicy);
         api.MapGet("/files/{id}/pages/{page:int}", RenderAsync);
         api.MapGet("/files/{id}/pages/{page:int}/area", RenderAreaAsync);

@@ -9,7 +9,7 @@ using EasyPDF.Core.Templates;
 namespace EasyPDF.App.Dialogs;
 
 /// <summary>Edits the text templates; the result is the new list, or null if cancelled (also when closed with [X]).</summary>
-public sealed class TemplatesDialog : Window
+public sealed class TemplatesView : DialogView
 {
     private readonly List<TextTemplate> _items;
     private readonly ListBox _list = new() { MinHeight = 200, Width = 180 };
@@ -18,19 +18,15 @@ public sealed class TemplatesDialog : Window
     private bool _loading;
     private bool _refreshing;
 
-    public TemplatesDialog() : this([])
+    public TemplatesView() : this([])
     {
     }
 
-    public TemplatesDialog(IEnumerable<TextTemplate> templates)
+    public TemplatesView(IEnumerable<TextTemplate> templates)
     {
         _items = [.. templates.Select(t => new TextTemplate { Name = t.Name, Text = t.Text, FilePath = t.FilePath })];
         Title = Loc.T("TemplatesTitle");
-        Width = 620;
-        SizeToContent = SizeToContent.Height;
-        WindowStartupLocation = WindowStartupLocation.CenterOwner;
-        CanResize = false;
-        ShowInTaskbar = false;
+        DialogWidth = 620;
 
         var add = new Button { Content = Loc.T("TemplateAdd") };
         var delete = new Button { Content = Loc.T("TemplateDelete") };
@@ -128,5 +124,13 @@ public sealed class TemplatesDialog : Window
         _text.Text = item?.Text ?? "";
         _name.IsEnabled = _text.IsEnabled = item != null;
         _loading = false;
+    }
+}
+
+/// <summary>The templates dialog as a window (desktop).</summary>
+public sealed class TemplatesDialog : DialogWindow
+{
+    public TemplatesDialog(IEnumerable<TextTemplate> templates) : base(new TemplatesView(templates))
+    {
     }
 }

@@ -377,6 +377,66 @@ public class StampEditorTests
         window.Close();
     }
 
+    /// <summary>The web version's library: shared stamps are those in a folder named "Shared".</summary>
+    private sealed class FakeLibrary : IUserLibrary
+    {
+        public int Changes { get; private set; }
+
+        public void Prepare(AppSettings settings)
+        {
+        }
+
+        public void Changed() => Changes++;
+
+        public bool IsReadOnly(string path) => Path.GetFileName(Path.GetDirectoryName(path)) == "Shared";
+
+        public Task ExportAsync(TopLevel host) => Task.CompletedTask;
+
+        public Task<bool> ImportAsync(TopLevel host) => Task.FromResult(false);
+    }
+
+    [AvaloniaFact]
+    public async Task OnTheWebTheGalleryDeletesOwnStampsKeepsSharedOnesAndOffersExportInsteadOfTheFolder()
+    {
+        using var dir = new TempDir();
+        var library = new FakeLibrary();
+        PlatformFeatures.Library = library;
+        try
+        {
+            var (window, folder, flyout) = await WindowWithGalleryAsync(dir);
+            var mine = Path.Combine(folder, "Mine.png");
+            File.WriteAllBytes(mine, Picture());
+            Directory.CreateDirectory(Path.Combine(folder, "Shared"));
+            File.WriteAllBytes(Path.Combine(folder, "Shared", "Theirs.png"), Picture());
+            ShowGallery(window, flyout);
+            await Pump();
+
+            var buttons = Host(flyout).Children.OfType<Button>().Select(b => b.Content as string).ToList();
+            Assert.Contains(Loc.T("LibraryExport"), buttons);
+            Assert.Contains(Loc.T("LibraryImport"), buttons);
+            Assert.DoesNotContain(Loc.T("StampOpenFolder"), buttons);
+            var shared = Host(flyout).Children.OfType<Expander>().Single();
+            var theirs = ((WrapPanel)shared.Content!).Children.OfType<Button>().Single();
+            Assert.Single(theirs.ContextMenu!.Items);                            // edit only
+
+            var tile = ((WrapPanel)Host(flyout).Children[0]).Children.OfType<Button>().Single();
+            var delete = tile.ContextMenu!.Items.OfType<MenuItem>().Single(i => i.Header as string == Loc.T("StampDelete"));
+            delete.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+            await Pump();
+            var question = Assert.Single(window.OwnedWindows.OfType<QuestionDialog>());
+            Click(question.FindControl<Button>("YesButton")!);
+            await Pump();
+
+            Assert.False(File.Exists(mine));
+            Assert.Equal(1, library.Changes);
+            window.Close();
+        }
+        finally
+        {
+            PlatformFeatures.Library = null;
+        }
+    }
+
     [AvaloniaFact]
     public async Task EditingFromTheGalleryReplacesAPngAndRenamingRemovesTheOldFile()
     {

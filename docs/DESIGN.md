@@ -313,7 +313,7 @@ server; one `RapidOcrEngine`, one page at a time, `OcrService`), `DELETE`. pdfiu
 Connect: Keycloak, Entra ID, …; optional group or role). On disk only a hash of either. File ids are random 128-bit
 values and are only found together with their owner (otherwise 404). Files go 30 minutes after their last use, at the
 latest after 8 hours, when the document is closed in the app (the last reference) and at every start; an expired
-session takes its files with it. In mode `None` the browser keeps settings (and later stamps) itself.
+session takes its files with it. In mode `None` the browser keeps settings, stamps and templates itself (see below).
 
 **Hardening** (as in the other web apps on the same host): security headers from the app (`SecurityHeadersMiddleware`:
 CSP `default-src 'self'` with `'wasm-unsafe-eval'` only, no inline scripts; `nosniff`, `Referrer-Policy`,
@@ -324,7 +324,20 @@ limit; a time limit per pdfium job; no details in error responses, no file names
 header timeout; data protection keys in the volume. Container: chiseled image without shell, non-root, `--read-only`,
 `--cap-drop=ALL`, `no-new-privileges`, memory limit, self health check (`--healthcheck`).
 
-**Not in the web version yet** (hidden): stamps and templates, print, mail, several windows, recent files. Split
+**Stamps and templates on the web** (`BrowserLibrary`, `IUserLibrary`): the stamp and templates folders exist in the
+program's memory as on the desktop, so gallery, editor, date field and templates work unchanged (their dialogs are
+`DialogView`s). The user's own stamps and templates are kept as one ZIP file (`LibraryArchive`: `stamps/` with one level of
+subfolders, `templates/`) in the site's IndexedDB, unpacked at start and packed again after each change (new, edited or
+deleted stamp, edited templates); "Export/Import stamps and templates…" in the stamp gallery and the templates flyout
+take the place of "Open folder" and move them to another browser or computer. The server sends `GET /api/library` (one
+ZIP): the sample stamps (copied into the folder by `SampleContent` as on the desktop, the provided ones are remembered in
+the settings) and the installation's shared folder (`Storage:SharedFolder`, `/data/shared`: `stamps/*.png` with one level
+of subfolders, `templates/*.txt`; files above 5 MB are left out). Shared stamps show as gallery sections "Shared" and
+"Shared – <subfolder>", can be used but not deleted, and an edited one is saved as the user's own; shared templates are
+added unless the user has one of the same name and are kept only once changed. The web gallery's right-click menu also
+deletes the user's own stamps (there is no folder to delete them in).
+
+**Not in the web version yet** (hidden): mail, several windows, recent files. Split
 writes the parts as one ZIP file (no folder to choose in a browser); attachments and the e-invoice are saved
 (downloaded), a browser cannot open them in a program of the system.
 

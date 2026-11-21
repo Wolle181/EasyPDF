@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using EasyPDF.Core.Settings;
 
 namespace EasyPDF.App.Services;
 
@@ -42,6 +44,29 @@ public sealed class LocalPlatformFiles : IPlatformFiles
 }
 
 /// <summary>What the program runs on: the desktop program, or the web version with the subset of features it offers.</summary>
+/// <summary>
+/// Where the web version keeps the user's stamps and templates: in the browser's storage instead of folders the user can
+/// open. The folders exist in the program's memory as on the desktop; this class fills them at start and writes them back
+/// after each change.
+/// </summary>
+public interface IUserLibrary
+{
+    /// <summary>At start, once the settings and language are applied: fills the stamp and templates folders (also with the samples).</summary>
+    void Prepare(AppSettings settings);
+
+    /// <summary>The user changed stamps or templates: keep them.</summary>
+    void Changed();
+
+    /// <summary>Whether the stamp at <paramref name="path"/> can be used but not changed (a shared stamp of the server).</summary>
+    bool IsReadOnly(string path);
+
+    /// <summary>Saves the user's stamps and templates as one ZIP file the user chooses.</summary>
+    Task ExportAsync(TopLevel host);
+
+    /// <summary>Adds the stamps and templates of a ZIP file the user chooses (made by <see cref="ExportAsync"/>); false if none was chosen or it held none.</summary>
+    Task<bool> ImportAsync(TopLevel host);
+}
+
 public sealed class PlatformFeatures
 {
     private readonly Func<ViewModels.MainViewModel, ICommand, bool>? _available;
@@ -69,6 +94,9 @@ public sealed class PlatformFeatures
 
     /// <summary>The file conversion of the platform (set by the web version at start-up).</summary>
     public static IPlatformFiles Files { get; set; } = new LocalPlatformFiles();
+
+    /// <summary>The stamps and templates in the browser (web version); null on the desktop, where they are normal folders.</summary>
+    public static IUserLibrary? Library { get; set; }
 
     public bool IsWeb { get; }
 

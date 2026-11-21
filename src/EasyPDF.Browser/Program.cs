@@ -40,6 +40,8 @@ internal static class Program
             File.WriteAllText(AppSettings.DefaultPath, stored);
         }
         AppSettings.Saved += Interop.SaveSettings;
+        // Stamps and templates: the user's own from the browser's storage, samples and shared ones from the server
+        PlatformFeatures.Library = await BrowserLibrary.LoadAsync(http);
         // The brand's introduction videos that are next to the page (none: the video button stays hidden)
         var languages = new List<string>();
         foreach (var language in new[] { "de", "en" })

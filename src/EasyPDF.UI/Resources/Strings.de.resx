@@ -512,4 +512,19 @@
   <data name="InfoWebVersion" xml:space="preserve"><value>Web-Version</value></data>
   <data name="MsgPrintInBrowser" xml:space="preserve"><value>Das Dokument wurde in einem neuen Tab geöffnet: dort mit der Drucktaste des Browsers drucken.</value></data>
   <data name="ErrPrintTabBlocked" xml:space="preserve"><value>Der Browser hat den neuen Tab blockiert. Erlauben Sie Pop-ups für diese Seite und versuchen Sie es erneut.</value></data>
+  <data name="LibraryExport" xml:space="preserve"><value>Stempel und Vorlagen exportieren…</value></data>
+  <data name="LibraryExportTip" xml:space="preserve"><value>Speichert deine eigenen Stempel und Textvorlagen als eine ZIP-Datei, zur Sicherung oder für einen anderen Rechner oder Browser.</value></data>
+  <data name="LibraryExportFailed" xml:space="preserve"><value>Die Stempel und Vorlagen konnten nicht gespeichert werden.</value></data>
+  <data name="LibraryImport" xml:space="preserve"><value>Stempel und Vorlagen importieren…</value></data>
+  <data name="LibraryImportTip" xml:space="preserve"><value>Übernimmt die Stempel und Textvorlagen einer mit „Exportieren“ gespeicherten ZIP-Datei; gleichnamige werden ersetzt.</value></data>
+  <data name="LibraryImportFailed" xml:space="preserve"><value>Die Datei konnte nicht importiert werden.</value></data>
+  <data name="LibraryImportEmpty" xml:space="preserve"><value>Die Datei enthält keine Stempel oder Vorlagen.</value></data>
+  <data name="StampDelete" xml:space="preserve"><value>Löschen</value></data>
+  <data name="StampDeleteTitle" xml:space="preserve"><value>Stempel löschen</value></data>
+  <data name="StampDeleteQuestion" xml:space="preserve"><value>Den Stempel „{0}“ löschen?</value></data>
+  <data name="StampDeleteFailed" xml:space="preserve"><value>Der Stempel „{0}“ konnte nicht gelöscht werden.</value></data>
+  <data name="StampFolderShared" xml:space="preserve"><value>Gemeinsam</value></data>
+  <data name="LibraryFileName" xml:space="preserve"><value>Stempel und Vorlagen</value></data>
+  <data name="LibraryZipFiles" xml:space="preserve"><value>ZIP-Dateien</value></data>
+  <data name="StampEditDeleteHint" xml:space="preserve"><value>Rechtsklick auf einen Stempel: bearbeiten oder löschen.</value></data>
 </root>

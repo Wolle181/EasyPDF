@@ -74,6 +74,12 @@ public sealed class StorageOptions
 
     public int CleanupIntervalSeconds { get; set; } = 60;
 
+    /// <summary>
+    /// Stamps and templates all users get (read-only): PNG files in <c>stamps/</c> (one level of subfolders, each a section
+    /// of the gallery) and text files in <c>templates/</c>. Empty or missing: only the sample stamps.
+    /// </summary>
+    public string SharedFolder { get; set; } = "/data/shared";
+
     public long MaxUploadBytes => MaxUploadMegabytes * 1024L * 1024L;
 }
 

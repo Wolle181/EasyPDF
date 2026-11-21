@@ -5,8 +5,8 @@ using EasyPDF.App.ViewModels;
 namespace EasyPDF.Browser;
 
 /// <summary>
-/// The commands the web version offers so far; the others (stamps, texts, redaction, OCR, printing, mail, settings…)
-/// are hidden until they work in the browser too.
+/// The commands the web version offers so far; the others (mail, recent files, several windows…) are hidden until they
+/// work in the browser too.
 /// </summary>
 internal static class WebCommands
 {
@@ -37,6 +37,8 @@ internal static class WebCommands
         || command == vm.ShowSearchCommand || command == vm.FindNextCommand || command == vm.FindPreviousCommand
         || command == vm.CloseSearchCommand
         || command == vm.CancelOperationCommand || command == vm.CancelStampCommand
+        // Stamps and templates (kept in the browser, see BrowserLibrary)
+        || command == vm.SelectStampCommand || command == vm.SelectTemplateCommand
         // Black out / white out, texts, copying an area (the server writes them with the page list)
         || command == vm.RedactCommand || command == vm.CoverCommand || command == vm.SelectTextToolCommand
         || command == vm.ToggleCopyAreaToolCommand || command == vm.PasteAreaCommand
@@ -46,5 +48,5 @@ internal static class WebCommands
         || command == vm.PrintCommand;
 
     /// <summary>Ribbon buttons without a command (a gallery or menu) the web version offers.</summary>
-    public static IReadOnlySet<string> Buttons { get; } = new HashSet<string> { "TextStyleButton" };
+    public static IReadOnlySet<string> Buttons { get; } = new HashSet<string> { "TextStyleButton", "StampButton", "TemplatesButton" };
 }

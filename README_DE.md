@@ -68,7 +68,8 @@ teilen (ZIP) und das Ergebnis herunterladen. Die PDFs verarbeitet ein Server im 
 der letzten Nutzung, höchstens 8 Stunden). Ohne Anmeldung für den privaten Gebrauch oder mit Single Sign-on (OpenID
 Connect: Keycloak, Entra ID, …) im Unternehmen; Bauen und Betrieb in [docs/BUILDING.md](docs/BUILDING.md#web-version-container).
 Text lässt sich markieren, kopieren und suchen, Texte setzen, Bereiche schwärzen, abdecken und kopieren; Texterkennung (OCR) läuft auf dem
-Server; Stempel und Drucken folgen später.
+Server; Stempel (mit Datumsfeldern) und Textvorlagen bleiben im Browser und lassen sich als ZIP-Datei exportieren und
+importieren, gemeinsame kommen vom Server; Drucken öffnet die PDF in einem neuen Tab.
 
 ## Anpassen
 

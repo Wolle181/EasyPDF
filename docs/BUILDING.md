@@ -146,7 +146,7 @@ Then open `http://localhost:5199` (browsers send the `Secure` cookies to `localh
 **Configuration** (section `Web` of `appsettings.json`; in the container `/app/appsettings.Production.json`, mounted from the
 host, or environment variables `Web__…`): `Authentication:Mode` `None` (no sign-in, anonymous sessions) or `Oidc` (OpenID
 Connect: `Authority`, `ClientId`, `ClientSecret`, optional `RequiredGroup`/`RequiredRole`; callback path `/signin-oidc`),
-`Storage` (folders `/data/files`, `/data/keys`; `IdleTimeoutMinutes` 30, `MaxAgeHours` 8, upload and quota limits),
+`Storage` (folders `/data/files`, `/data/keys`, `SharedFolder` `/data/shared` with stamps and templates for all users, read-only; `IdleTimeoutMinutes` 30, `MaxAgeHours` 8, upload and quota limits),
 `RateLimits`, `ReverseProxy` (`TrustContainerGateway`, `TrustedProxies`) and `AllowedHosts`. The container writes only to
 `/data` and `/tmp`, so it runs with `--read-only`; it checks its own health with `/app/EasyPDF.Server --healthcheck`.
 The start script for the NAS (volumes, hardening options, reverse proxy) lives in the ContainerZoo repository

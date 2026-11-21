@@ -61,7 +61,9 @@ desktop: open, read, organize, rotate, delete and insert pages, merge files, ext
 PDFs are processed by a server in a container (pdfium) and stay there only temporarily (30 minutes after the last use,
 at most 8 hours). Without sign-in for private use, or with single sign-on (OpenID Connect: Keycloak, Entra ID, …) in a
 company; built and run as described in [docs/BUILDING.md](docs/BUILDING.md#web-version-container). Text can be selected, copied and searched, texts placed, areas blacked
-out or covered and copied; text is recognized (OCR) on the server; stamps and printing follow later.
+out or covered and copied; text is recognized (OCR) on the server; stamps (with date fields) and text templates stay in
+the browser and can be exported and imported as a ZIP file, shared ones come from the server; printing opens the PDF
+in a new tab.
 
 ## Customization
 

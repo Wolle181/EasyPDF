@@ -26,7 +26,7 @@ public sealed record StampEditorResult(string Name, byte[] Png);
 /// Stamps are PNG only (<see cref="StampLibrary"/>). The result is the finished stamp, or null if
 /// cancelled (also when closed with [X]); nothing is written here.
 /// </summary>
-public sealed class StampEditorDialog : Window
+public sealed class StampEditorView : DialogView
 {
     // An empty area: 60 x 25 mm at 300 dpi, sharp in print like the sample stamps
     private const int BlankWidth = 709;
@@ -68,21 +68,17 @@ public sealed class StampEditorDialog : Window
     private bool _nameTyped;
     private Bitmap? _preview;
 
-    public StampEditorDialog() : this(null, new TemplateContext(DateTime.Now, "", "", 1, 1))
+    public StampEditorView() : this(null, new TemplateContext(DateTime.Now, "", "", 1, 1))
     {
     }
 
     /// <param name="path">The PNG file to edit; null starts with an empty area. Throws if it isn't a PNG that can be read.</param>
     /// <param name="context">What macros stand for in the preview.</param>
-    public StampEditorDialog(string? path, TemplateContext context)
+    public StampEditorView(string? path, TemplateContext context)
     {
         _context = context;
         Title = Loc.T("StampEditorTitle");
-        Width = 780;
-        SizeToContent = SizeToContent.Height;
-        WindowStartupLocation = WindowStartupLocation.CenterOwner;
-        CanResize = false;
-        ShowInTaskbar = false;
+        DialogWidth = 780;
 
         if (path != null)
         {
@@ -280,14 +276,33 @@ public sealed class StampEditorDialog : Window
 
     private async System.Threading.Tasks.Task ChoosePictureAsync()
     {
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        if (Host is not { } host)
+            return;
+        var files = await host.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = Loc.T("StampEditorChoosePicture"),
             AllowMultiple = false,
-            FileTypeFilter = [new FilePickerFileType(Loc.T("StampPictures")) { Patterns = ["*.png"] }],
+            FileTypeFilter = [new FilePickerFileType(Loc.T("StampPictures")) { Patterns = ["*.png"], MimeTypes = ["image/png"] }],
         });
-        if (files.Count > 0 && files[0].TryGetLocalPath() is { } path)
+        if (files.Count == 0)
+            return;
+        if (files[0].TryGetLocalPath() is { } path)
+        {
             UsePicture(path);
+            return;
+        }
+        // The browser has no paths: the picture comes as a stream
+        try
+        {
+            await using var stream = await files[0].OpenReadAsync();
+            using var memory = new MemoryStream();
+            await stream.CopyToAsync(memory);
+            UsePicture(memory.ToArray(), files[0].Name);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            ShowError(Loc.F("StampUnreadable", files[0].Name));
+        }
     }
 
     /// <summary>Takes the PNG in the file; the fields stay, unless there are none yet and the file brings its own. Any other file is refused with a message.</summary>
@@ -297,6 +312,21 @@ public sealed class StampEditorDialog : Window
         try
         {
             file = File.ReadAllBytes(path);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            ShowError(Loc.F("StampUnreadable", Path.GetFileName(path)));
+            return;
+        }
+        UsePicture(file, Path.GetFileName(path));
+    }
+
+    /// <summary>Takes the PNG <paramref name="file"/> named <paramref name="fileName"/>, as <see cref="UsePicture(string)"/>.</summary>
+    public void UsePicture(byte[] file, string fileName)
+    {
+        var path = fileName;
+        try
+        {
             if (!StampFile.IsPng(file))
             {
                 ShowError(Loc.F("StampEditorPngOnly", Path.GetFileName(path)));
@@ -383,4 +413,24 @@ public sealed class StampEditorDialog : Window
         result.Save(png, new PngBitmapEncoderOptions());
         return png.ToArray();
     }
+}
+
+/// <summary>The stamp editor as a window (desktop).</summary>
+public sealed class StampEditorDialog : DialogWindow
+{
+    /// <inheritdoc cref="StampEditorView(string?, TemplateContext)"/>
+    public StampEditorDialog(string? path, TemplateContext context) : base(new StampEditorView(path, context))
+    {
+    }
+
+    private StampEditorView View => (StampEditorView)DialogContent;
+
+    /// <inheritdoc cref="StampEditorView.Canvas"/>
+    public StampEditorCanvas Canvas => View.Canvas;
+
+    /// <inheritdoc cref="StampEditorView.Fields"/>
+    public IReadOnlyList<StampField> Fields => View.Fields;
+
+    /// <inheritdoc cref="StampEditorView.UsePicture(string)"/>
+    public void UsePicture(string path) => View.UsePicture(path);
 }

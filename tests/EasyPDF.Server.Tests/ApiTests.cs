@@ -372,6 +372,32 @@ public class ApiTests
         Assert.Contains("app", await (await browser.GetAsync("/some/deep/link")).Content.ReadAsStringAsync());
     }
 
+    [Fact]
+    public async Task LibraryHasTheSampleStampsAndTheSharedStampsAndTemplates()
+    {
+        await using var probe = await TestServerHost.StartAsync();
+        var shared = Path.Combine(probe.Folder, "shared");
+        Directory.CreateDirectory(Path.Combine(shared, "stamps", "Company"));
+        Directory.CreateDirectory(Path.Combine(shared, "templates"));
+        await File.WriteAllBytesAsync(Path.Combine(shared, "stamps", "Checked.png"), [0x89, 0x50]);
+        await File.WriteAllBytesAsync(Path.Combine(shared, "stamps", "Company", "Logo.png"), [0x89, 0x50]);
+        await File.WriteAllTextAsync(Path.Combine(shared, "stamps", "readme.txt"), "not a stamp");
+        await File.WriteAllTextAsync(Path.Combine(shared, "templates", "Greeting.txt"), "Kind regards");
+        await File.WriteAllBytesAsync(Path.Combine(shared, "templates", "Huge.txt"), new byte[Library.MaxFileBytes + 1]);
+        await using var server = await TestServerHost.StartAsync(("Web:Storage:SharedFolder", shared));
+
+        var response = await server.NewBrowser().GetAsync("/api/library");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var zip = new System.IO.Compression.ZipArchive(await response.Content.ReadAsStreamAsync());
+        var names = zip.Entries.Select(e => e.FullName).ToList();
+        Assert.Contains("samples/Numbers/01.png", names);
+        Assert.Contains("shared/stamps/Checked.png", names);
+        Assert.Contains("shared/stamps/Company/Logo.png", names);
+        Assert.Contains("shared/templates/Greeting.txt", names);
+        Assert.DoesNotContain("shared/stamps/readme.txt", names);
+        Assert.DoesNotContain("shared/templates/Huge.txt", names);
+    }
+
     private static Task<TestServerHost> TestServerHostWithRoot(string root) => TestServerHost.StartAsync(("Web:WebRoot", root));
 }
 

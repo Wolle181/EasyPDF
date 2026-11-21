@@ -499,6 +499,19 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
                 flyout.Hide();
                 await EditTemplatesAsync();
             };
+            host.Children.Add(new Separator());
+            host.Children.Add(edit);
+            if (PlatformFeatures.Library is { } library)
+            {
+                foreach (var button in LibraryButtons(library, flyout))
+                {
+                    button.HorizontalAlignment = HorizontalAlignment.Stretch;
+                    button.HorizontalContentAlignment = HorizontalAlignment.Left;
+                    button.Background = Avalonia.Media.Brushes.Transparent;
+                    host.Children.Add(button);
+                }
+                return;
+            }
             var open = new Button { Content = Loc.T("TemplateOpenFolder"), HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Left, Background = Avalonia.Media.Brushes.Transparent };
             ToolTip.SetTip(open, _viewModel.TemplateFolder);
             open.Click += async (_, _) =>
@@ -506,8 +519,6 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
                 flyout.Hide();
                 await FolderLauncher.OpenAsync(RequireWindow(), _viewModel.TemplateFolder);
             };
-            host.Children.Add(new Separator());
-            host.Children.Add(edit);
             host.Children.Add(open);
         };
         return flyout;
@@ -516,9 +527,50 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
     public async Task EditTemplatesAsync()
     {
         var before = _viewModel.LoadTemplates();
-        var result = await new TemplatesDialog(before).ShowDialog<List<TextTemplate>?>(RequireWindow());
+        var result = await ShowDialogAsync<List<TextTemplate>>(() => new TemplatesDialog(before), () => new TemplatesView(before));
         if (result != null)
+        {
             await _viewModel.SaveTemplatesAsync(before, result);
+            PlatformFeatures.Library?.Changed();
+        }
+    }
+
+    /// <summary>
+    /// Web version: the entries that save the user's stamps and templates as a ZIP file and add those of one (there is no
+    /// folder to open in the browser).
+    /// </summary>
+    private IEnumerable<Button> LibraryButtons(IUserLibrary library, Flyout flyout)
+    {
+        var export = new Button { Content = Loc.T("LibraryExport") };
+        ToolTip.SetTip(export, Loc.T("LibraryExportTip"));
+        export.Click += async (_, _) =>
+        {
+            flyout.Hide();
+            try
+            {
+                await library.ExportAsync(Host);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                await ShowErrorAsync(Loc.T("LibraryExportFailed"), ex.Message);
+            }
+        };
+        var import = new Button { Content = Loc.T("LibraryImport") };
+        ToolTip.SetTip(import, Loc.T("LibraryImportTip"));
+        import.Click += async (_, _) =>
+        {
+            flyout.Hide();
+            try
+            {
+                if (!await library.ImportAsync(Host))
+                    return;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException)
+            {
+                await ShowErrorAsync(Loc.T("LibraryImportFailed"), ex.Message);
+            }
+        };
+        return [export, import];
     }
 
     private void ApplyTextStyle()
@@ -618,10 +670,15 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
     /// </summary>
     private async Task EditStampAsync(string? path)
     {
-        StampEditorDialog dialog;
+        var context = _viewModel.MacroContext(_viewModel.CurrentPage);
+        Window? window = null;
+        DialogView? view = null;
         try
         {
-            dialog = new StampEditorDialog(path, _viewModel.MacroContext(_viewModel.CurrentPage));
+            if (OwnerWindow != null)
+                window = new StampEditorDialog(path, context);
+            else
+                view = new StampEditorView(path, context);
         }
         catch (Exception)
         {
@@ -629,17 +686,41 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
             await ShowErrorAsync(Loc.F("StampUnreadable", Path.GetFileName(path ?? "")));
             return;
         }
-        if (await dialog.ShowDialog<StampEditorResult?>(RequireWindow()) is not { } result)
+        if (await ShowDialogAsync<StampEditorResult>(() => window!, () => view!) is not { } result)
             return;
+        // A shared stamp of the server can't be changed: the edited one becomes the user's own
+        if (path != null && IsReadOnlyStamp(path))
+            path = null;
         var folder = path != null ? Path.GetDirectoryName(path)! : StampLibrary.ResolveFolder(_settings);
         try
         {
             var saved = StampLibrary.SaveStamp(folder, result.Name, result.Png, path);
+            PlatformFeatures.Library?.Changed();
             _viewModel.ReportStampSaved(Path.GetFileNameWithoutExtension(saved));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
         {
             await ShowErrorAsync(Loc.F("StampSaveFailed", result.Name, ex.Message));
+        }
+    }
+
+    private static bool IsReadOnlyStamp(string path) => PlatformFeatures.Library?.IsReadOnly(path) == true;
+
+    /// <summary>Web version: deletes a stamp of the gallery after asking.</summary>
+    private async Task DeleteStampAsync(string path)
+    {
+        var name = Path.GetFileNameWithoutExtension(path);
+        if (!await ShowDialogAsync<bool>(() => new QuestionDialog(Loc.T("StampDeleteTitle"), Loc.F("StampDeleteQuestion", name)),
+                () => new QuestionDialogView(Loc.T("StampDeleteTitle"), Loc.F("StampDeleteQuestion", name))))
+            return;
+        try
+        {
+            File.Delete(path);
+            PlatformFeatures.Library?.Changed();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            await ShowErrorAsync(Loc.F("StampDeleteFailed", name), ex.Message);
         }
     }
 
@@ -649,7 +730,8 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
         var stamp = _viewModel.Document?.Pages.SelectMany(p => p.Stamps).FirstOrDefault(s => s.Id == stampId);
         if (stamp?.Template is not { } template)
             return;
-        var chosen = await new StampDateDialog(template.Context.Now).ShowDialog<DateTime?>(RequireWindow());
+        var now = template.Context.Now;
+        var chosen = await ShowDialogAsync<DateTime?>(() => new StampDateDialog(now), () => new StampDateView(now));
         if (chosen is not { } date || date.Date == template.Context.Now.Date)
             return;
         var changed = template with { Context = template.Context with { Now = date.Date + template.Context.Now.TimeOfDay } };
@@ -804,6 +886,17 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
                     _ = EditStampAsync(path);
                 };
                 item.ContextMenu = new ContextMenu { Items = { edit } };
+                // The web version has no folder to delete stamps in: the menu does it (not for the server's shared ones)
+                if (PlatformFeatures.Library != null && !IsReadOnlyStamp(path))
+                {
+                    var delete = new MenuItem { Header = Loc.T("StampDelete") };
+                    delete.Click += (_, _) =>
+                    {
+                        flyout.Hide();
+                        _ = DeleteStampAsync(path);
+                    };
+                    item.ContextMenu.Items.Add(delete);
+                }
                 grid.Children.Add(item);
             }
             return grid;
@@ -840,7 +933,7 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
         if (skipped > 0)
             host.Children.Add(new TextBlock { Text = Loc.F("StampSkipped", skipped), Opacity = 0.7 });
         if (shown > 0)
-            host.Children.Add(new TextBlock { Text = Loc.T("StampEditHint"), FontSize = 12, Opacity = 0.7 });
+            host.Children.Add(new TextBlock { Text = Loc.T(PlatformFeatures.Library != null ? "StampEditDeleteHint" : "StampEditHint"), FontSize = 12, Opacity = 0.7 });
         host.Children.Add(new TextBlock { Text = Loc.T("StampPngHint"), FontSize = 12, Opacity = 0.7, TextWrapping = Avalonia.Media.TextWrapping.Wrap, MaxWidth = 300, HorizontalAlignment = HorizontalAlignment.Left });
         var newStamp = new Button { Content = Loc.T("StampNew") };
         newStamp.Click += (_, _) =>
@@ -849,6 +942,12 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
             _ = EditStampAsync(null);
         };
         host.Children.Add(newStamp);
+        if (PlatformFeatures.Library is { } library)
+        {
+            foreach (var button in LibraryButtons(library, flyout))
+                host.Children.Add(button);
+            return;
+        }
         var open = new Button { Content = Loc.T("StampOpenFolder") };
         ToolTip.SetTip(open, folder);
         open.Click += async (_, _) =>

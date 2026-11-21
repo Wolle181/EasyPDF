@@ -45,3 +45,37 @@ export function loadSettings() {
 export function saveSettings(json) {
     try { localStorage.setItem('settings', json); } catch { }
 }
+
+// Stamps and templates: one ZIP file (Base64) in IndexedDB, which holds much more than localStorage
+function openStore() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('app', 1);
+        request.onupgradeneeded = () => request.result.createObjectStore('files');
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+export async function loadLibrary() {
+    try {
+        const db = await openStore();
+        return await new Promise(resolve => {
+            const get = db.transaction('files').objectStore('files').get('library');
+            get.onsuccess = () => resolve(typeof get.result === 'string' ? get.result : '');
+            get.onerror = () => resolve('');
+        });
+    } catch { return ''; }
+}
+
+export async function saveLibrary(zipBase64) {
+    try {
+        const db = await openStore();
+        await new Promise(resolve => {
+            const transaction = db.transaction('files', 'readwrite');
+            transaction.objectStore('files').put(zipBase64, 'library');
+            transaction.oncomplete = resolve;
+            transaction.onerror = resolve;
+            transaction.onabort = resolve;
+        });
+    } catch { }
+}

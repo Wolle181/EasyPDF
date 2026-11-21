@@ -7,21 +7,18 @@ using EasyPDF.App.Localization;
 namespace EasyPDF.App.Dialogs;
 
 /// <summary>Chooses the date of a placed stamp; the result is the date, or null if cancelled (also when closed with [X]).</summary>
-public sealed class StampDateDialog : Window
+public sealed class StampDateView : DialogView
 {
     private readonly Calendar _calendar = new() { SelectionMode = CalendarSelectionMode.SingleDate, HorizontalAlignment = HorizontalAlignment.Center };
 
-    public StampDateDialog() : this(DateTime.Today)
+    public StampDateView() : this(DateTime.Today)
     {
     }
 
-    public StampDateDialog(DateTime date)
+    public StampDateView(DateTime date)
     {
         Title = Loc.T("StampDateTitle");
-        SizeToContent = SizeToContent.WidthAndHeight;
-        WindowStartupLocation = WindowStartupLocation.CenterOwner;
-        CanResize = false;
-        ShowInTaskbar = false;
+        DialogWidth = 320;
 
         _calendar.SelectedDate = date.Date;
         _calendar.DisplayDate = date.Date;
@@ -46,4 +43,15 @@ public sealed class StampDateDialog : Window
 
     /// <summary>The calendar shown.</summary>
     public Calendar Calendar => _calendar;
+}
+
+/// <summary>The date dialog as a window (desktop).</summary>
+public sealed class StampDateDialog : DialogWindow
+{
+    public StampDateDialog(DateTime date) : base(new StampDateView(date))
+    {
+    }
+
+    /// <inheritdoc cref="StampDateView.Calendar"/>
+    public Calendar Calendar => ((StampDateView)DialogContent).Calendar;
 }

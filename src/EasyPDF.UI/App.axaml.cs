@@ -95,6 +95,14 @@ public class App : Application
             // Web version: one view, the page itself; settings live in the browser's memory for this visit
             var settings = AppSettings.Load();
             AppEnvironment.Apply(settings);
+            // Stamps and templates from the browser's storage, with the samples and the server's shared ones
+            if (Services.PlatformFeatures.Library is { } library)
+            {
+                library.Prepare(settings);
+                if (SampleContent.Provide(settings))
+                    TrySave(settings);
+                library.Changed();
+            }
             single.MainView = new MainView(settings);
         }
         base.OnFrameworkInitializationCompleted();

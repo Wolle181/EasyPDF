@@ -26,4 +26,13 @@ internal static partial class Interop
 
     [JSImport("saveSettings", "interop")]
     public static partial void SaveSettings(string json);
+
+    /// <summary>The user's stamps and templates (a ZIP file as Base64) from the browser's storage; empty if there are none.</summary>
+    [JSImport("loadLibrary", "interop")]
+    [return: JSMarshalAs<JSType.Promise<JSType.String>>]
+    public static partial Task<string> LoadLibrary();
+
+    [JSImport("saveLibrary", "interop")]
+    [return: JSMarshalAs<JSType.Promise<JSType.Void>>]
+    public static partial Task SaveLibrary(string zipBase64);
 }
