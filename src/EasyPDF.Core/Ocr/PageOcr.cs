@@ -27,6 +27,8 @@ public static class PageOcr
         int extraRotation = 0, CancellationToken token = default)
     {
         extraRotation = ((extraRotation / 90 % 4) + 4) % 4 * 90;
+        if (source is IServerOcr server)
+            return await server.RecognizeAsync(pageIndex, extraRotation, token).ConfigureAwait(false);
         var size = await source.GetPageSizeAsync(pageIndex, token).ConfigureAwait(false);
         var shown = size.Rotated(extraRotation);
         var (width, height) = PixelSize(shown);

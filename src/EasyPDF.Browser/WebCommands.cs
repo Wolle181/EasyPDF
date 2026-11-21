@@ -28,6 +28,7 @@ internal static class WebCommands
         || command == vm.ApplyZoomInputCommand
         || command == vm.SelectAllCommand || command == vm.CloseDocumentCommand
         || command == vm.ShowSettingsCommand || command == vm.ShowAboutCommand || command == vm.ShowQuickGuideCommand
+        || command == vm.ShowIntroVideoCommand
         // Attachments and e-invoice (saved as download; a browser cannot open them in a program of the system)
         || command == vm.ShowAttachmentsCommand || command == vm.OpenEInvoiceCommand || command == vm.SaveEInvoiceCommand
         || command == vm.DismissEInvoiceBarCommand
@@ -38,7 +39,11 @@ internal static class WebCommands
         || command == vm.CancelOperationCommand || command == vm.CancelStampCommand
         // Black out / white out, texts, copying an area (the server writes them with the page list)
         || command == vm.RedactCommand || command == vm.CoverCommand || command == vm.SelectTextToolCommand
-        || command == vm.ToggleCopyAreaToolCommand || command == vm.PasteAreaCommand;
+        || command == vm.ToggleCopyAreaToolCommand || command == vm.PasteAreaCommand
+        // Text recognition on the server
+        || command == vm.RecognizeTextCommand
+        // Printing: a new tab with the PDF, printed by the browser's viewer
+        || command == vm.PrintCommand;
 
     /// <summary>Ribbon buttons without a command (a gallery or menu) the web version offers.</summary>
     public static IReadOnlySet<string> Buttons { get; } = new HashSet<string> { "TextStyleButton" };

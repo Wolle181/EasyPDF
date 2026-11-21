@@ -1403,10 +1403,39 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
     private readonly Dictionary<string, PrinterSetup> _printerSetups = [];
 
     /// <summary>Print: the dialog asks for printer, copies and pages; the pages (with all edits) go to a temporary PDF that is sent to the printer.</summary>
+    /// <summary>Web version: the server writes the document as it is now, a new tab shows it, its viewer prints.</summary>
+    private async Task PrintInBrowserAsync(EditableDocument document)
+    {
+        BeginOperation(Loc.F("BusyPrinting", document.PageCount));
+        try
+        {
+            var shown = await Services.PlatformFeatures.Files.ShowForPrintingAsync([.. document.Pages], BaseNameOf(document) + ".pdf");
+            if (shown)
+                ShowMessage(Loc.T("MsgPrintInBrowser"));
+            else
+                await dialogs.ShowErrorAsync(Loc.T("ErrPrintTabBlocked"));
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            await dialogs.ShowErrorAsync(Loc.T("ErrPrintFailed"), ex.Message);
+        }
+        finally
+        {
+            _operation?.Dispose();
+            _operation = null;
+            IsBusy = false;
+        }
+    }
+
     [RelayCommand(CanExecute = nameof(CanUseDocument))]
     private async Task PrintAsync(int? page)
     {
         var document = OpenDocument;
+        if (Services.PlatformFeatures.Current.IsWeb)
+        {
+            await PrintInBrowserAsync(document);
+            return;
+        }
         var service = printing ?? PlatformPrintService.Instance;
         var (current, selected) = DialogPages(page);
         var request = await dialogs.ShowPrintDialogAsync(new PrintDialogContext(
@@ -1663,7 +1692,7 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
         var token = _operation.Token;
         try
         {
-            _ocrEngine ??= await Task.Run(ocrEngineFactory ?? (() => new RapidOcrEngine()), token);
+            _ocrEngine ??= await Task.Run(ocrEngineFactory ?? Services.PlatformFeatures.OcrEngineFactory ?? (() => new RapidOcrEngine()), token);
             var progress = new Progress<int>(done =>
             {
                 Progress = (double)done / pages.Count;

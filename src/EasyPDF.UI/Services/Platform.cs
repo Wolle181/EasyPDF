@@ -20,6 +20,12 @@ public interface IPlatformFiles
 
     /// <summary>Writes a file to a path from <see cref="ToSavePath"/> (web version: to the target the user chose).</summary>
     Task WriteAsync(string path, byte[] content);
+
+    /// <summary>
+    /// Web version: shows the pages (with everything placed on them) as a PDF in a new browser tab, where the browser's
+    /// viewer prints it. False if the browser blocked the tab. The desktop prints itself and never calls this.
+    /// </summary>
+    Task<bool> ShowForPrintingAsync(IReadOnlyList<EasyPDF.Core.Documents.PageEntry> pages, string name);
 }
 
 /// <summary>Local files (desktop): their own paths.</summary>
@@ -30,6 +36,9 @@ public sealed class LocalPlatformFiles : IPlatformFiles
     public string? ToSavePath(IStorageFile file) => file.TryGetLocalPath();
 
     public Task WriteAsync(string path, byte[] content) => System.IO.File.WriteAllBytesAsync(path, content);
+
+    public Task<bool> ShowForPrintingAsync(IReadOnlyList<EasyPDF.Core.Documents.PageEntry> pages, string name) =>
+        throw new NotSupportedException("The desktop program prints itself.");
 }
 
 /// <summary>What the program runs on: the desktop program, or the web version with the subset of features it offers.</summary>
@@ -54,6 +63,9 @@ public sealed class PlatformFeatures
 
     /// <summary>Set once at start-up by the web version.</summary>
     public static PlatformFeatures Current { get; set; } = Desktop;
+
+    /// <summary>Creates the text recognizer when the platform has its own (web version: recognition runs on the server).</summary>
+    public static Func<EasyPDF.Core.Ocr.IOcrEngine>? OcrEngineFactory { get; set; }
 
     /// <summary>The file conversion of the platform (set by the web version at start-up).</summary>
     public static IPlatformFiles Files { get; set; } = new LocalPlatformFiles();

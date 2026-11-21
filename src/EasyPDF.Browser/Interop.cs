@@ -14,6 +14,13 @@ internal static partial class Interop
     [JSImport("setTitle", "interop")]
     public static partial void SetTitle(string title);
 
+    /// <summary>Opens <paramref name="url"/> in a new tab; false if the browser blocked it.</summary>
+    [JSImport("openTab", "interop")]
+    public static partial bool OpenTab(string url);
+
+    [JSImport("playVideo", "interop")]
+    public static partial void PlayVideo(string url, string closeLabel);
+
     [JSImport("loadSettings", "interop")]
     public static partial string LoadSettings();
 

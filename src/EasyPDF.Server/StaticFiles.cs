@@ -22,6 +22,7 @@ public static class StaticContentTypes
         provider.Mappings[".dll"] = "application/octet-stream";
         provider.Mappings[".pdb"] = "application/octet-stream";
         provider.Mappings[".webmanifest"] = "application/manifest+json";
+        provider.Mappings[".mp4"] = "video/mp4";
         return provider;
     }
 }

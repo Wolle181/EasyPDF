@@ -13,8 +13,23 @@ public static class IntroVideo
 {
     public static string Folder { get; } = Path.Combine(AppContext.BaseDirectory, "videos");
 
+    private static readonly bool LocalAvailable = Find(Folder, "en") != null;
+
     /// <summary>The program comes with a video (any language).</summary>
-    public static bool IsAvailable { get; } = Find(Folder, "en") != null;
+    public static bool IsAvailable => Web != null ? Web.Languages.Count > 0 : LocalAvailable;
+
+    /// <summary>
+    /// Web version: the videos the server offers (languages) and how the page plays one (an overlay with a video element);
+    /// null on the desktop.
+    /// </summary>
+    public static WebVideos? Web { get; set; }
+
+    public sealed record WebVideos(System.Collections.Generic.IReadOnlyList<string> Languages, Func<string, System.Threading.Tasks.Task> Play)
+    {
+        /// <summary>The language of the user interface if there is a video in it, else English, else any.</summary>
+        public string? Pick(string language) =>
+            Languages.Contains(language) ? language : Languages.Contains("en") ? "en" : Languages.FirstOrDefault();
+    }
 
     /// <summary>The video in the language of the user interface, or another one.</summary>
     public static string? Current => Find(Folder, CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);

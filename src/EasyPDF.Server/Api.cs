@@ -40,6 +40,7 @@ public static class Api
         api.MapGet("/files/{id}/pages/{page:int}/area", RenderAreaAsync);
         api.MapGet("/files/{id}/pages/{page:int}/words", WordsAsync);
         api.MapGet("/files/{id}/pages/{page:int}/chars", CharsAsync);
+        api.MapGet("/files/{id}/pages/{page:int}/ocr", OcrAsync).RequireRateLimiting(UploadPolicy);
         api.MapGet("/files/{id}/attachments", AttachmentsAsync);
         api.MapGet("/files/{id}/attachments/{index:int}", AttachmentAsync);
         api.MapGet("/files/{id}/content", Content);
@@ -172,6 +173,18 @@ public static class Api
         return Results.Json(await source.ReadWordsAsync(page, job.Token), RemoteJson.Default.IReadOnlyListOcrWord);
     }
 
+    private static async Task<IResult> OcrAsync(HttpContext context, string id, int page, int rot, FileStore files, OpenDocuments documents,
+        OcrService ocr)
+    {
+        using var job = Job(context);
+        var (_, source) = await OpenAsync(context, id, files, documents, job.Token);
+        if (source == null)
+            return NotFound();
+        if (page < 0 || page >= source.PageCount || rot % 90 != 0)
+            return Error(ApiErrors.Invalid, StatusCodes.Status400BadRequest);
+        return Results.Json(await ocr.RecognizeAsync(source, page, rot, job.Token), RemoteJson.Default.IReadOnlyListOcrWord);
+    }
+
     private static async Task<IResult> CharsAsync(HttpContext context, string id, int page, FileStore files, OpenDocuments documents)
     {
         using var job = Job(context);
@@ -204,10 +217,13 @@ public static class Api
         return Results.Bytes(await source.ReadAttachmentAsync(index, job.Token), "application/octet-stream");
     }
 
-    private static IResult Content(HttpContext context, string id, FileStore files)
+    /// <summary>The PDF itself: as download, or with <paramref name="inline"/> to be shown in the browser's viewer (printing).</summary>
+    private static IResult Content(HttpContext context, string id, FileStore files, bool inline = false)
     {
         var file = files.Get(OwnerKeys.Of(context), id);
-        return file == null ? NotFound() : Results.File(file.Path, "application/pdf", file.Name);
+        if (file == null)
+            return NotFound();
+        return inline ? Results.File(file.Path, "application/pdf") : Results.File(file.Path, "application/pdf", file.Name);
     }
 
     private static async Task<IResult> DeleteAsync(HttpContext context, string id, FileStore files, OpenDocuments documents)

@@ -11,7 +11,7 @@ namespace EasyPDF.Remote;
 /// A PDF that lives on the server: every page size is known from the upload, pages are rendered by the server's pdfium
 /// and come back as PNG. <see cref="Path"/> is a virtual path (<see cref="RemoteFiles.PathOf"/>) ending in the file name.
 /// </summary>
-public sealed class RemotePdfSource : IPdfSource
+public sealed class RemotePdfSource : IPdfSource, IServerOcr
 {
     private readonly RemoteFiles _files;
     private int _disposed;
@@ -73,6 +73,9 @@ public sealed class RemotePdfSource : IPdfSource
     public Task<RenderedPage> RenderAreaAsync(int pageIndex, int pageWidth, int pageHeight, int extraRotation, int x, int y, int width, int height,
         int priority = PdfiumWorker.PriorityVisible, CancellationToken token = default) =>
         _files.Api.RenderAreaAsync(Id, pageIndex, pageWidth, pageHeight, extraRotation, x, y, width, height, token);
+
+    public Task<IReadOnlyList<OcrWord>> RecognizeAsync(int pageIndex, int extraRotation, CancellationToken token = default) =>
+        _files.Api.RecognizeAsync(Id, pageIndex, extraRotation, token);
 
     public Task<IReadOnlyList<PdfAttachment>> ListAttachmentsAsync(CancellationToken token = default) =>
         _files.Api.ListAttachmentsAsync(Id, token);

@@ -510,4 +510,6 @@
   <data name="WebErrServer" xml:space="preserve"><value>Der Server konnte die Anfrage nicht bearbeiten. Bitte versuchen Sie es später erneut.</value></data>
   <data name="BrandSubtitleWeb" xml:space="preserve"><value>PDFs lesen, ordnen und zusammenführen – im Browser</value></data>
   <data name="InfoWebVersion" xml:space="preserve"><value>Web-Version</value></data>
+  <data name="MsgPrintInBrowser" xml:space="preserve"><value>Das Dokument wurde in einem neuen Tab geöffnet: dort mit der Drucktaste des Browsers drucken.</value></data>
+  <data name="ErrPrintTabBlocked" xml:space="preserve"><value>Der Browser hat den neuen Tab blockiert. Erlauben Sie Pop-ups für diese Seite und versuchen Sie es erneut.</value></data>
 </root>

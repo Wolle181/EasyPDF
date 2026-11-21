@@ -305,7 +305,8 @@ browser has none of the system fonts: the preview of a text uses a fallback font
 **Server.** REST under `/api`: upload (`POST /files`, PDF header checked, opened with pdfium right away, all page sizes
 returned), rendered pages as PNG (own codec in Core, `PngCodec`, so neither side needs a native image library), words,
 attachments, content, `build` (writes a page list based on a file: the snapshot of `EditableDocument`), `extract`,
-`blank`, `DELETE`. pdfium stays on its one worker thread; opened files are kept in a small LRU (`OpenDocuments`).
+`blank`, `split` (ZIP), `ocr` (text recognition of a page: `RemotePdfSource` is an `IServerOcr`, so `PageOcr` asks the
+server; one `RapidOcrEngine`, one page at a time, `OcrService`), `DELETE`. pdfium stays on its one worker thread; opened files are kept in a small LRU (`OpenDocuments`).
 
 **Owners and retention.** Every file belongs to an owner: in mode `None` an anonymous session (random id in the cookie
 `__Host-session`, `Secure`, `HttpOnly`, `SameSite=Strict`), in mode `Oidc` the signed-in user (`sub`, generic OpenID
@@ -323,7 +324,7 @@ limit; a time limit per pdfium job; no details in error responses, no file names
 header timeout; data protection keys in the volume. Container: chiseled image without shell, non-root, `--read-only`,
 `--cap-drop=ALL`, `no-new-privileges`, memory limit, self health check (`--healthcheck`).
 
-**Not in the web version yet** (hidden): stamps and templates, OCR, print, mail, several windows, recent files. Split
+**Not in the web version yet** (hidden): stamps and templates, print, mail, several windows, recent files. Split
 writes the parts as one ZIP file (no folder to choose in a browser); attachments and the e-invoice are saved
 (downloaded), a browser cannot open them in a program of the system.
 

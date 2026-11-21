@@ -4,7 +4,9 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
+using System.Collections.Generic;
 using EasyPDF.App.Services;
+using EasyPDF.Core.Documents;
 using EasyPDF.Remote;
 
 namespace EasyPDF.Browser;
@@ -34,6 +36,13 @@ internal sealed class BrowserFiles(RemoteFiles files, BrowserSaveTargets targets
     public string? ToSavePath(IStorageFile file) => targets.Add(file);
 
     public Task WriteAsync(string path, byte[] content) => targets.WriteAsync(path, content, CancellationToken.None);
+
+    public async Task<bool> ShowForPrintingAsync(IReadOnlyList<PageEntry> pages, string name)
+    {
+        var info = await files.Api.ExtractAsync(new ExtractRequest(name, RemotePdfBackend.ToRemote(pages)), CancellationToken.None);
+        // The server's own address: the tab shows the PDF in the browser's viewer (the file expires like every other)
+        return Interop.OpenTab($"api/files/{info.Id}/content?inline=true");
+    }
 }
 
 /// <summary>The files the user chose in save dialogs, by a virtual path <c>/save/&lt;id&gt;/&lt;name&gt;</c>.</summary>

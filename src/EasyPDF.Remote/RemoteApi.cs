@@ -75,6 +75,14 @@ public sealed class RemoteApi
         return (await response.Content.ReadFromJsonAsync(RemoteJson.Default.IReadOnlyListOcrWord, token).ConfigureAwait(false))!;
     }
 
+    /// <summary>Text recognition of the page on the server (as shown, turned by <paramref name="rotation"/>).</summary>
+    public async Task<IReadOnlyList<OcrWord>> RecognizeAsync(string id, int page, int rotation, CancellationToken token)
+    {
+        using var response = await _http.GetAsync($"api/files/{id}/pages/{page}/ocr?rot={rotation}", token).ConfigureAwait(false);
+        await EnsureAsync(response, token).ConfigureAwait(false);
+        return (await response.Content.ReadFromJsonAsync(RemoteJson.Default.IReadOnlyListOcrWord, token).ConfigureAwait(false))!;
+    }
+
     public async Task<int> CountTextCharsAsync(string id, int page, CancellationToken token)
     {
         using var response = await _http.GetAsync($"api/files/{id}/pages/{page}/chars", token).ConfigureAwait(false);

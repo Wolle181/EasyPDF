@@ -71,6 +71,7 @@ public static class Program
         builder.Services.AddSingleton<SessionStore>();
         builder.Services.AddSingleton<FileStore>();
         builder.Services.AddSingleton<OpenDocuments>();
+        builder.Services.AddSingleton<OcrService>();
         builder.Services.AddSingleton<CleanupService>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<CleanupService>());
 

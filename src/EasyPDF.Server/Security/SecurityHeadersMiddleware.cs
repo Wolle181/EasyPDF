@@ -44,7 +44,10 @@ public sealed class SecurityHeadersMiddleware(RequestDelegate next)
             headers.TryAdd("X-Content-Type-Options", ContentTypeOptions);
             headers.TryAdd("Referrer-Policy", ReferrerPolicy);
             headers.TryAdd("Permissions-Policy", PermissionsPolicy);
-            headers.TryAdd("Content-Security-Policy", ContentSecurityPolicy);
+            // The browser's own PDF viewer (printing from the web version) does not work under object-src 'none'; a PDF runs
+            // no scripts of the page, so it gets no CSP
+            if (context.Response.ContentType?.StartsWith("application/pdf", System.StringComparison.OrdinalIgnoreCase) != true)
+                headers.TryAdd("Content-Security-Policy", ContentSecurityPolicy);
             return Task.CompletedTask;
         });
         return next(context);

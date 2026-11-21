@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.Versioning;
@@ -27,6 +28,7 @@ internal static class Program
         var targets = new BrowserSaveTargets();
         PdfBackend.Current = new RemotePdfBackend(files, targets);
         PlatformFeatures.Files = new BrowserFiles(files, targets);
+        PlatformFeatures.OcrEngineFactory = () => new ServerOcrOnly();
         PlatformFeatures.Current = PlatformFeatures.Web(WebCommands.IsAvailable, WebCommands.Buttons);
         await Interop.LoadAsync();
         Interop.SetTitle(AppInfo.Name);
@@ -38,6 +40,25 @@ internal static class Program
             File.WriteAllText(AppSettings.DefaultPath, stored);
         }
         AppSettings.Saved += Interop.SaveSettings;
+        // The brand's introduction videos that are next to the page (none: the video button stays hidden)
+        var languages = new List<string>();
+        foreach (var language in new[] { "de", "en" })
+        {
+            try
+            {
+                using var head = await http.SendAsync(new HttpRequestMessage(HttpMethod.Head, $"videos/introduction.{language}.mp4"));
+                if (head.IsSuccessStatusCode)
+                    languages.Add(language);
+            }
+            catch (HttpRequestException)
+            {
+            }
+        }
+        IntroVideo.Web = new IntroVideo.WebVideos(languages, language =>
+        {
+            Interop.PlayVideo($"videos/introduction.{language}.mp4", EasyPDF.App.Localization.Loc.T("Close"));
+            return Task.CompletedTask;
+        });
         await BuildAvaloniaApp().StartBrowserAppAsync("out");
         Interop.RemoveSplash();
     }

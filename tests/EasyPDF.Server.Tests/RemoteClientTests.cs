@@ -212,6 +212,20 @@ public class RemoteClientTests
     }
 
     [Fact]
+    public async Task TextRecognitionRunsOnTheServer()
+    {
+        await using var server = await TestServerHost.StartAsync();
+        var (backend, _) = Client(server);
+        var path = await UploadDemoAsync(backend);
+        await using var document = EditableDocument.FromSource(await backend.OpenAsync(path));
+        // PageOcr asks the server (the engine passed here must never be used)
+        var found = await Core.Ocr.PageOcr.RecognizePagesAsync(new ServerOcrOnly(), [document.Pages[1]], skipPagesWithText: false);
+        var words = found[document.Pages[1].Id];
+        Assert.Contains(words, w => w.Text.Contains("CONTENTS", StringComparison.OrdinalIgnoreCase));
+        Assert.All(words, w => Assert.True(w.Box.X >= 0 && w.Box.Right <= 600));   // page space (points), not pixels
+    }
+
+    [Fact]
     public async Task ServerErrorsArriveWithTheirCode()
     {
         await using var server = await TestServerHost.StartAsync();

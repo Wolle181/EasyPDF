@@ -1112,7 +1112,7 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
         ShowDialogAsync<SplitRequest?>(() => new SplitDialog(context), () => new SplitDialogView(context));
 
     public Task<OcrRequest?> ShowOcrDialogAsync(OcrDialogContext context) =>
-        new OcrDialog(context).ShowDialog<OcrRequest?>(RequireWindow());
+        ShowDialogAsync<OcrRequest?>(() => new OcrDialog(context), () => new OcrDialogView(context));
 
     public Task<ConcatenateResult?> ShowConcatenateDialogAsync(ConcatenateContext context) =>
         ShowDialogAsync<ConcatenateResult?>(() => new ConcatenateDialog(context, _viewModel.Document?.PageCount ?? 0),
@@ -1147,6 +1147,12 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
 
     public async Task ShowIntroVideoAsync()
     {
+        if (IntroVideo.Web is { } web)
+        {
+            if (web.Pick(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName) is { } language)
+                await web.Play(language);
+            return;
+        }
         if (IntroVideo.Current is not { } video)
             return;
         bool played;
