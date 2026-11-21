@@ -51,8 +51,8 @@ dotnet run --project src/EasyPDF.App -- "C:\path\file.pdf"
 # Self-contained native app (no .NET needed on the target machine; needs the C++ build tools): artifacts\publish\win-x64\<App>.exe (shown name of the brand)
 dotnet publish src/EasyPDF.App -p:PublishProfile=win-x64
 
-# MSI installer (publishes first): artifacts\installer\<App>-<version>-win-x64.msi (shown name)
-# and the portable version next to it: artifacts\installer\<App>-<version>-win-x64-portable.zip
+# MSI installer (publishes first): artifacts\installer\<App>-<version>-Windows-Installer.msi (shown name)
+# and the portable version next to it: artifacts\installer\<App>-<version>-Windows-portable.zip
 powershell -ExecutionPolicy Bypass -File installer\windows\build-windows-on-windows.ps1   # or: pwsh installer/windows/build-windows-on-windows.ps1
 ```
 The name of each installer script says where to start it: `build-<target>-on-<system>` (`build-windows-on-windows`, `build-linux-on-linux`, `build-macos-on-macos`). `build-windows-on-windows` checks for the C++ build tools first and stops with a hint if they are missing. All installer scripts (`installer/*/build-*.ps1`, `installer/build-macos-on-macos.sh`) first delete every `bin/` and `obj/` folder (`installer/clean-build-output.ps1`, `git clean -X`), so each installer is a full rebuild without stale output; close the IDE or a running app if a file is in use. Then they run all tests (`dotnet test EasyPDF.slnx`, `installer/run-tests.ps1`; a few minutes): a failing test stops the build, so an installer only comes from a state whose tests pass. `-NoTests` (or the environment variable `EASYPDF_NO_TESTS=1`, the only way for `build-macos-on-macos.sh`) skips them. After a successful build they delete `bin/`, `obj/` and the publish output (`artifacts/publish`) again, so only the installers in `artifacts/installer` are left (not on CI). `installer\build-windows-on-windows.cmd` then opens that folder in Explorer and closes; on an error it waits for a key press.
@@ -60,7 +60,7 @@ Only one version of the app is ever installed. On Windows and Linux a newer vers
 - **Windows** compares only the first three parts, so any build of 1.0.0 replaces an installed 1.0.0.x, an older build too.
 - **Linux** treats a package of the same commit as already installed; `apt install --reinstall ./file.deb` installs it anyway.
 WiX is restored as a NuGet package, nothing else has to be installed. The MSI installs per user (no administrator rights, no UAC prompt) to `%LocalAppData%\Programs\<App>` (the shown name, `AppDisplayName` of the brand profile), adds a Start menu entry and the Explorer context menu for PDFs, and registers the app as a PDF program ("Open with", Default apps). Its dialog "Preferences" offers to make it the default program: Windows does not let programs do that themselves, so Finish opens the app's page in Settings ▸ Default apps (one click on "Set default"). On Linux and macOS the app asks once at the first start; Settings ▸ "Open PDF files with …" does it on all systems.
-The **portable version** (`-win-x64-portable.zip`) is the same publish output in a folder `<App>-<version>`: unpack anywhere (e.g. a USB stick) and start `<App>.exe`, no installation and no administrator rights. It adds no Start menu entry, no Explorer context menu and no registration as a PDF program; the settings live in `%AppData%\<App>` as with the MSI. To remove it, delete the folder.
+The **portable version** (`-Windows-portable.zip`) is the same publish output in a folder `<App>-<version>`: unpack anywhere (e.g. a USB stick) and start `<App>.exe`, no installation and no administrator rights. It adds no Start menu entry, no Explorer context menu and no registration as a PDF program; the settings live in `%AppData%\<App>` as with the MSI. To remove it, delete the folder.
 
 ## Linux (x64)
 Running the app needs fontconfig, X11 and ICU, e.g. on Debian/Ubuntu: `sudo apt install libfontconfig1 libx11-6 libice6 libsm6 libicu74` (the ICU version depends on the distribution), and glibc 2.28 or newer for the text recognition (Debian 10, Ubuntu 20.04 and later).
@@ -74,7 +74,7 @@ dotnet publish src/EasyPDF.App -p:PublishProfile=linux-x64
 
 # .deb (Debian/Ubuntu) and .tar.gz (any distribution): one step incl. publish, on Linux with PowerShell 7 (needs: sudo apt install clang zlib1g-dev)
 pwsh installer/linux/build-linux-on-linux.ps1   # or by hand after the publish above: python3 installer/linux/build_linux.py
-sudo apt install ./artifacts/installer/<app>_<version>_amd64.deb
+sudo apt install ./artifacts/installer/<App>-<version>-Linux-x64.deb
 ```
 The publish has to run on Linux (Native AOT); `build_linux.py` itself needs neither dpkg nor Linux. The `.deb` (package `<app>`: the shown name in lower case) installs to `/opt/<App>`, adds the command `<app>`, the application menu entry and the context menus for Dolphin and Nemo.
 
@@ -88,7 +88,7 @@ dotnet run --project src/EasyPDF.App -- ~/file.pdf
 # Self-contained app: artifacts/publish/osx-arm64/
 dotnet publish src/EasyPDF.App -p:PublishProfile=osx-arm64
 
-# <App>.app (signed ad hoc) in a .dmg: artifacts/installer/<App>-<version>-macos-arm64.dmg (shown name)
+# <App>.app (signed ad hoc) in a .dmg: artifacts/installer/<App>-<version>-macOS-AppleSilicon.dmg (shown name)
 bash installer/build-macos-on-macos.sh   # other brand: bash installer/build-macos-on-macos.sh <id>
 ```
 The disk images can only be built on a Mac. Without an Apple Developer ID the app is only ad hoc signed, not notarized, so macOS blocks a downloaded copy. After dragging it to *Applications*, remove the quarantine flag once:
@@ -146,11 +146,19 @@ Then open `http://localhost:5199` (browsers send the `Secure` cookies to `localh
 **Configuration** (section `Web` of `appsettings.json`; in the container `/app/appsettings.Production.json`, mounted from the
 host, or environment variables `Web__…`): `Authentication:Mode` `None` (no sign-in, anonymous sessions) or `Oidc` (OpenID
 Connect: `Authority`, `ClientId`, `ClientSecret`, optional `RequiredGroup`/`RequiredRole`; callback path `/signin-oidc`),
-`Storage` (folders `/data/files`, `/data/keys`, `SharedFolder` `/data/shared` with stamps and templates for all users, read-only; `IdleTimeoutMinutes` 30, `MaxAgeHours` 8, upload and quota limits),
+`Storage` (folders `/data/files`, `/data/keys`, `SharedFolder` `/data/shared` with stamps and templates for all users, read-only; `DownloadsFolder` `/data/downloads` with the desktop packages offered for download, read-only; `IdleTimeoutMinutes` 30, `MaxAgeHours` 8, upload and quota limits),
 `RateLimits`, `ReverseProxy` (`TrustContainerGateway`, `TrustedProxies`) and `AllowedHosts`. The container writes only to
 `/data` and `/tmp`, so it runs with `--read-only`; it checks its own health with `/app/EasyPDF.Server --healthcheck`.
 The start script for the NAS (volumes, hardening options, reverse proxy) lives in the ContainerZoo repository
 (folder `EasyPDFWeb`).
+
+**Desktop downloads:** the web version offers the desktop packages (button with the download arrow in the header,
+shown only when there are some). They are not part of the image: the server lists the files in `DownloadsFolder` that are
+named like the installer scripts name them – `<App>-<version>-Windows-Installer.msi`, `-Windows-portable.zip`,
+`-macOS-AppleSilicon.dmg`, `-Linux-x64.deb`, `-Linux-x64.tar.gz` (`DesktopPackage` in Core) – the newest of each kind,
+and the dialog marks those for the browser's system. New installers only need new files in the folder (no new image); on
+the NAS `EasyPDFWeb/update-downloads.sh` in the ContainerZoo repository fetches them from the release *latest* and adds
+the Linux packages built locally.
 
 ## Development and release repositories
 All work happens in the development repository, on `main` only; there are no brand branches. Each published brand has

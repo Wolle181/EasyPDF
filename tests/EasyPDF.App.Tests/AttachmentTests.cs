@@ -249,6 +249,7 @@ public class AttachmentTests
         public Task WriteAsync(string path, byte[] content) => throw new System.NotSupportedException();
         public Task<bool> ShowForPrintingAsync(System.Collections.Generic.IReadOnlyList<EasyPDF.Core.Documents.PageEntry> pages, string name) =>
             throw new System.NotSupportedException();
+        public bool CanShareFiles => false;
         public Task<string> PrepareForSharingAsync(EasyPDF.Core.Documents.EditableDocument document, string name) => throw new System.NotSupportedException();
         public Task<ShareOutcome> ShareAsync(string prepared, string name) => throw new System.NotSupportedException();
     }

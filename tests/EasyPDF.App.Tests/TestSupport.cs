@@ -132,6 +132,14 @@ internal sealed class FakeDialogs : IDialogService
 
     public Task ShowAboutAsync() => Task.CompletedTask;
 
+    public readonly List<DesktopDownloads.WebPackages> DownloadsShown = [];
+
+    public Task ShowDownloadsAsync(DesktopDownloads.WebPackages packages)
+    {
+        DownloadsShown.Add(packages);
+        return Task.CompletedTask;
+    }
+
     public int IntroVideoShown;
 
     public Task ShowIntroVideoAsync()

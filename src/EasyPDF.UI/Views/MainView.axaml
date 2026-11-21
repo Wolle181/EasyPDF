@@ -40,6 +40,9 @@
           <!-- Only when the brand comes with an introduction video (videos/ next to the program) -->
           <rb:RibbonButton x:Name="VideoButton" Classes="band" Height="36" Width="36" IconSize="18" CircleSize="32" IsVisible="{Binding HasIntroVideo}"
                            Icon="{StaticResource Icon.Video}" IconAccent="{StaticResource Icon.Video.Accent}" Command="{Binding ShowIntroVideoCommand}" ToolTip.Tip="{loc:Tr MenuIntroVideo}" />
+          <!-- Web version: the desktop packages for download, when the server offers some -->
+          <rb:RibbonButton x:Name="DownloadButton" Classes="band" Height="36" Width="36" IconSize="18" CircleSize="32" IsVisible="{Binding HasDesktopDownloads}"
+                           Icon="{StaticResource Icon.Download}" IconAccent="{StaticResource Icon.Download.Accent}" Command="{Binding ShowDownloadsCommand}" ToolTip.Tip="{loc:Tr DownloadsTitle}" />
           <rb:RibbonButton x:Name="GuideButton" Classes="band" Height="36" Width="36" IconSize="18" CircleSize="32"
                            Icon="{StaticResource Icon.Help}" IconAccent="{StaticResource Icon.Help.Accent}" Command="{Binding ShowQuickGuideCommand}" ToolTip.Tip="{loc:Tr MenuQuickGuide}" />
           <rb:RibbonButton x:Name="InfoButton" Classes="band" Height="36" Width="36" IconSize="18" CircleSize="32"
@@ -60,7 +63,7 @@
                 <rb:RibbonButton Classes="signal" Label="{loc:Tr BtnSave}" Icon="{StaticResource Icon.Save}" IconAccent="{StaticResource Icon.Save.Accent}" Command="{Binding SaveCommand}" />
                 <rb:RibbonButton Label="{loc:Tr BtnSaveAs}" Icon="{StaticResource Icon.SaveAs}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.SaveAs.Accent}" Command="{Binding SaveAsCommand}" />
                 <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnPrint}" Icon="{StaticResource Icon.Print}" IconColor="{DynamicResource Icon.Color.Slate}" IconAccent="{StaticResource Icon.Print.Accent}" Command="{Binding PrintCommand}" />
-                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnSendByMail}" Icon="{StaticResource Icon.Mail}" IconColor="{DynamicResource Icon.Color.Amber}" IconAccent="{StaticResource Icon.Mail.Accent}" Command="{Binding SendByMailCommand}" />
+                <rb:RibbonButton x:Name="SendByMailButton" IsLarge="True" Label="{loc:Tr BtnSendByMail}" Icon="{StaticResource Icon.Mail}" IconColor="{DynamicResource Icon.Color.Amber}" IconAccent="{StaticResource Icon.Mail.Accent}" Command="{Binding SendByMailCommand}" />
                 <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnReduceSize}" Icon="{StaticResource Icon.ReduceSize}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.ReduceSize.Accent}" Command="{Binding ReduceSizeCommand}" />
                 <!-- Files embedded in the PDF (e.g. the XML of a ZUGFeRD invoice); shown only when there are some (the tab has no room to spare otherwise) -->
                 <rb:RibbonButton x:Name="AttachmentsButton" IsLarge="True" IsVisible="{Binding HasAttachments}" Label="{loc:Tr BtnAttachments}" Icon="{StaticResource Icon.Attachment}" IconColor="{DynamicResource Icon.Color.Slate}" IconAccent="{StaticResource Icon.Attachment.Accent}" Command="{Binding ShowAttachmentsCommand}" />

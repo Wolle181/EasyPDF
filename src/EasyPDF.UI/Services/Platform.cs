@@ -29,6 +29,9 @@ public interface IPlatformFiles
     /// </summary>
     Task<bool> ShowForPrintingAsync(IReadOnlyList<EasyPDF.Core.Documents.PageEntry> pages, string name);
 
+    /// <summary>Web version: the browser can hand files to the system's share sheet (not on Linux, not in Firefox).</summary>
+    bool CanShareFiles { get; }
+
     /// <summary>
     /// Web version: has the server write the document as it is now (like saving, with bookmarks) and returns a handle for
     /// <see cref="ShareAsync"/>. The desktop sends emails itself and never calls this.
@@ -68,6 +71,8 @@ public sealed class LocalPlatformFiles : IPlatformFiles
 
     public Task<bool> ShowForPrintingAsync(IReadOnlyList<EasyPDF.Core.Documents.PageEntry> pages, string name) =>
         throw new NotSupportedException("The desktop program prints itself.");
+
+    public bool CanShareFiles => false;
 
     public Task<string> PrepareForSharingAsync(EasyPDF.Core.Documents.EditableDocument document, string name) =>
         throw new NotSupportedException("The desktop program sends emails itself.");

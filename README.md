@@ -63,8 +63,10 @@ at most 8 hours). Without sign-in for private use, or with single sign-on (OpenI
 company; built and run as described in [docs/BUILDING.md](docs/BUILDING.md#web-version-container). Text can be selected, copied and searched, texts placed, areas blacked
 out or covered and copied; text is recognized (OCR) on the server; stamps (with date fields) and text templates stay in
 the browser and can be exported and imported as a ZIP file, shared ones come from the server; printing opens the PDF
-in a new tab; "Send by email" hands the PDF to the system's share sheet, which opens the email program with it attached
-(Windows, macOS, Android, iOS; not offered where the browser cannot share files, e.g. on Linux).
+in a new tab; "Share" (instead of "Email") hands the PDF to the system's share sheet: email program, messengers, AirDrop …
+(Windows, macOS, Android, iOS; where the browser cannot share files, e.g. on Linux or in Firefox, it offers the download).
+The e-invoice XML opens as text in a new tab. The desktop versions (Windows installer and portable, macOS, Linux .deb
+and .tar.gz) can be downloaded from the web version, the one for your system is marked.
 
 ## Customization
 

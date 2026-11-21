@@ -38,6 +38,12 @@ public static class Api
         // Sample stamps and the shared stamps and templates of the installation, as one ZIP (read at start of the program)
         api.MapGet("/library", (IOptions<ServerOptions> options) =>
             Results.Bytes(Library.BuildZip(Library.SampleFolder, options.Value.Storage.SharedFolder), "application/zip"));
+        api.MapGet("/downloads", (IOptions<ServerOptions> options) =>
+            Results.Json(Downloads.List(options.Value.Storage.DownloadsFolder), RemoteJson.Default.IReadOnlyListDesktopPackage));
+        api.MapGet("/downloads/{name}", (string name, IOptions<ServerOptions> options) =>
+            Downloads.Find(options.Value.Storage.DownloadsFolder, name) is { } path
+                ? Results.File(path, "application/octet-stream", Path.GetFileName(path), enableRangeProcessing: true)
+                : NotFound());
         api.MapPost("/files", UploadAsync).RequireRateLimiting(UploadPolicy);
         api.MapGet("/files/{id}/pages/{page:int}", RenderAsync);
         api.MapGet("/files/{id}/pages/{page:int}/area", RenderAreaAsync);

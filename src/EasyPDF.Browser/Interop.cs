@@ -18,6 +18,14 @@ internal static partial class Interop
     [JSImport("openTab", "interop")]
     public static partial bool OpenTab(string url);
 
+    /// <summary>Downloads the file at <paramref name="url"/> (the server sends it as attachment: the page stays).</summary>
+    [JSImport("download", "interop")]
+    public static partial void Download(string url);
+
+    /// <summary>The browser's operating system as it names it ("Windows", "macOS", "Linux", …; the user agent if unknown).</summary>
+    [JSImport("platform", "interop")]
+    public static partial string Platform();
+
     [JSImport("playVideo", "interop")]
     public static partial void PlayVideo(string url, string closeLabel);
 

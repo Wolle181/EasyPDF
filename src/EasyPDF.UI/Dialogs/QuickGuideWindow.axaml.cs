@@ -45,7 +45,9 @@ public partial class QuickGuideView : DialogView
 
     /// <summary>The topics of what the web version offers (the others are hidden there).</summary>
     public static IReadOnlyList<Topic> WebTopics { get; } =
-        [.. Topics.Where(t => t.Key is "Open" or "Read" or "Organize" or "Pages" or "Concatenate" or "Extract" or "Attachments" or "Save")];
+        [.. Topics.Where(t => t.Key is "Open" or "Read" or "Organize" or "Pages" or "Concatenate" or "Extract"),
+         new("Share", "Icon.Share", "Amber"),
+         .. Topics.Where(t => t.Key is "Attachments" or "Save")];
 
     public QuickGuideView()
     {

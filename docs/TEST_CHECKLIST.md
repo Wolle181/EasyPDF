@@ -132,7 +132,7 @@ Start: `dotnet run --project src/EasyPDF.App -- <file.pdf>` or the published bui
 - [ ] First visit: the splash shows, then the app; dropping a PDF from the desktop opens it (progress for big files); a ~50 MB file passes the reverse proxy
 - [ ] Organize: drag pages, rotate, delete, undo/redo; Save as… downloads (Chrome/Edge: save dialog of the system) and the file opens in the desktop app as edited
 - [ ] Print: a new tab shows the PDF; the browser's print dialog prints it (a popup blocker shows a hint instead)
-- [ ] Send by email (Windows Chrome/Edge, macOS Safari/Chrome, phone): the share sheet opens, the email program shows a new message with the PDF attached under the document's name; a big file first shows "attachment is ready", OK opens the share sheet; on Linux the button is hidden
+- [ ] Share (button "Share" with the three-dot icon; Windows Chrome/Edge, macOS Safari/Chrome, phone): the share sheet opens, the email program shows a new message with the PDF attached under the document's name; a big file first shows "document is ready", OK opens the share sheet; on Linux and in Firefox a message says the browser cannot share files and Save as follows
 - [ ] Stamps: gallery with samples, "Shared" sections from `/volume1/docker/easypdf-web/shared/stamps`; place one, double-click → date dialog; New stamp… → editor, OK → in the gallery; right-click → Delete asks first
 - [ ] Stamps and templates survive reloading the page and closing the browser; Export… downloads a ZIP; in another browser Import… brings them back; a private window starts with the samples only
 - [ ] Templates: shared ones from `…/shared/templates` appear; an edited shared template is kept as the user's own
@@ -140,6 +140,7 @@ Start: `dotnet run --project src/EasyPDF.App -- <file.pdf>` or the published bui
 - [ ] Placed text: the preview looks like the saved text (same width, Helvetica/Times/Courier)
 - [ ] Two browsers (or a private window) at the same time see only their own files; after 30 minutes idle a file is gone (the app reports it)
 - [ ] Settings: theme and language switch live and are kept after reloading
+- [ ] Downloads: with files in `/volume1/docker/easypdf-web/downloads` the header shows the download arrow; the dialog lists one package per kind (newest), marks those of the own system, Download saves the file without leaving the page; without files the button is hidden
 - [ ] About: "Deployed" shows the time of the last container build, badge "Containerized" ("Native" with `dotnet run`)
 
 ## Installers
@@ -150,7 +151,7 @@ Start: `dotnet run --project src/EasyPDF.App -- <file.pdf>` or the published bui
 - [ ] Default program (Windows): MSI dialog "Preferences" shows "Use <App> as the default program for PDF files" (ticked); after Finish the Windows settings open on the <App> page, "Set default" makes it open PDFs; <App> is listed under "Open with" either way; the box is hidden when <App> is the default already; Settings ▸ "Open PDF files with <App>" opens the same page and afterwards says "<App> is the default program …"; uninstall removes the registration
 - [ ] Shown name (`AppDisplayName`, <App>): Windows start menu entry, "Installed apps" and "Open with" say <App>; Linux application menu and Dolphin/Nemo menus; macOS: `<App>.app` in the disk image, menu bar and Dock say <App>
 - [ ] Windows MSI: dialog "Preferences" after the install folder (Back/Next work, also Back from "Ready to install"); the chosen language and appearance are active at the first start, also for a user who already had other settings; changing them in the app's settings sticks after a restart; reinstalling preselects the previous choice; Repair does not reset the app's settings
-- [ ] Linux: `sudo apt install ./<app>_<version>_amd64.deb` → app in `/opt/<App>`, in the application menu with icon, `<app> file.pdf` opens the file; `sudo apt remove <app>`
+- [ ] Linux: `sudo apt install ./<App>-<version>-Linux-x64.deb` → app in `/opt/<App>`, in the application menu with icon, `<app> file.pdf` opens the file; `sudo apt remove <app>`
 - [ ] Default program (Linux, GNOME/KDE/Cinnamon): first start of the installed .deb asks "Should <App> open PDF files from now on?" once; Yes → double-click on a PDF opens <App> (`xdg-mime query default application/pdf` = <app>.desktop); No → not asked again; Settings button does the same; from the unpacked .tar.gz no question, the button says "Only possible for the installed program"
 - [ ] Default program (macOS): first start of <App>.app (from /Applications) asks once; Yes → double-click on a PDF in Finder opens <App> (Finder ▸ Get Info ▸ Open with shows it); Settings button does the same; started with `dotnet run` no question
 - [ ] User folders have the shown name: settings `%AppData%\<App>` (Linux `~/.config/<App>`, macOS `~/Library/Application Support/<App>`), stamps `Documents/<App>/Stamps`, templates `Documents/<App>/Templates` (`%LocalAppData%\<App>` if Documents can't be written); "Installed apps" shows the publisher Wolfgang Ahting

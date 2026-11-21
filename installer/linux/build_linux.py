@@ -1,7 +1,7 @@
 """Builds the Linux packages from the linux-x64 publish output (Native AOT), without dpkg:
 
-  artifacts/installer/<package>_<version>_amd64.deb      Debian/Ubuntu (apt install ./file.deb)
-  artifacts/installer/<name>-<version>-linux-x64.tar.gz  any distribution (unpack and run)
+  artifacts/installer/<name>-<version>-Linux-x64.deb     Debian/Ubuntu (apt install ./file.deb)
+  artifacts/installer/<name>-<version>-Linux-x64.tar.gz  any distribution (unpack and run)
 
 <name> is AppDisplayName from the brand profile (branding/<Brand>/Branding.props), <package> the same in lower case: package
 and command name. There is only ever one package: a newer version replaces the installed one, an older one is refused
@@ -180,7 +180,7 @@ def build_deb(ver, name, package, maintainer, icons):
     control_tar = tar_gz(lambda tar: (add_dir(tar, "./"), add_bytes(tar, "./control", control_text),
                                       add_bytes(tar, "./preinst", preinst, 0o755)))
     deb = ar_archive([("debian-binary", b"2.0\n"), ("control.tar.gz", control_tar), ("data.tar.gz", data_tar)])
-    path = os.path.join(OUT, f"{package}_{ver}_amd64.deb")
+    path = os.path.join(OUT, f"{name}-{ver}-Linux-x64.deb")
     with open(path, "wb") as f:
         f.write(deb)
     return path
@@ -193,7 +193,7 @@ def build_tarball(ver, name, package, icons):
         add_tree(tar, folder)
         add_file(tar, f"{folder}/{package}.png", os.path.join(icons, "app-256.png"), 0o644)
 
-    path = os.path.join(OUT, f"{name}-{ver}-linux-x64.tar.gz")
+    path = os.path.join(OUT, f"{name}-{ver}-Linux-x64.tar.gz")
     with open(path, "wb") as f:
         f.write(tar_gz(content))
     return path

@@ -39,6 +39,17 @@ public sealed class RemoteApi
         return (await response.Content.ReadFromJsonAsync(RemoteJson.Default.ServerConfig, token).ConfigureAwait(false))!;
     }
 
+    /// <summary>The desktop packages the server offers for download (newest of each kind).</summary>
+    public async Task<IReadOnlyList<EasyPDF.Core.Downloads.DesktopPackage>> ListDownloadsAsync(CancellationToken token = default)
+    {
+        using var response = await _http.GetAsync("api/downloads", token).ConfigureAwait(false);
+        await EnsureAsync(response, token).ConfigureAwait(false);
+        return (await response.Content.ReadFromJsonAsync(RemoteJson.Default.IReadOnlyListDesktopPackage, token).ConfigureAwait(false))!;
+    }
+
+    /// <summary>Address of a package from <see cref="ListDownloadsAsync"/> (relative to the page).</summary>
+    public static string DownloadUrl(EasyPDF.Core.Downloads.DesktopPackage package) => "api/downloads/" + Uri.EscapeDataString(package.Name);
+
     /// <summary>Uploads a PDF; <paramref name="progress"/> gets 0..1.</summary>
     public async Task<RemoteFileInfo> UploadAsync(Stream content, string fileName, long? length = null, IProgress<double>? progress = null,
         CancellationToken token = default)

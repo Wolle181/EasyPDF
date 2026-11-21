@@ -116,8 +116,8 @@ public class AppUiTests
         await Pump();
         buttons.AddRange(window.GetVisualDescendants().OfType<RibbonButton>());
         Assert.True(buttons.Distinct().Count() >= 18);
-        // Icon-only buttons with a tooltip: settings, video, quick guide and Info in the header, zoom out/in in the status bar
-        Assert.All(buttons.Where(b => b.Name is not ("SettingsButton" or "VideoButton" or "GuideButton" or "InfoButton" or "StatusZoomOut" or "StatusZoomIn") && b.Command != window.ViewModel.ActualSizeCommand), b =>
+        // Icon-only buttons with a tooltip: settings, video, downloads, quick guide and Info in the header, zoom out/in in the status bar
+        Assert.All(buttons.Where(b => b.Name is not ("SettingsButton" or "VideoButton" or "DownloadButton" or "GuideButton" or "InfoButton" or "StatusZoomOut" or "StatusZoomIn") && b.Command != window.ViewModel.ActualSizeCommand), b =>
         {
             Assert.NotNull(b.Icon);
             Assert.False(string.IsNullOrEmpty(b.Label));

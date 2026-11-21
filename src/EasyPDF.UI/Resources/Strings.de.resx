@@ -386,9 +386,15 @@
   <data name="BusyPreparingMail" xml:space="preserve"><value>E-Mail-Anhang wird vorbereitet…</value></data>
   <data name="MsgMailOpened" xml:space="preserve"><value>Neue E-Mail mit „{0}“ als Anhang wird geöffnet…</value></data>
   <data name="ErrMailFailed" xml:space="preserve"><value>Es konnte keine E-Mail geöffnet werden. Ist ein E-Mail-Programm als Standard eingerichtet (z. B. Outlook, Thunderbird oder Mail)?</value></data>
-  <data name="MsgShareReady" xml:space="preserve"><value>Der Anhang „{0}“ ist bereit. Klicken Sie auf OK, um das E-Mail-Programm zu wählen.</value></data>
+  <data name="MsgShareReady" xml:space="preserve"><value>Das Dokument „{0}“ ist bereit. Klicken Sie auf OK, um zu wählen, wohin es geteilt wird.</value></data>
+  <data name="BtnShare" xml:space="preserve"><value>Teilen</value></data>
+  <data name="MenuShare" xml:space="preserve"><value>Teilen…</value></data>
+  <data name="BusyPreparingShare" xml:space="preserve"><value>Dokument wird zum Teilen vorbereitet…</value></data>
+  <data name="MsgShareUnavailable" xml:space="preserve"><value>Dieser Browser kann keine Dateien an andere Programme übergeben (Firefox und Browser unter Linux können das nicht). Speichern Sie das Dokument stattdessen und hängen Sie es selbst an Ihre E-Mail an.</value></data>
+  <data name="GuideShareTitle" xml:space="preserve"><value>Teilen</value></data>
+  <data name="GuideShareText" xml:space="preserve"><value>„Teilen“ übergibt das Dokument – so, wie Sie es sehen, mit allen Änderungen – an das Teilen-Menü Ihres Systems: E-Mail, Messenger, AirDrop und mehr. Hat der Browser kein Teilen-Menü für Dateien, speichern Sie das Dokument und hängen es selbst an.</value></data>
   <data name="MsgShared" xml:space="preserve"><value>„{0}“ wurde zum Senden übergeben.</value></data>
-  <data name="ErrShareFailed" xml:space="preserve"><value>Das Dokument konnte nicht an das E-Mail-Programm übergeben werden. Speichern Sie es in diesem Browser und hängen Sie es selbst an eine E-Mail an.</value></data>
+  <data name="ErrShareFailed" xml:space="preserve"><value>Das Dokument konnte nicht geteilt werden. Speichern Sie es in diesem Browser und hängen Sie es selbst an eine E-Mail an.</value></data>
   <data name="CtxPrint" xml:space="preserve"><value>Seite(n) drucken…</value></data>
   <data name="GroupRecognize" xml:space="preserve"><value>Erkennen</value></data>
   <data name="BtnRecognizeText" xml:space="preserve"><value>Text erkennen…</value></data>
@@ -533,4 +539,19 @@
   <data name="LibraryFileName" xml:space="preserve"><value>Stempel und Vorlagen</value></data>
   <data name="LibraryZipFiles" xml:space="preserve"><value>ZIP-Dateien</value></data>
   <data name="StampEditDeleteHint" xml:space="preserve"><value>Rechtsklick auf einen Stempel: bearbeiten oder löschen.</value></data>
+  <data name="DownloadsTitle" xml:space="preserve"><value>Desktop-Version herunterladen</value></data>
+  <data name="DownloadsMessage" xml:space="preserve"><value>{App} gibt es auch als Programm für Ihren Computer – offline, Ihre Dateien verlassen ihn nicht. Wählen Sie das Paket für Ihr System:</value></data>
+  <data name="DownloadsDownload" xml:space="preserve"><value>Herunterladen</value></data>
+  <data name="DownloadsThisSystem" xml:space="preserve"><value>für Ihr System</value></data>
+  <data name="DownloadsFile" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="DownloadKindWindowsInstaller" xml:space="preserve"><value>Windows – Installationsprogramm</value></data>
+  <data name="DownloadHintWindowsInstaller" xml:space="preserve"><value>Installiert für Ihren Benutzer (ohne Administratorrechte), mit Startmenü-Eintrag und Explorer-Kontextmenü.</value></data>
+  <data name="DownloadKindWindowsPortable" xml:space="preserve"><value>Windows – portabel</value></data>
+  <data name="DownloadHintWindowsPortable" xml:space="preserve"><value>Irgendwo entpacken (z. B. auf einen USB-Stick) und starten, ohne Installation.</value></data>
+  <data name="DownloadKindMacOS" xml:space="preserve"><value>macOS – Apple Silicon</value></data>
+  <data name="DownloadHintMacOS" xml:space="preserve"><value>Image öffnen und die App in „Programme“ ziehen (macOS 14 oder neuer, ab M1).</value></data>
+  <data name="DownloadKindLinuxDeb" xml:space="preserve"><value>Linux – Debian, Ubuntu, Mint</value></data>
+  <data name="DownloadHintLinuxDeb" xml:space="preserve"><value>Paket für apt: sudo apt install ./&lt;Datei&gt;</value></data>
+  <data name="DownloadKindLinuxTar" xml:space="preserve"><value>Linux – andere Distributionen</value></data>
+  <data name="DownloadHintLinuxTar" xml:space="preserve"><value>Entpacken und das Programm im Ordner starten, ohne Installation.</value></data>
 </root>

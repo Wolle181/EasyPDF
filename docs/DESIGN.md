@@ -341,13 +341,20 @@ deletes the user's own stamps (there is no folder to delete them in).
 browser program brings Liberation Sans, Serif and Mono (Regular, SIL OFL, `EasyPDF.Browser/Assets/Fonts`), which have the
 widths of Arial/Helvetica, Times and Courier, the standard fonts the text is written with (`TextMetrics.EmbeddedFonts`).
 
-**Send by email on the web:** a browser cannot start the email program with an attachment (`mailto:` takes no files).
+**Share on the web** (the Email button, labelled "Share" with its own icon): a browser cannot start the email program with an attachment (`mailto:` takes no files).
 Instead the server writes the document as it is now (like saving, with bookmarks) and the browser hands it to the
 system's share sheet (Web Share API, `navigator.share` with a file), where the user picks the email program (Outlook,
-Mail, …), which opens a new message with the PDF attached. Offered only where `navigator.canShare` accepts a PDF file
-(Chrome/Edge on Windows, macOS, Android, iOS, Safari); elsewhere (Linux, Firefox on the desktop) the button is hidden.
+Mail, …), which opens a new message with the PDF attached, or another target (messengers, AirDrop). Where
+`navigator.canShare` does not accept a PDF file (Linux, Firefox on the desktop) a message says so and Save as (download)
+follows.
 Browsers allow sharing only shortly after a click: if preparing took longer (`NotAllowedError`), a message says the
 attachment is ready and its OK click shares the already fetched file.
+
+**Desktop downloads on the web:** a header button (download arrow, only when the server has packages) opens a dialog
+with the newest package of each kind from the server's downloads folder (`/api/downloads`, `/api/downloads/<name>`; only
+files named like the installer scripts name them, never other files of the folder); the packages for the browser's
+system (`navigator.userAgentData.platform` or the user agent) are marked and their button is the primary one. The
+packages are not in the image, so new installers need no new image (see BUILDING.md "Desktop downloads").
 
 **About on the web:** instead of the build date of a program file it shows when the server was deployed (`/api/config`:
 the time its program file was built, in the container the image build) with a badge "Containerized" or "Native"

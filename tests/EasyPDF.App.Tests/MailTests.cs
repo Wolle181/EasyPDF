@@ -145,6 +145,7 @@ public class MailTests
     private sealed class FakeShareFiles(params ShareOutcome[] outcomes) : IPlatformFiles
     {
         private readonly Queue<ShareOutcome> _outcomes = new(outcomes);
+        public bool CanShareFiles { get; init; } = true;
         public readonly List<(int Pages, string Name)> Prepared = [];
         public readonly List<string> Shared = [];
 
@@ -221,6 +222,27 @@ public class MailTests
             Assert.Single(files.Prepared);                           // prepared once, shared after the click
             Assert.Equal(2, files.Shared.Count);
             Assert.Equal([EasyPDF.App.Localization.Loc.F("MsgShareReady", "report.pdf")], dialogs.Infos);
+            Assert.Empty(dialogs.Errors);
+            await vm.Document!.DisposeAsync();
+        }
+        finally
+        {
+            RestoreDesktop();
+        }
+    }
+
+    [Fact]
+    public async Task ABrowserWithoutShareSheetOffersTheDownload()
+    {
+        using var dir = new TempDir();
+        var files = new FakeShareFiles { CanShareFiles = false };
+        try
+        {
+            var (vm, dialogs, _) = await WebDocumentAsync(dir, files);
+            await vm.SendByMailCommand.ExecuteAsync(null);
+            Assert.Equal([EasyPDF.App.Localization.Loc.T("MsgShareUnavailable")], dialogs.Infos);
+            Assert.Equal("report.pdf", dialogs.SuggestedFileName); // Save as (download) follows
+            Assert.Empty(files.Prepared);
             Assert.Empty(dialogs.Errors);
             await vm.Document!.DisposeAsync();
         }

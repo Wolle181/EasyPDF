@@ -1515,16 +1515,23 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
     }
 
     /// <summary>
-    /// Web version: the server writes the document as it is now, the browser hands it to the system's share sheet, where
-    /// the user picks the email program. Browsers allow that only shortly after a click: if preparing took longer, a
-    /// message asks for one more click.
+    /// Web version ("Share"): the server writes the document as it is now, the browser hands it to the system's share
+    /// sheet, where the user picks the email program or another target. Browsers allow that only shortly after a click: if
+    /// preparing took longer, a message asks for one more click. A browser without a share sheet for files (Linux, Firefox)
+    /// says so and offers the download (Save as) instead.
     /// </summary>
     private async Task SendByMailInBrowserAsync(EditableDocument document)
     {
         var files = Services.PlatformFeatures.Files;
         var name = BaseNameOf(document) + ".pdf";
+        if (!files.CanShareFiles)
+        {
+            await dialogs.ShowInfoAsync(Loc.T("MsgShareUnavailable"));
+            await SaveAsAsync();
+            return;
+        }
         string prepared;
-        BeginOperation(Loc.T("BusyPreparingMail"));
+        BeginOperation(Loc.T("BusyPreparingShare"));
         try
         {
             prepared = await files.PrepareForSharingAsync(document, name);
@@ -1895,6 +1902,13 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
 
     [RelayCommand]
     private Task ShowQuickGuideAsync() => dialogs.ShowQuickGuideAsync();
+
+    /// <summary>Web version: the server offers desktop packages for download (button in the header).</summary>
+    public bool HasDesktopDownloads => DesktopDownloads.IsAvailable;
+
+    [RelayCommand]
+    private Task ShowDownloadsAsync() =>
+        DesktopDownloads.Web is { } packages ? dialogs.ShowDownloadsAsync(packages) : Task.CompletedTask;
 
     /// <summary>The brand comes with an introduction video (button in the header, Help menu).</summary>
     public bool HasIntroVideo => IntroVideo.IsAvailable;

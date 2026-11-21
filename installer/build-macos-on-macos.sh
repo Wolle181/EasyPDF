@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds the macOS disk image with the app compiled by Native AOT (run on a Mac; needs the .NET SDK, the Xcode command
 # line tools for the native linker, codesign and hdiutil):
-#   artifacts/installer/<AppDisplayName>-<version>-macos-arm64.dmg
+#   artifacts/installer/<AppDisplayName>-<version>-macOS-AppleSilicon.dmg
 # Apple Silicon and macOS 14 or later only: ONNX Runtime (used by OCR) has no Intel build and needs macOS 14.
 # Usage: bash installer/build-macos-on-macos.sh [<id> | -p:<id> | -p:Brand=<id> | -Brand <id>]
 #   brand profile branding/<id>/ like the other installer scripts; without it EASYPDF_BRAND or the default
@@ -95,7 +95,7 @@ codesign --verify --deep --strict "$APP"
 
 # Disk image with the app and a link to /Applications for drag-and-drop installation
 ln -s /Applications "$WORK/stage/Applications"
-DMG="$ROOT/artifacts/installer/$APPNAME-$VERSION-macos-$A.dmg"
+DMG="$ROOT/artifacts/installer/$APPNAME-$VERSION-macOS-AppleSilicon.dmg"   # arm64 only
 rm -f "$DMG"
 for attempt in 1 2 3; do   # hdiutil occasionally fails with "Resource busy" on CI machines
   if hdiutil create -volname "$APPNAME" -srcfolder "$WORK/stage" -ov -format UDZO "$DMG"; then break; fi

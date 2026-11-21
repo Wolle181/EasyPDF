@@ -1,4 +1,4 @@
-# Builds the Linux packages: artifacts/installer/<package>_<version>_amd64.deb (package = AppDisplayName in lower case) and <AppDisplayName>-<version>-linux-x64.tar.gz
+# Builds the Linux packages: artifacts/installer/<AppDisplayName>-<version>-Linux-x64.deb (package name = AppDisplayName in lower case) and <AppDisplayName>-<version>-Linux-x64.tar.gz
 # Runs on Linux x64 with PowerShell 7 (pwsh): Native AOT compiles for the system it runs on only. Needs the .NET SDK,
 # Python 3 and the native toolchain (Debian/Ubuntu: sudo apt install clang zlib1g-dev); dpkg is not required.
 # Always pulls the newest sources first (git pull --ff-only; -NoPull skips it) and deletes all bin/obj
@@ -50,4 +50,4 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if (-not $env:CI) {
     try { & "$installer/clean-build-output.ps1" -Intermediate } catch { Write-Warning "Packages built, but cleaning up failed: $_" }
 }
-Get-ChildItem "$root/artifacts/installer/*linux*", "$root/artifacts/installer/*.deb" -ErrorAction SilentlyContinue | Sort-Object FullName -Unique
+Get-ChildItem "$root/artifacts/installer/*-Linux-x64.*" -ErrorAction SilentlyContinue

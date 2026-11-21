@@ -45,6 +45,7 @@ public sealed class TestServerHost : IAsyncDisposable
             ["Web:Storage:Folder"] = Path.Combine(folder, "files"),
             ["Web:Storage:KeysFolder"] = Path.Combine(folder, "keys"),
             ["Web:WebRoot"] = Path.Combine(folder, "wwwroot"),
+            ["Web:Storage:DownloadsFolder"] = Path.Combine(folder, "downloads"),
         };
         foreach (var (key, value) in settings)
             config[key] = value;

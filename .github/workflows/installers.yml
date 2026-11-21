@@ -147,7 +147,7 @@ jobs:
         shell: pwsh
         run: |
           $appName = dotnet msbuild src/EasyPDF.App -getProperty:AppDisplayName
-          $zip = @(Get-ChildItem artifacts/installer/*-win-x64-portable.zip)
+          $zip = @(Get-ChildItem artifacts/installer/*-Windows-portable.zip)
           if ($zip.Count -ne 1) { throw "expected one portable .zip: $zip" }
           $dir = Join-Path $env:RUNNER_TEMP portable
           Expand-Archive $zip[0].FullName $dir
@@ -163,7 +163,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view latest --json assets -q '.assets[].name' | { grep -E '(-win-x64\.msi|-portable\.zip)$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
+          gh release view latest --json assets -q '.assets[].name' | { grep -E '(-Windows-Installer\.msi|-Windows-portable\.zip)$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
           gh release upload latest artifacts/installer/*.msi artifacts/installer/*.zip
 
 
@@ -190,10 +190,10 @@ jobs:
         run: |
           python3 installer/linux/build_linux.py
           # Package and command name = AppDisplayName in lower case (build_linux.py)
-          echo "PKG=$(dpkg-deb -f artifacts/installer/*_amd64.deb Package)" >> "$GITHUB_ENV"
+          echo "PKG=$(dpkg-deb -f artifacts/installer/*-Linux-x64.deb Package)" >> "$GITHUB_ENV"
       - name: Install the .deb and start the app
         run: |
-          sudo apt-get install -y xvfb ./artifacts/installer/${PKG}_*_amd64.deb
+          sudo apt-get install -y xvfb ./artifacts/installer/*-Linux-x64.deb
           dpkg -s "$PKG"
           test -x "/usr/bin/$PKG"
           # Smoke test: the app must still be running after 15 s (timeout exits with 124)
@@ -201,7 +201,7 @@ jobs:
           test "$code" -eq 124
       - name: "Upgrade test: newer and same version replace, older is refused"
         run: |
-          deb=$(ls artifacts/installer/${PKG}_*_amd64.deb)
+          deb=$(ls artifacts/installer/*-Linux-x64.deb)
           installed() { dpkg-query -W -f='${Version}' "$PKG"; }
           variant() {   # variant <version> <file>: the same package with another version
             rm -rf variant && dpkg-deb -R "$deb" variant
@@ -248,7 +248,7 @@ jobs:
       - name: "Mount the .dmg and start the app"
         run: |
           APPNAME="$(dotnet msbuild src/EasyPDF.App -getProperty:AppDisplayName | tr -d '\r\n')"
-          dmg=$(ls artifacts/installer/*-macos-arm64.dmg)
+          dmg=$(ls artifacts/installer/*-macOS-AppleSilicon.dmg)
           mnt="$RUNNER_TEMP/dmg"
           hdiutil attach "$dmg" -nobrowse -mountpoint "$mnt"
           exe="$mnt/$APPNAME.app/Contents/MacOS/$APPNAME"
@@ -265,6 +265,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view latest --json assets -q '.assets[].name' | { grep -E -- '-macos-arm64\.dmg$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
+          gh release view latest --json assets -q '.assets[].name' | { grep -E -- '-macOS-AppleSilicon\.dmg$' || true; } | while read -r f; do gh release delete-asset latest "$f" --yes; done
           gh release upload latest artifacts/installer/*.dmg
 

@@ -16,6 +16,20 @@ export function openTab(url) {
     return true;
 }
 
+// A file the server sends as attachment: a link with "download" saves it without leaving the page
+export function download(url) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = '';
+    document.body.append(link);
+    link.click();
+    link.remove();
+}
+
+export function platform() {
+    return navigator.userAgentData?.platform || navigator.userAgent || '';
+}
+
 // The introduction video above the page (the program draws into a canvas: the video element lies on top of it)
 export function playVideo(url, closeLabel) {
     if (document.getElementById('video-overlay'))

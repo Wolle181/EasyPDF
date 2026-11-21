@@ -80,6 +80,13 @@ public sealed class StorageOptions
     /// </summary>
     public string SharedFolder { get; set; } = "/data/shared";
 
+    /// <summary>
+    /// Desktop packages offered for download (Help: the download button in the header): files named like the installer
+    /// scripts name them (<c>&lt;App&gt;-&lt;version&gt;-Windows-Installer.msi</c> …); the newest of each kind is listed.
+    /// Empty or missing: no downloads (the button is hidden).
+    /// </summary>
+    public string DownloadsFolder { get; set; } = "/data/downloads";
+
     public long MaxUploadBytes => MaxUploadMegabytes * 1024L * 1024L;
 }
 

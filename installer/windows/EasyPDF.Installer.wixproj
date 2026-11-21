@@ -3,12 +3,12 @@
     Windows installer (MSI). Not part of EasyPDF.slnx because WiX only builds on Windows.
     Build: installer/windows/build-windows-on-windows.ps1 (publishes the app first), or after a publish with the app's version (1.0.0.97):
       dotnet build installer/windows/EasyPDF.Installer.wixproj -c Release -p:Version=<version>
-    Output: artifacts/installer/<AppDisplayName>-<Version>-win-x64.msi
+    Output: artifacts/installer/<AppDisplayName>-<Version>-Windows-Installer.msi
     The version must be passed: it is computed by a target (Directory.Build.targets), but the file name is fixed earlier.
   -->
   <PropertyGroup>
     <InstallerPlatform>x64</InstallerPlatform>
-    <OutputName>$(AppDisplayName)-$(Version)-win-x64</OutputName>
+    <OutputName>$(AppDisplayName)-$(Version)-Windows-Installer</OutputName>
     <OutputPath>$(MSBuildThisFileDirectory)..\..\artifacts\installer\</OutputPath>
     <PublishDir>$(MSBuildThisFileDirectory)..\..\artifacts\publish\win-x64</PublishDir>
     <!-- From the brand profile (branding/<Brand>/Branding.props): AppDisplayName (shown name: installed apps, start menu, context

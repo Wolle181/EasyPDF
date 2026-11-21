@@ -51,6 +51,17 @@ internal static class Program
         catch (Exception ex) when (ex is HttpRequestException or RemoteApiException or System.Text.Json.JsonException)
         {
         }
+        // Desktop packages the server offers for download (none: the button stays hidden)
+        try
+        {
+            var packages = await api.ListDownloadsAsync();
+            if (packages.Count > 0)
+                DesktopDownloads.Web = new DesktopDownloads.WebPackages(packages, DesktopDownloads.KindsFor(Interop.Platform()),
+                    package => Interop.Download(RemoteApi.DownloadUrl(package)));
+        }
+        catch (Exception ex) when (ex is HttpRequestException or RemoteApiException or System.Text.Json.JsonException)
+        {
+        }
         // Stamps and templates: the user's own from the browser's storage, samples and shared ones from the server
         PlatformFeatures.Library = await BrowserLibrary.LoadAsync(http);
         // The brand's introduction videos that are next to the page (none: the video button stays hidden)

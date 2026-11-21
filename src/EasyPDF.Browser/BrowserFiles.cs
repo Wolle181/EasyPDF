@@ -45,6 +45,10 @@ internal sealed class BrowserFiles(RemoteFiles files, BrowserSaveTargets targets
         return Interop.OpenTab($"api/files/{info.Id}/content?inline=true");
     }
 
+    private readonly Lazy<bool> _canShare = new(Interop.CanShareFiles);
+
+    public bool CanShareFiles => _canShare.Value;
+
     public async Task<string> PrepareForSharingAsync(EditableDocument document, string name)
     {
         var request = new BuildRequest(RemotePdfBackend.IdOf(document.BaseSource), name, RemotePdfBackend.ToRemote(document.Pages));

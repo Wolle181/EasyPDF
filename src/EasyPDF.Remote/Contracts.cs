@@ -76,6 +76,7 @@ public static class ApiHeaders
 [JsonSerializable(typeof(BlankRequest))]
 [JsonSerializable(typeof(SplitDocumentRequest))]
 [JsonSerializable(typeof(ServerConfig))]
+[JsonSerializable(typeof(IReadOnlyList<EasyPDF.Core.Downloads.DesktopPackage>))]
 [JsonSerializable(typeof(ApiError))]
 [JsonSerializable(typeof(IReadOnlyList<OcrWord>))]
 [JsonSerializable(typeof(IReadOnlyList<PdfAttachment>))]

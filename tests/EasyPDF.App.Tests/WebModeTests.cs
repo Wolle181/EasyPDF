@@ -15,7 +15,9 @@ using EasyPDF.App.Controls.Ribbon;
 using EasyPDF.App.Dialogs;
 using EasyPDF.App.Localization;
 using EasyPDF.App.Services;
+using EasyPDF.App.ViewModels;
 using EasyPDF.App.Views;
+using EasyPDF.Core.Downloads;
 using Xunit;
 
 namespace EasyPDF.App.Tests;
@@ -138,6 +140,8 @@ public class WebModeTests
             var rows = layer.GetVisualDescendants().OfType<Grid>().Where(g => g.Tag is string).Select(g => (string)g.Tag!).ToList();
             Assert.Equal(QuickGuideView.WebTopics.Select(t => t.Key), rows);
             Assert.DoesNotContain("Stamp", rows);
+            Assert.Contains("Share", rows);
+            Assert.DoesNotContain("Mail", rows);
             Assert.All(layer.GetVisualDescendants().OfType<RibbonButton>(), b => Assert.True(b.IsVisible));
             window.Close();
         }
@@ -146,6 +150,88 @@ public class WebModeTests
             PlatformFeatures.Current = PlatformFeatures.Desktop;
         }
     }
+
+    [AvaloniaFact]
+    public async Task OnTheWebTheEmailButtonIsShare()
+    {
+        PlatformFeatures.Current = PlatformFeatures.Web((vm, c) => c == vm.SendByMailCommand);
+        try
+        {
+            var window = new MainWindow { Width = 1200, Height = 700 };
+            window.Show();
+            await Pump();
+            var button = window.FindControl<RibbonButton>("SendByMailButton")!;
+            Assert.True(button.IsVisible);
+            Assert.Equal(Loc.T("BtnShare"), button.Label);
+            Assert.Same(window.FindResource("Icon.Share"), button.Icon);
+            window.Close();
+        }
+        finally
+        {
+            PlatformFeatures.Current = PlatformFeatures.Desktop;
+        }
+        var desktop = new MainWindow { Width = 1200, Height = 700 };
+        desktop.Show();
+        Assert.Equal(Loc.T("BtnSendByMail"), desktop.FindControl<RibbonButton>("SendByMailButton")!.Label);
+        desktop.Close();
+    }
+
+    [AvaloniaFact]
+    public async Task OnTheWebTheDesktopPackagesCanBeDownloaded()
+    {
+        var downloaded = new List<string>();
+        var packages = new DesktopDownloads.WebPackages(
+            [new("App-1.0.0.18-Windows-Installer.msi", 60_000_000, DesktopPackageKind.WindowsInstaller, "1.0.0.18"),
+             new("App-1.0.0.18-Linux-x64.deb", 50_000_000, DesktopPackageKind.LinuxDeb, "1.0.0.18")],
+            DesktopDownloads.KindsFor("Linux"), p => downloaded.Add(p.Name));
+        PlatformFeatures.Current = PlatformFeatures.Web((vm, c) => c == vm.ShowDownloadsCommand);
+        DesktopDownloads.Web = packages;
+        try
+        {
+            var window = new MainWindow { Width = 1200, Height = 700 };
+            window.Show();
+            await Pump();
+            var button = window.FindControl<RibbonButton>("DownloadButton")!;
+            Assert.True(button.IsEffectivelyVisible);
+            Assert.Same(window.ViewModel.ShowDownloadsCommand, button.Command);
+            var dialogs = new FakeDialogs();
+            await new MainViewModel(new EasyPDF.Core.Settings.AppSettings(), dialogs).ShowDownloadsCommand.ExecuteAsync(null);
+            Assert.Same(packages, Assert.Single(dialogs.DownloadsShown));
+
+            // In the browser the dialog is an overlay
+            var layer = window.FindControl<DialogLayer>("Dialogs")!;
+            _ = layer.ShowAsync(new DownloadsView(packages));
+            await Pump();
+            var buttons = layer.GetVisualDescendants().OfType<Button>().ToList();
+            var linux = buttons.Single(b => b.Name == DownloadsView.ButtonName(DesktopPackageKind.LinuxDeb));
+            Assert.Contains("primary", linux.Classes); // for the browser's system
+            Assert.DoesNotContain("primary", buttons.Single(b => b.Name == DownloadsView.ButtonName(DesktopPackageKind.WindowsInstaller)).Classes);
+            Assert.Contains(layer.GetVisualDescendants().OfType<TextBlock>(), t => t.Text == Loc.T("DownloadsThisSystem"));
+            linux.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+            Assert.Equal(["App-1.0.0.18-Linux-x64.deb"], downloaded);
+            window.Close();
+        }
+        finally
+        {
+            PlatformFeatures.Current = PlatformFeatures.Desktop;
+            DesktopDownloads.Web = null;
+        }
+        // The desktop program offers none
+        var desktop = new MainWindow { Width = 1200, Height = 700 };
+        desktop.Show();
+        Assert.False(desktop.FindControl<RibbonButton>("DownloadButton")!.IsVisible);
+        desktop.Close();
+    }
+
+    [Theory]
+    [InlineData("Windows", DesktopPackageKind.WindowsInstaller)]
+    [InlineData("macOS", DesktopPackageKind.MacOS)]
+    [InlineData("Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0", DesktopPackageKind.LinuxTar)]
+    public void TheBrowsersSystemPicksItsPackages(string platform, DesktopPackageKind kind) =>
+        Assert.Contains(kind, DesktopDownloads.KindsFor(platform));
+
+    [Fact]
+    public void PhonesGetNoPackageMarked() => Assert.Empty(DesktopDownloads.KindsFor("Android"));
 
     [Fact]
     public void AboutListsTheWebAddressOfTheBrand()

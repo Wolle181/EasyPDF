@@ -129,7 +129,13 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
 
         AddHandler(DragDrop.DropEvent, OnDrop);
         if (PlatformFeatures.Current.IsWeb)
+        {
             BrandSubtitle.Text = Loc.T("BrandSubtitleWeb");
+            // The browser hands the document to the system's share sheet (email, messengers, AirDrop …): "Share"
+            SendByMailButton.Bind(RibbonButton.LabelProperty, (Avalonia.Data.BindingBase)new TrExtension("BtnShare").ProvideValue(null!));
+            SendByMailButton.Icon = (Avalonia.Media.Geometry)Avalonia.Application.Current!.FindResource("Icon.Share")!;
+            SendByMailButton.IconAccent = (Avalonia.Media.Geometry)Avalonia.Application.Current!.FindResource("Icon.Share.Accent")!;
+        }
         ZoomBox.LostFocus += (_, _) => _viewModel.ApplyZoomInputCommand.Execute(null);
         BuildMenuAndShortcuts();
         RebuildRecentFiles();
@@ -310,7 +316,7 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
             new Entry("MenuSaveAs", vm.SaveAsCommand, Key.S, Primary: true, Shift: true),
             null,
             new Entry("MenuPrint", vm.PrintCommand, Key.P, Primary: true),
-            new Entry("MenuSendByMail", vm.SendByMailCommand),
+            new Entry(PlatformFeatures.Current.IsWeb ? "MenuShare" : "MenuSendByMail", vm.SendByMailCommand),
             null,
             new Entry("MenuConcatenate", vm.ConcatenateCommand),
             new Entry("MenuExtract", vm.ExtractPagesCommand),
@@ -1222,6 +1228,9 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
         ?? new RedactedSaveAnswer(RedactedSaveChoice.Cancel, false); // closed with [X]
 
     public Task ShowAboutAsync() => ShowDialogAsync<object?>(() => new AboutWindow(), () => new AboutView());
+
+    public Task ShowDownloadsAsync(DesktopDownloads.WebPackages packages) =>
+        ShowDialogAsync<object?>(() => new DialogWindow(new DownloadsView(packages)), () => new DownloadsView(packages));
 
     private QuickGuideWindow? _guide;
 

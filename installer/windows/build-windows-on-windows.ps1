@@ -1,6 +1,6 @@
 # Builds the Windows installer and the portable version, both with the app compiled by Native AOT:
-#   artifacts/installer/<AppDisplayName>-<version>-win-x64.msi           per-user installer
-#   artifacts/installer/<AppDisplayName>-<version>-win-x64-portable.zip  unpack and run (folder <AppDisplayName>-<version>)
+#   artifacts/installer/<AppDisplayName>-<version>-Windows-Installer.msi  per-user installer
+#   artifacts/installer/<AppDisplayName>-<version>-Windows-portable.zip   unpack and run (folder <AppDisplayName>-<version>)
 # Needs the .NET SDK (WiX comes as NuGet package) and the C++ build tools for the native linker: Visual Studio (or the
 # Build Tools for Visual Studio) with the workload "Desktop development with C++".
 # Always pulls the newest sources first (git pull --ff-only; -NoPull skips it) and deletes all bin/obj
@@ -59,7 +59,7 @@ $publishDir = (Resolve-Path "$root/artifacts/publish/win-x64").Path
 $size = (Get-ChildItem -Recurse -File $publishDir | Measure-Object -Property Length -Sum).Sum
 Write-Host ("== {0}.exe {1:N1} MB, whole folder {2:N1} MB" -f $appName, ((Get-Item "$publishDir/$appName.exe").Length / 1MB), ($size / 1MB)) -ForegroundColor Cyan
 New-Item -ItemType Directory -Force "$root/artifacts/installer" | Out-Null
-$zip = Join-Path (Resolve-Path "$root/artifacts/installer").Path "$appName-$version-win-x64-portable.zip"
+$zip = Join-Path (Resolve-Path "$root/artifacts/installer").Path "$appName-$version-Windows-portable.zip"
 Write-Host "== $zip" -ForegroundColor Cyan
 Remove-Item $zip -ErrorAction SilentlyContinue
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
@@ -79,4 +79,4 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if (-not $env:CI) {
     try { & "$installer/clean-build-output.ps1" -Intermediate } catch { Write-Warning "Installer built, but cleaning up failed: $_" }
 }
-Get-ChildItem "$root/artifacts/installer/*-win-x64.msi", $zip
+Get-ChildItem "$root/artifacts/installer/*-Windows-Installer.msi", $zip

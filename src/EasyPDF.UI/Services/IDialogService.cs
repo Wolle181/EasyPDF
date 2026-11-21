@@ -150,6 +150,9 @@ public interface IDialogService
 
     Task ShowAboutAsync();
 
+    /// <summary>Web version: the desktop packages for download.</summary>
+    Task ShowDownloadsAsync(DesktopDownloads.WebPackages packages);
+
     /// <summary>The quick guide: a short tour of all functions (not modal).</summary>
     Task ShowQuickGuideAsync();
 
