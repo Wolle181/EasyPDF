@@ -73,7 +73,7 @@ importieren, gemeinsame kommen vom Server; Drucken öffnet die PDF in einem neue
 E-Mail-Programm, Messenger, AirDrop … (Windows, macOS, Android, iOS; wo der Browser keine Dateien teilen kann, z. B.
 unter Linux oder in Firefox, bietet es den Download an). Die XML einer E-Rechnung öffnet als Text in einem neuen Tab.
 Die Desktop-Versionen (Windows-Installer und portabel, macOS, Linux .deb und .tar.gz) lassen sich aus der Web-Version
-herunterladen, die für das eigene System ist hervorgehoben.
+herunterladen: System wählen, das eigene ist vorausgewählt.
 
 ## Anpassen
 

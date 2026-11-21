@@ -352,8 +352,9 @@ attachment is ready and its OK click shares the already fetched file.
 
 **Desktop downloads on the web:** a header button (download arrow, only when the server has packages) opens a dialog
 with the newest package of each kind from the server's downloads folder (`/api/downloads`, `/api/downloads/<name>`; only
-files named like the installer scripts name them, never other files of the folder); the packages for the browser's
-system (`navigator.userAgentData.platform` or the user agent) are marked and their button is the primary one. The
+files named like the installer scripts name them, never other files of the folder). A choice of the system (Windows,
+macOS, Linux; those without packages disabled) shows its packages; the browser's system (`navigator.userAgentData.platform`
+or the user agent) is preselected and marked "(your system)". The
 packages are not in the image, so new installers need no new image (see BUILDING.md "Desktop downloads").
 
 **About on the web:** instead of the build date of a program file it shows when the server was deployed (`/api/config`:

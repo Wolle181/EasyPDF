@@ -66,7 +66,7 @@ the browser and can be exported and imported as a ZIP file, shared ones come fro
 in a new tab; "Share" (instead of "Email") hands the PDF to the system's share sheet: email program, messengers, AirDrop …
 (Windows, macOS, Android, iOS; where the browser cannot share files, e.g. on Linux or in Firefox, it offers the download).
 The e-invoice XML opens as text in a new tab. The desktop versions (Windows installer and portable, macOS, Linux .deb
-and .tar.gz) can be downloaded from the web version, the one for your system is marked.
+and .tar.gz) can be downloaded from the web version: choose the system, your own is preselected.
 
 ## Customization
 

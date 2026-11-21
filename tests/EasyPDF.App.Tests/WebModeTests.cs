@@ -202,13 +202,29 @@ public class WebModeTests
             var layer = window.FindControl<DialogLayer>("Dialogs")!;
             _ = layer.ShowAsync(new DownloadsView(packages));
             await Pump();
-            var buttons = layer.GetVisualDescendants().OfType<Button>().ToList();
-            var linux = buttons.Single(b => b.Name == DownloadsView.ButtonName(DesktopPackageKind.LinuxDeb));
-            Assert.Contains("primary", linux.Classes); // for the browser's system
-            Assert.DoesNotContain("primary", buttons.Single(b => b.Name == DownloadsView.ButtonName(DesktopPackageKind.WindowsInstaller)).Classes);
-            Assert.Contains(layer.GetVisualDescendants().OfType<TextBlock>(), t => t.Text == Loc.T("DownloadsThisSystem"));
+            // The browser's system is preselected and shows only its packages
+            Button? Download(DesktopPackageKind kind) =>
+                layer.GetVisualDescendants().OfType<Button>().SingleOrDefault(b => b.Name == DownloadsView.ButtonName(kind));
+            RadioButton System(DesktopSystem system) =>
+                layer.GetVisualDescendants().OfType<RadioButton>().Single(r => r.Name == DownloadsView.SystemButtonName(system));
+            Assert.True(System(DesktopSystem.Linux).IsChecked);
+            Assert.Equal(Loc.F("DownloadsSystemOwn", Loc.T("DownloadsSystemLinux")), System(DesktopSystem.Linux).Content);
+            Assert.False(System(DesktopSystem.MacOS).IsEnabled);              // no package for it
+            Assert.Null(Download(DesktopPackageKind.WindowsInstaller));
+            var linux = Download(DesktopPackageKind.LinuxDeb)!;
+            Assert.Contains("primary", linux.Classes);
             linux.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
-            Assert.Equal(["App-1.0.0.18-Linux-x64.deb"], downloaded);
+
+            // Any other system can be chosen
+            var windows = System(DesktopSystem.Windows);
+            var at = windows.TranslatePoint(new Point(windows.Bounds.Width / 2, windows.Bounds.Height / 2), window)!.Value;
+            window.MouseDown(at, MouseButton.Left);
+            window.MouseUp(at, MouseButton.Left);
+            await Pump();
+            Assert.True(windows.IsChecked);
+            Assert.Null(Download(DesktopPackageKind.LinuxDeb));
+            Download(DesktopPackageKind.WindowsInstaller)!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+            Assert.Equal(["App-1.0.0.18-Linux-x64.deb", "App-1.0.0.18-Windows-Installer.msi"], downloaded);
             window.Close();
         }
         finally

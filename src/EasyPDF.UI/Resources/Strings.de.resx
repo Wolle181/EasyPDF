@@ -540,9 +540,13 @@
   <data name="LibraryZipFiles" xml:space="preserve"><value>ZIP-Dateien</value></data>
   <data name="StampEditDeleteHint" xml:space="preserve"><value>Rechtsklick auf einen Stempel: bearbeiten oder löschen.</value></data>
   <data name="DownloadsTitle" xml:space="preserve"><value>Desktop-Version herunterladen</value></data>
-  <data name="DownloadsMessage" xml:space="preserve"><value>{App} gibt es auch als Programm für Ihren Computer – offline, Ihre Dateien verlassen ihn nicht. Wählen Sie das Paket für Ihr System:</value></data>
+  <data name="DownloadsMessage" xml:space="preserve"><value>{App} gibt es auch als Programm für Ihren Computer – offline, Ihre Dateien verlassen ihn nicht. Wählen Sie Ihr System und das Paket:</value></data>
+  <data name="DownloadsSystem" xml:space="preserve"><value>System:</value></data>
+  <data name="DownloadsSystemOwn" xml:space="preserve"><value>{0} (Ihr System)</value></data>
+  <data name="DownloadsSystemWindows" xml:space="preserve"><value>Windows</value></data>
+  <data name="DownloadsSystemMacOS" xml:space="preserve"><value>macOS</value></data>
+  <data name="DownloadsSystemLinux" xml:space="preserve"><value>Linux</value></data>
   <data name="DownloadsDownload" xml:space="preserve"><value>Herunterladen</value></data>
-  <data name="DownloadsThisSystem" xml:space="preserve"><value>für Ihr System</value></data>
   <data name="DownloadsFile" xml:space="preserve"><value>{0} · {1}</value></data>
   <data name="DownloadKindWindowsInstaller" xml:space="preserve"><value>Windows – Installationsprogramm</value></data>
   <data name="DownloadHintWindowsInstaller" xml:space="preserve"><value>Installiert für Ihren Benutzer (ohne Administratorrechte), mit Startmenü-Eintrag und Explorer-Kontextmenü.</value></data>

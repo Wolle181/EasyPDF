@@ -540,9 +540,13 @@
   <data name="LibraryZipFiles" xml:space="preserve"><value>ZIP files</value></data>
   <data name="StampEditDeleteHint" xml:space="preserve"><value>Right-click a stamp: edit or delete.</value></data>
   <data name="DownloadsTitle" xml:space="preserve"><value>Download the desktop version</value></data>
-  <data name="DownloadsMessage" xml:space="preserve"><value>{App} also runs as a program on your computer – offline, your files never leave it. Choose the package for your system:</value></data>
+  <data name="DownloadsMessage" xml:space="preserve"><value>{App} also runs as a program on your computer – offline, your files never leave it. Choose your system and the package:</value></data>
+  <data name="DownloadsSystem" xml:space="preserve"><value>System:</value></data>
+  <data name="DownloadsSystemOwn" xml:space="preserve"><value>{0} (your system)</value></data>
+  <data name="DownloadsSystemWindows" xml:space="preserve"><value>Windows</value></data>
+  <data name="DownloadsSystemMacOS" xml:space="preserve"><value>macOS</value></data>
+  <data name="DownloadsSystemLinux" xml:space="preserve"><value>Linux</value></data>
   <data name="DownloadsDownload" xml:space="preserve"><value>Download</value></data>
-  <data name="DownloadsThisSystem" xml:space="preserve"><value>for your system</value></data>
   <data name="DownloadsFile" xml:space="preserve"><value>{0} · {1}</value></data>
   <data name="DownloadKindWindowsInstaller" xml:space="preserve"><value>Windows – installer</value></data>
   <data name="DownloadHintWindowsInstaller" xml:space="preserve"><value>Installs for your user (no administrator rights), with Start menu entry and Explorer context menu.</value></data>
