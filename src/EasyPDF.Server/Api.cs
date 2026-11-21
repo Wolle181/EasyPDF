@@ -251,7 +251,7 @@ public static class Api
         var file = files.Delete(OwnerKeys.Of(context), id);
         if (file == null)
             return NotFound();
-        await documents.CloseAsync(file.Id);
+        await documents.ReleaseAsync(file);
         return Results.NoContent();
     }
 

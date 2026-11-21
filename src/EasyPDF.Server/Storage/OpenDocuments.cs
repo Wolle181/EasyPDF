@@ -52,6 +52,16 @@ public sealed class OpenDocuments : IAsyncDisposable
         return new RemoteFileInfo(file.Id, file.Name, source.PageCount, sizes, file.Size);
     }
 
+    /// <summary>
+    /// Closes a file the store has removed and deletes it from the disk: only after closing, Windows refuses to delete a
+    /// file that is open (the store's own attempt only works on Linux and macOS).
+    /// </summary>
+    public async Task ReleaseAsync(StoredFile file)
+    {
+        await CloseAsync(file.Id);
+        FileStore.TryDeleteFile(file.Path);
+    }
+
     public async Task CloseAsync(string id)
     {
         _used.TryRemove(id, out _);

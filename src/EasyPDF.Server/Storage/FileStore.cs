@@ -152,6 +152,9 @@ public sealed class FileStore
         return files;
     }
 
+    /// <summary>Deletes the folder of an owner whose files are all removed.</summary>
+    public void DeleteOwnerFolder(string owner) => TryDeleteDirectory(System.IO.Path.Combine(_options.Folder, owner));
+
     public bool HasRoom(string owner, long size) =>
         OwnerBytes(owner) + size <= _options.MaxOwnerMegabytes * 1024L * 1024L
         && TotalBytes + size <= _options.MaxTotalMegabytes * 1024L * 1024L;

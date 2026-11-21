@@ -29,10 +29,13 @@ public sealed class CleanupService(FileStore files, OpenDocuments documents, Ses
     public async Task RunOnceAsync()
     {
         foreach (var file in files.RemoveExpired())
-            await documents.CloseAsync(file.Id);
+            await documents.ReleaseAsync(file);
         var idle = TimeSpan.FromMinutes(Math.Max(1, options.Value.Authentication.SessionIdleMinutes));
         foreach (var owner in sessions.RemoveExpired(idle))
+        {
             foreach (var file in files.RemoveOwner(owner))
-                await documents.CloseAsync(file.Id);
+                await documents.ReleaseAsync(file);
+            files.DeleteOwnerFolder(owner); // again, now that its files are closed (Windows)
+        }
     }
 }
