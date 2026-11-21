@@ -7,6 +7,7 @@ Plattformübergreifende Desktop-App (Windows, macOS, Linux) zum **Lesen und Neuo
 Detaillierter Entwurf, Entscheidungen und UX (auch OCR): **[docs/DESIGN.md](docs/DESIGN.md)** (bei Änderungen am Konzept dort pflegen).
 
 ## Aufgabenverwaltung
+- [docs/OPEN_TASKS.md](docs/OPEN_TASKS.md) – geplante, bewusst zurückgestellte Aufgaben.
 - [docs/TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md) – manuelle Testliste (v. a. für macOS/Linux, die hier nicht automatisch getestet werden).
 
 ## Tech-Stack
