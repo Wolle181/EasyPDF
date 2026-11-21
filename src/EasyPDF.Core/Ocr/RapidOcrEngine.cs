@@ -17,7 +17,7 @@ namespace EasyPDF.Core.Ocr;
 /// The models ship with the app in <see cref="DefaultModelDirectory"/>. Calls are serialized (one recognition at a time;
 /// the engine itself uses several cores).
 /// </summary>
-public sealed class RapidOcrEngine : IOcrEngine
+public sealed partial class RapidOcrEngine : IOcrEngine
 {
     /// <summary>Longest image side for text detection. The default 1024 misses small print on full pages (measured: 79 % vs. 98 % of the words at 150 dpi).</summary>
     public const int DetectionSize = 2048;
@@ -31,6 +31,7 @@ public sealed class RapidOcrEngine : IOcrEngine
     /// <summary>Loads the models (about 0.3 s). Throws <see cref="FileNotFoundException"/> if a model file is missing.</summary>
     public RapidOcrEngine(string? modelDirectory = null)
     {
+        DisableOnnxTelemetry();
         var dir = modelDirectory ?? DefaultModelDirectory;
         string Model(string name)
         {
@@ -48,6 +49,30 @@ public sealed class RapidOcrEngine : IOcrEngine
         _session.EnableMemoryPattern = false;
         _ocr.InitModels(det, cls, rec, keys, _session);
     }
+
+    /// <summary>
+    /// ONNX Runtime (1.29) collects a device id and sends telemetry, on Linux also by running <c>blkid</c> and
+    /// <c>hostname</c> through <c>/bin/sh</c>: not wanted in a program that works offline, and in a container without a
+    /// shell it crashed the process. <c>ORT_DISABLE_TELEMETRY</c> must be in the native environment before the runtime
+    /// starts (.NET's own environment is not the C library's on Linux/macOS, hence setenv); the API call covers Windows.
+    /// </summary>
+    private static void DisableOnnxTelemetry()
+    {
+        if (!OperatingSystem.IsWindows())
+            _ = SetEnv("ORT_DISABLE_TELEMETRY", "1", 1);
+        Environment.SetEnvironmentVariable("ORT_DISABLE_TELEMETRY", "1");
+        try
+        {
+            OrtEnv.Instance().DisableTelemetryEvents();
+        }
+        catch (OnnxRuntimeException)
+        {
+            // Not fatal: the environment variable already switched it off
+        }
+    }
+
+    [LibraryImport("libc", EntryPoint = "setenv", StringMarshalling = StringMarshalling.Utf8)]
+    private static partial int SetEnv(string name, string value, int overwrite);
 
     /// <summary>Folder next to the program that holds the models (copied there by the Core project).</summary>
     public static string DefaultModelDirectory => Path.Combine(AppContext.BaseDirectory, "ocr-models");

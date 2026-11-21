@@ -59,9 +59,11 @@ RUN dotnet publish src/EasyPDF.Browser/EasyPDF.Browser.csproj -c Release -p:Bran
 # Chiseled ("distroless"-like): no shell, no package manager, non-root by default - minimal attack surface. "-extra":
 # with ICU (German/English formats) and tzdata. pdfium (libpdfium.so) needs only glibc and libstdc++, which it has.
 FROM mcr.microsoft.com/dotnet/runtime-deps:11.0-resolute-chiseled-extra AS final
+# ORT_DISABLE_TELEMETRY: ONNX Runtime (OCR) would collect a device id and send telemetry (also set in the code)
 ENV ASPNETCORE_HTTP_PORTS=8080 \
     ASPNETCORE_ENVIRONMENT=Production \
-    TZ=Europe/Berlin
+    TZ=Europe/Berlin \
+    ORT_DISABLE_TELEMETRY=1
 WORKDIR /app
 COPY --from=build /app/publish .
 # Writes only to /data (mounted: files, keys) and /tmp, so the container can run with a read-only root file system
