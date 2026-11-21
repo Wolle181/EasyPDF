@@ -57,9 +57,10 @@ BenchmarkDotNet.Artifacts/
 project.lock.json
 project.fragment.lock.json
 artifacts/
-# Videos are not committed, except the introduction videos of the brands (shipped with the app)
+# Videos are not committed, except the introduction videos of the brands (shipped with the app and the web version)
 *.mp4
 !branding/*/videos/introduction.*.mp4
+!branding/*/videos/web/introduction.*.mp4
 
 # StyleCop
 StyleCopReport.xml
