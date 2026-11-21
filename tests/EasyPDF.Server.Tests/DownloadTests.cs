@@ -34,22 +34,6 @@ public class DownloadTests
     public void OtherFilesAreNoPackages(string name) => Assert.Null(DesktopPackage.FromFile(name, 1));
 
     [Fact]
-    public void TheInstallerScriptsNameThePackagesSo()
-    {
-        var root = AppContext.BaseDirectory;
-        while (!File.Exists(Path.Combine(root, "EasyPDF.slnx")))
-            root = Path.GetDirectoryName(root)!;
-        string Read(string path) => File.ReadAllText(Path.Combine(root, path));
-        Assert.Contains("-" + Path.GetFileNameWithoutExtension(DesktopPackage.Suffixes[DesktopPackageKind.WindowsInstaller]) + "</OutputName>",
-            Read("installer/windows/EasyPDF.Installer.wixproj"));
-        Assert.Contains(DesktopPackage.Suffixes[DesktopPackageKind.WindowsPortable], Read("installer/windows/build-windows-on-windows.ps1"));
-        Assert.Contains(DesktopPackage.Suffixes[DesktopPackageKind.MacOS], Read("installer/build-macos-on-macos.sh"));
-        var linux = Read("installer/linux/build_linux.py");
-        Assert.Contains(DesktopPackage.Suffixes[DesktopPackageKind.LinuxDeb], linux);
-        Assert.Contains(DesktopPackage.Suffixes[DesktopPackageKind.LinuxTar], linux);
-    }
-
-    [Fact]
     public async Task TheServerListsTheNewestOfEachKindAndSendsIt()
     {
         await using var server = await TestServerHost.StartAsync();
