@@ -171,6 +171,19 @@ public class MultiWindowTests
         await CloseAllAsync(windows);
     }
 
+    private static bool TryDelete(string path)
+    {
+        try
+        {
+            File.Delete(path);
+            return true;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+    }
+
     [AvaloniaFact]
     public async Task AClosedWindowLeavesItsFileFreeWhileOthersAreOpen()
     {
@@ -184,9 +197,11 @@ public class MultiWindowTests
 
         second.Close();                                                 // [X]: not the Close command
         Assert.Single(windows.Windows);
-        await WaitForAsync(() => document.Sources.Count == 0 ? document : null);
         Assert.Null(second.ViewModel.Document);
-        File.Delete(dir.File("b.pdf"));                                 // throws while a handle is open (Windows)
+        // The document empties its source list before closing the files on the pdfium thread, so wait
+        // until Windows lets the file go (deleting throws while a handle is open); it never would if a handle leaked
+        await WaitForAsync(() => TryDelete(dir.File("b.pdf")) ? document : null);
+        Assert.Empty(document.Sources);
         Assert.False(File.Exists(dir.File("b.pdf")));
         Assert.Equal(dir.File("a.pdf"), first.ViewModel.Document!.FilePath);
         await CloseAllAsync(windows);
