@@ -29,8 +29,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(BrandDir)icons/app-128.png" Link="wwwroot/favicon.png" CopyToOutputDirectory="PreserveNewest" />
-    <!-- Introduction videos of the brand (button in the header; the page plays them in a video element) -->
-    <Content Include="$(BrandDir)videos/introduction.*.mp4" Link="wwwroot/videos/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Introduction videos of the brand's web version (button in the header; the page plays them in a video element).
+         In the image with the page, so they always match its surface (recorded with tools/DemoVideo -web) -->
+    <Content Include="$(BrandDir)videos/web/introduction.*.mp4" Link="wwwroot/videos/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <!-- Avalonia.Browser adds the native libraries for the Emscripten of .NET 9/10 (3.1.56); the packages above add those for
        .NET 11 themselves -->

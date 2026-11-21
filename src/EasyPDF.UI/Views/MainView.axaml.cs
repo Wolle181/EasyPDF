@@ -144,7 +144,8 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
     public MainViewModel ViewModel => _viewModel;
 
     /// <summary>The window around the view (desktop), or null (web version: the page has no windows).</summary>
-    public Window? OwnerWindow => TopLevel.GetTopLevel(this) as Window;
+    /// <remarks>Null in the web version, also when it is hosted in a window (the demo video records it that way): dialogs are overlays there.</remarks>
+    public Window? OwnerWindow => PlatformFeatures.Current.IsWeb ? null : TopLevel.GetTopLevel(this) as Window;
 
     private TopLevel Host => TopLevel.GetTopLevel(this) ?? throw new InvalidOperationException("The view is not shown.");
 

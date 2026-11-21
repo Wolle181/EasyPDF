@@ -2,13 +2,13 @@ using System.Collections.Generic;
 using System.Windows.Input;
 using EasyPDF.App.ViewModels;
 
-namespace EasyPDF.Browser;
+namespace EasyPDF.App.Services;
 
 /// <summary>
 /// The commands the web version offers so far; the others (recent files, several windows…) are hidden until they
-/// work in the browser too.
+/// work in the browser too. Here and not in the browser program, so the demo video can record the web version's surface.
 /// </summary>
-internal static class WebCommands
+public static class WebCommands
 {
     public static bool IsAvailable(MainViewModel vm, ICommand command) =>
         command == vm.OpenCommand || command == vm.SaveCommand || command == vm.SaveAsCommand
@@ -48,6 +48,9 @@ internal static class WebCommands
         || command == vm.PrintCommand
         // Share (instead of Email): the system's share sheet; browsers without one with files offer the download
         || command == vm.SendByMailCommand;
+
+    /// <summary>The features of the web version (commands and buttons above).</summary>
+    public static PlatformFeatures Features => PlatformFeatures.Web(IsAvailable, Buttons);
 
     /// <summary>Ribbon buttons without a command (a gallery or menu) the web version offers.</summary>
     public static IReadOnlySet<string> Buttons { get; } = new HashSet<string> { "TextStyleButton", "StampButton", "TemplatesButton" };

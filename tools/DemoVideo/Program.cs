@@ -1,9 +1,10 @@
 // Records the demo video (no sound, banners at the bottom) from the real app, headless, in one language per run:
-//   dotnet run -c Release --project tools/DemoVideo -- [--language de|en] [--ffmpeg <file>] [--out <file.mp4>]
+//   dotnet run -c Release --project tools/DemoVideo -- [--language de|en] [--web] [--ffmpeg <file>] [--out <file.mp4>]
+// --web records the web version (its commands, dialogs as overlays, a browser bar above it, upload, share, desktop downloads).
 // ffmpeg must be on the PATH or given with --ffmpeg; make-video.cmd downloads it for the one run and records both languages (Windows).
 // The app is the brand the build selects (-p:Brand=<id> or EASYPDF_BRAND; branding/<id>/make-presentation-videos.cmd does it).
-// Default output: branding/<brand>/videos/introduction.<de|en>.mp4, committed with the brand: the build copies them next to
-// the program (videos/), the button in the header plays them.
+// Default output: branding/<brand>/videos/introduction.<de|en>.mp4 (web: branding/<brand>/videos/web/…), committed with the
+// brand: the build copies them next to the program (videos/) or into the web page (wwwroot/videos/), the button in the header plays them.
 
 using System;
 using System.Collections.Generic;
@@ -55,7 +56,9 @@ internal static class Program
         var language = Option(args, "--language") ?? "de";
         if (language is not ("de" or "en"))
             throw new ArgumentException($"Unknown language: {language}");
-        var output = Path.GetFullPath(Option(args, "--out") ?? Path.Combine(root, "branding", Brand, "videos", $"introduction.{language}.mp4"));
+        var web = args.Contains("--web");
+        var output = Path.GetFullPath(Option(args, "--out")
+            ?? Path.Combine(root, "branding", Brand, "videos", web ? "web" : "", $"introduction.{language}.mp4"));
         // Dates in the picture follow the language of the video, not the machine that records it
         CultureInfo.DefaultThreadCurrentCulture = new CultureInfo(language);
         Directory.CreateDirectory(Path.GetDirectoryName(output)!);
@@ -63,7 +66,7 @@ internal static class Program
         using var session = HeadlessUnitTestSession.StartNew(typeof(DemoAppBuilder));
         session.Dispatch<int>(async () =>
         {
-            await new Script(root, ffmpeg, output, language).RunAsync();
+            await new Script(root, ffmpeg, output, language, web).RunAsync();
             return 0;
         }, CancellationToken.None).GetAwaiter().GetResult();
         Console.WriteLine(output);
@@ -86,7 +89,7 @@ internal static class Program
 }
 
 /// <summary>The storyboard: one method per feature, each with its banner.</summary>
-internal sealed class Script(string root, string ffmpeg, string output, string language)
+internal sealed class Script(string root, string ffmpeg, string output, string language, bool web)
 {
     private string L(string german, string english) => language == "de" ? german : english;
 
@@ -129,8 +132,14 @@ internal sealed class Script(string root, string ffmpeg, string output, string l
         {
             Prepare();
             using (_rec = new Recorder(ffmpeg, output, Path.Combine(root, "src", "EasyPDF.App", "Assets", "Fonts"),
-                       Path.Combine(root, "branding", Program.Brand, "icons", "app-128.png")))
+                       Path.Combine(root, "branding", Program.Brand, "icons", "app-128.png"))
+                   { BrowserAddress = web ? WebAddress() : null })
             {
+                if (web)
+                {
+                    await WebStoryAsync();
+                    return;
+                }
                 await OpenAsync(_report);
                 await _rec.Card(_rec.TitleCard(EasyPDF.Core.AppInfo.Name, L("PDFs lesen, ordnen und bearbeiten", "Read, organize and edit PDFs"), L("lokal und offline", "local and offline")), 3, fadeIn: true, fadeOut: true);
                 await ReadingAsync();
@@ -183,6 +192,16 @@ internal sealed class Script(string root, string ffmpeg, string output, string l
         foreach (var name in new[] { L("Eingegangen.png", "Received.png"), L("Stempel 'gescannt'.png", "Received.png"), Path.Combine("Numbers", "01.png"), Path.Combine("Numbers", "02.png") }.Distinct())
             File.Copy(Path.Combine(samples, name), Path.Combine(stamps, Path.GetFileName(name)));
 
+        if (web)
+        {
+            PlatformFeatures.Current = WebCommands.Features;
+            var version = typeof(Program).Assembly.GetName().Version!.ToString();
+            DesktopDownloads.Web = new DesktopDownloads.WebPackages(
+                [.. Enum.GetValues<EasyPDF.Core.Downloads.DesktopPackageKind>().Select(kind => new EasyPDF.Core.Downloads.DesktopPackage(
+                    EasyPDF.Core.Downloads.DesktopPackage.FileName(EasyPDF.Core.AppInfo.Name, version, kind), 60_000_000, kind, version))],
+                DesktopDownloads.KindsFor("Windows"), _ => { });
+            IntroVideo.Web = new IntroVideo.WebVideos(["de", "en"], _ => Task.CompletedTask);
+        }
         _settings = new AppSettings { Language = language, StampFolder = stamps, TemplateFolder = Path.Combine(_work, L("Vorlagen", "Templates")), TextColor = "#C00000", TextFontSize = 14 };
         AppEnvironment.Apply(_settings);
         TemplateLibrary.ProvideSamples(_settings.TemplateFolder, SampleContent.Templates(), _settings.ProvidedSamples);
@@ -204,7 +223,7 @@ internal sealed class Script(string root, string ffmpeg, string output, string l
     private async Task OpenAsync(string? path)
     {
         var old = _rec.Window;
-        var window = new MainWindow(_settings) { Width = Recorder.Width / Recorder.Scale, Height = Recorder.AppHeight / Recorder.Scale };
+        var window = new MainWindow(_settings) { Width = Recorder.Width / Recorder.Scale, Height = (Recorder.AppHeight - _rec.AppTop) / Recorder.Scale };
         _windows.Add(window);
         window.Show();
         window.SetRenderScaling(Recorder.Scale);
@@ -255,7 +274,7 @@ internal sealed class Script(string root, string ffmpeg, string output, string l
 
     /// <summary>The button with this text in an open flyout or in the dialog on top.</summary>
     private Button ButtonNamed(string text) =>
-        _rec.TopWindow.GetVisualDescendants().OfType<Button>().First(b => b.Content as string == text && b.IsEffectivelyVisible);
+        DialogRoot.GetVisualDescendants().OfType<Button>().First(b => b.Content as string == text && b.IsEffectivelyVisible);
 
     /// <summary>A point of the stamp editor's picture, as shares of its size.</summary>
     private static Point OnStamp(StampEditorDialog dialog, double x, double y)
@@ -264,13 +283,124 @@ internal sealed class Script(string root, string ffmpeg, string output, string l
         return dialog.Canvas.TranslatePoint(new Point(area.X + x * area.Width, area.Y + y * area.Height), dialog)!.Value;
     }
 
-    private Button DialogOk() => _rec.TopWindow.GetVisualDescendants().OfType<Button>().First(b => b.IsDefault && b.IsEffectivelyVisible);
+    /// <summary>The web version's dialogs: overlays in the page.</summary>
+    private DialogLayer Layer => _window.FindControl<DialogLayer>("Dialogs")!;
 
-    private Button DialogCancel() => _rec.TopWindow.GetVisualDescendants().OfType<Button>().First(b => b.IsCancel && b.IsEffectivelyVisible);
+    /// <summary>Where the open dialog's controls are: its window (desktop) or the overlay layer (web).</summary>
+    private Visual DialogRoot => web && Layer.HasOpenDialog ? Layer : _rec.TopWindow;
 
-    private Task DialogOpen() => _rec.WaitUntil(() => _window.OwnedWindows.Any(w => w.IsVisible));
+    private Button DialogOk() => DialogRoot.GetVisualDescendants().OfType<Button>().First(b => b.IsDefault && b.IsEffectivelyVisible);
 
-    private Task DialogClosed() => _rec.WaitUntil(() => !_window.OwnedWindows.Any(w => w.IsVisible));
+    private Button DialogCancel() => DialogRoot.GetVisualDescendants().OfType<Button>().First(b => b.IsCancel && b.IsEffectivelyVisible);
+
+    private Task DialogOpen() => _rec.WaitUntil(() => web ? Layer.HasOpenDialog : _window.OwnedWindows.Any(w => w.IsVisible));
+
+    private Task DialogClosed() => _rec.WaitUntil(() => web ? !Layer.HasOpenDialog : !_window.OwnedWindows.Any(w => w.IsVisible));
+
+    #endregion
+
+    #region Web version
+
+    /// <summary>The address in the browser bar: the brand's web address, without the scheme.</summary>
+    private static string WebAddress() =>
+        VersionInfo.WebAppUrl.Length > 0 ? new Uri(VersionInfo.WebAppUrl).Host : EasyPDF.Core.AppInfo.Name.ToLowerInvariant() + ".example";
+
+    /// <summary>The storyboard of the web version: what it offers, with upload, share and the desktop version instead of local files.</summary>
+    private async Task WebStoryAsync()
+    {
+        await OpenAsync(null);
+        await _rec.Card(_rec.TitleCard(EasyPDF.Core.AppInfo.Name, L("PDFs lesen, ordnen und bearbeiten", "Read, organize and edit PDFs"), L("im Browser, ohne Installation", "in the browser, nothing to install")), 3, fadeIn: true, fadeOut: true);
+        await UploadAsync();
+        await ReadingAsync();
+        await OrganizeAsync();
+        await WebMergeAsync();
+        await OcrAsync();
+        await StampAsync();
+        await TextAsync();
+        await RedactAsync();
+        await ShareAsync();
+        await DesktopVersionAsync();
+        await ThemeAsync();
+        await _rec.Card(_rec.TitleCard(EasyPDF.Core.AppInfo.Name, "Chrome · Edge · Firefox · Safari", L("Deutsch und Englisch · Hell und Dunkel", "English and German · Light and dark")), 3.5, fadeIn: true, fadeOut: false);
+    }
+
+    /// <summary>Files dragged in from outside the page: the pointer comes from the left edge and lets them go at <paramref name="target"/>.</summary>
+    private async Task DropAsync(Point target, params string[] paths)
+    {
+        await _rec.MoveTo(new Point(4, target.Y + 60), 0.25);
+        await _rec.MoveTo(target, 1.1);
+        var data = new DataTransfer();
+        foreach (var path in paths)
+            data.Add(DataTransferItem.CreateFile((await _window.StorageProvider.TryGetFileFromPathAsync(new Uri(path)))!));
+        foreach (var type in new[] { Avalonia.Input.Raw.RawDragEventType.DragEnter, Avalonia.Input.Raw.RawDragEventType.DragOver, Avalonia.Input.Raw.RawDragEventType.Drop })
+            _window.DragDrop(target, type, data, DragDropEffects.Copy, RawInputModifiers.None);
+    }
+
+    private async Task UploadAsync()
+    {
+        _rec.Banner(L("PDF hineinziehen", "Drag a PDF in"), L("Oder „Öffnen“ wählen. Die Datei bleibt nur für Ihre Sitzung auf dem Server.", "Or choose “Open”. The file stays on the server for your session only."));
+        await _rec.Pause(1.2);
+        var view = _window.FindControl<MainView>("View") ?? _window.GetVisualDescendants().OfType<MainView>().First();
+        await DropAsync(view.TranslatePoint(new Point(view.Bounds.Width / 2, view.Bounds.Height * 0.6), _window)!.Value, _report);
+        await _rec.WaitUntil(() => _window.ViewModel.Document != null, 30, maxVideoSeconds: 1);
+        await Recorder.Settle(800);
+        PageView.Clock = () => _rec.VideoMs;
+        await _rec.Pause(1.5);
+    }
+
+    private async Task WebMergeAsync()
+    {
+        var vm = _window.ViewModel;
+        _rec.Banner(L("Dateien zusammenführen", "Merge files"), L("Weitere PDFs in den Dialog ziehen und die Reihenfolge festlegen.", "Drag more PDFs into the dialog and set the order."));
+        await _rec.Click(Tab(0));
+        await _rec.Pause(0.3);
+        await _rec.Click(ButtonOf(vm.ConcatenateCommand));
+        await DialogOpen();
+        await _rec.Pause(0.8);
+        var list = Layer.GetVisualDescendants().OfType<ListBox>().First();
+        await DropAsync(list.TranslatePoint(new Point(list.Bounds.Width / 2, list.Bounds.Height * 0.7), _window)!.Value, _cover, _annex);
+        await _rec.WaitUntil(() => list.ItemCount >= 3, 30, maxVideoSeconds: 1);
+        await _rec.Pause(1);
+        var items = Layer.GetVisualDescendants().OfType<ListBoxItem>().ToList();
+        await _rec.Click(items[1]);
+        await _rec.Pause(0.4);
+        await _rec.Click(Layer.GetVisualDescendants().OfType<Button>().First(b => b.Content as string == Loc.T("ConcatUp")));
+        await _rec.Pause(1);
+        await _rec.Click(DialogOk());
+        await DialogClosed();
+        await _rec.WaitUntil(() => !vm.IsBusy, 30, maxVideoSeconds: 1);
+        await Recorder.Settle(800);
+        await _rec.Click(ButtonOf(vm.ShowOrganizeCommand));
+        await _rec.Pause(2.4);
+    }
+
+    private async Task ShareAsync()
+    {
+        var vm = _window.ViewModel;
+        _rec.Banner(L("Herunterladen oder teilen", "Download or share"), L("Speichern lädt die PDF herunter, Teilen gibt sie an E-Mail und Messenger.", "Save downloads the PDF, Share hands it to email and messengers."));
+        await _rec.Click(Tab(0));
+        await _rec.MoveTo(Recorder.PointIn(ButtonOf(vm.SaveAsCommand)), 0.8);
+        await _rec.Pause(1.4);
+        await _rec.MoveTo(Recorder.PointIn(ButtonOf(vm.SendByMailCommand)), 0.7);
+        await _rec.Pause(2);
+    }
+
+    private async Task DesktopVersionAsync()
+    {
+        _rec.Banner(L("Auch für Ihren Computer", "Also for your computer"), L("Die Desktop-Version für Windows, macOS und Linux arbeitet ganz offline.", "The desktop version for Windows, macOS and Linux works fully offline."));
+        await _rec.Click(_window.FindControl<RibbonButton>("DownloadButton")!);
+        await DialogOpen();
+        await _rec.Pause(2.2);
+        var mac = Layer.GetVisualDescendants().OfType<RadioButton>().First(r => r.Name == DownloadsView.SystemButtonName(DesktopSystem.MacOS));
+        await _rec.Click(mac);
+        await _rec.Pause(1.2);
+        var linux = Layer.GetVisualDescendants().OfType<RadioButton>().First(r => r.Name == DownloadsView.SystemButtonName(DesktopSystem.Linux));
+        await _rec.Click(linux);
+        await _rec.Pause(1.6);
+        await _rec.Click(DialogCancel());
+        await DialogClosed();
+        await _rec.Pause(0.4);
+    }
 
     #endregion
 

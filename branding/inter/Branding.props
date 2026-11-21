@@ -9,6 +9,7 @@
     <AppAuthor>Wolfgang Ahting</AppAuthor>
     <MsiUpgradeCode>7E0D8C5B-3F4A-4C2E-9B1D-6A5F2E8C4D17</MsiUpgradeCode>
     <MacBundleId>io.github.wolle181.smartpdf</MacBundleId>
+    <WebAppUrl>https://smartpdf.ahting.de</WebAppUrl>
     <BrandWords>INTER</BrandWords>
   </PropertyGroup>
 </Project>

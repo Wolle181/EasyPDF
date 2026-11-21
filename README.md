@@ -13,7 +13,8 @@ stands for the name of the brand you use. The copyright and license notice must 
 [latest](../../releases/tag/latest) (built by GitHub Actions,
 [docs/BUILDING.md](docs/BUILDING.md#without-local-tools-github-actions)).
 **Introduction video:** a two-minute introduction (English and German) comes with the app: the video button in the
-header plays it. It is recorded per brand with `branding/<id>/make-presentation-videos.cmd`.
+header plays it. The web version has an introduction of its own (upload, share, desktop download). Both are recorded per
+brand with `branding/<id>/make-presentation-videos.cmd`.
 
 ## Features
 

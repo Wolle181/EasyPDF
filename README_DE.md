@@ -15,7 +15,8 @@ siehe [Lizenz](#lizenz)).
 [latest](../../releases/tag/latest) (gebaut von GitHub Actions,
 [docs/BUILDING.md](docs/BUILDING.md#without-local-tools-github-actions), Englisch).
 **Vorstellungsvideo:** Eine zweiminütige Vorstellung (Deutsch und Englisch) wird mit der App ausgeliefert: Der Video-Button
-im Kopf spielt sie ab. Aufgenommen wird sie pro Marke mit `branding/<id>/make-presentation-videos.cmd`.
+im Kopf spielt sie ab. Die Web-Version hat eine eigene Vorstellung (Hochladen, Teilen, Desktop-Download). Aufgenommen
+werden beide pro Marke mit `branding/<id>/make-presentation-videos.cmd`.
 
 ## Funktionen
 

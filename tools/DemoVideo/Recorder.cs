@@ -58,6 +58,17 @@ internal sealed class Recorder : IDisposable
 
     public Window? Window { get; set; }
 
+    /// <summary>
+    /// Web version: the address shown in a browser bar above the app (the main window is that much lower and shorter,
+    /// <see cref="BrowserBarHeight"/>); null = no bar (desktop app).
+    /// </summary>
+    public string? BrowserAddress { get; init; }
+
+    public const int BrowserBarHeight = 64;
+
+    /// <summary>Top of the main window in the video.</summary>
+    public int AppTop => BrowserAddress != null ? BrowserBarHeight : 0;
+
     /// <summary>Runs before each frame is drawn.</summary>
     public Action? EachFrame { get; set; }
 
@@ -199,7 +210,7 @@ internal sealed class Recorder : IDisposable
     private (double X, double Y) WindowOffset(Window window)
     {
         if (ReferenceEquals(window, Window))
-            return (0, 0);
+            return (0, AppTop);
         var (width, height) = (window.Bounds.Width * Scale, window.Bounds.Height * Scale);
         return ((Width - width) / 2, (AppHeight - height + TitleBarHeight) / 2);
     }
@@ -317,10 +328,12 @@ internal sealed class Recorder : IDisposable
         canvas.Clear(Primary);
         if (Window is { IsVisible: true })
         {
-            DrawWindow(canvas, Window, 0, 0);
+            DrawWindow(canvas, Window, 0, AppTop);
             foreach (var dialog in OpenDialogs())
                 DrawDialog(canvas, dialog);
         }
+        if (BrowserAddress != null)
+            DrawBrowserBar(canvas, BrowserAddress);
         DrawBanner(canvas);
         if (Window is { IsVisible: true })
             DrawPointer(canvas);
@@ -462,6 +475,35 @@ internal sealed class Recorder : IDisposable
         var window = TopWindow;
         var hit = window.InputHitTest(ToWindow(window, _pointer));
         return (hit as InputElement)?.Cursor?.ToString() ?? "Arrow";
+    }
+
+    /// <summary>A plain browser bar (no particular browser): back, forward, reload and the address with a lock.</summary>
+    private void DrawBrowserBar(SKCanvas canvas, string address)
+    {
+        using (var band = new SKPaint { Color = new SKColor(0xEC, 0xEE, 0xF1) })
+            canvas.DrawRect(0, 0, Width, BrowserBarHeight, band);
+        using (var line = new SKPaint { Color = new SKColor(0xD0, 0xD4, 0xDA) })
+            canvas.DrawRect(0, BrowserBarHeight - 1, Width, 1, line);
+        using var icon = new SKPaint { Color = new SKColor(0x5F, 0x63, 0x68), Style = SKPaintStyle.Stroke, StrokeWidth = 3, IsAntialias = true, StrokeCap = SKStrokeCap.Round };
+        var mid = BrowserBarHeight / 2f;
+        foreach (var (x, direction) in new[] { (34f, -1f), (82f, 1f) })
+        {
+            canvas.DrawLine(x - 10, mid, x + 10, mid, icon);
+            canvas.DrawLine(x + 10 * direction, mid, x + 2 * direction, mid - 8, icon);
+            canvas.DrawLine(x + 10 * direction, mid, x + 2 * direction, mid + 8, icon);
+        }
+        canvas.DrawArc(new SKRect(118, mid - 11, 140, mid + 11), -60, 300, false, icon);
+        var field = new SKRect(170, 12, Width - 40, BrowserBarHeight - 12);
+        using (var white = new SKPaint { Color = SKColors.White, IsAntialias = true })
+            canvas.DrawRoundRect(field, field.Height / 2, field.Height / 2, white);
+        // Lock: shackle and body
+        var lx = field.Left + 26;
+        canvas.DrawArc(new SKRect(lx - 6, mid - 13, lx + 6, mid - 1), 180, 180, false, icon);
+        using (var body = new SKPaint { Color = new SKColor(0x5F, 0x63, 0x68), IsAntialias = true })
+            canvas.DrawRoundRect(new SKRect(lx - 9, mid - 5, lx + 9, mid + 9), 2, 2, body);
+        using var font = new SKFont(_regular, 26);
+        using var ink = new SKPaint { Color = new SKColor(0x20, 0x21, 0x24), IsAntialias = true };
+        canvas.DrawText(address, lx + 24, mid + 9, font, ink);
     }
 
     private void DrawBanner(SKCanvas canvas)

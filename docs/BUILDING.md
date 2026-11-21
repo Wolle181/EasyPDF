@@ -189,4 +189,5 @@ The build number is the number of commits, so the same change has a lower one in
 `branding/<id>/make-presentation-videos.cmd` records the introduction in German and English for that brand
 (`tools/DemoVideo`, drives the real app headless; ffmpeg is downloaded into a temp folder for the run) into
 `branding/<id>/videos/` (`introduction.de.mp4`, `introduction.en.mp4`); they are committed and shipped with the app
-(video button in the header).
+(video button in the header). With `--web` the tool records the web version into `branding/<id>/videos/web/`; the
+browser program puts those into the page (`wwwroot/videos/`), so they are part of the image (see branding/README.md).

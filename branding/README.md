@@ -28,7 +28,7 @@ After switching, build everything again (the installer scripts always do).
 | `Branding.props` | shown name (`AppDisplayName`), brand colours, publisher (`Company`, `Copyright`), About line (`AppAuthor`), installer ids (`MsiUpgradeCode`, `MacBundleId`), address of the web version (`WebAppUrl`, optional), `BrandWords`; every value is explained in `easypdf/Branding.props` |
 | `icons/` | `app.ico`, `app.icns`, `app-<size>.png`, written by `tools/icon/make_icon.py`; with a logo also `logo.png` (+ `logo-small.png`) and `header-logo.png`; `company-logo.svg`: the company logo in Help ▸ About (optional, drawn as vector graphics) |
 | `make-presentation-videos.cmd` | records the introduction videos of this brand (German and English) into `videos/` (Windows; downloads ffmpeg for the run), see [Presentation videos](#presentation-videos) |
-| `videos/` | `introduction.de.mp4`, `introduction.en.mp4`: shipped with the app (`videos/` next to the program), the video button in the header plays the one of the UI language with the system's video player; without videos the button is hidden |
+| `videos/` | `introduction.de.mp4`, `introduction.en.mp4`: shipped with the app (`videos/` next to the program), the video button in the header plays the one of the UI language with the system's video player; without videos the button is hidden. `videos/web/` holds those of the web version (same names; in the image with the page) |
 | `README.md` | what the brand is for, its look and where its design comes from |
 | anything else | the brand's own material, e.g. `easypdf/logos/` |
 
@@ -45,6 +45,13 @@ installed and run side by side. The technical name EasyPDF stays in projects and
 committed and shipped with the app: the build copies them to `videos/` next to the program, and the video button in the
 header plays the one of the UI language (else the English one). Record them again after visible changes of the user
 interface, then commit them. It builds from the working copy as it is, so run `git pull` first. ffmpeg is downloaded into a temp folder for the run and deleted afterwards.
+
+The web version has videos of its own in `videos/web/` (same names): its commands, dialogs as overlays and a browser bar
+with the brand's `WebAppUrl` above it; it shows upload by drag and drop, Share and the download of the desktop version.
+The script records them as well. They go into the web image with the page (`wwwroot/videos/`), so a new image always
+brings the videos that match its surface. On Linux, with ffmpeg at hand (libx264):
+`EASYPDF_BRAND=<id> dotnet run -c Release --project tools/DemoVideo -- --web --language de --ffmpeg <ffmpeg>` (and `en`;
+without `--web` the desktop videos).
 
 The dialogs for merging and splitting show the file paths, so the sample files go into a tidy folder,
 `Documents\Beispiele` (German) or `Documents\Samples` (English). The folder is created for the recording and deleted

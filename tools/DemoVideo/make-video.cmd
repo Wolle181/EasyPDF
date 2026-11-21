@@ -1,6 +1,7 @@
 @echo off
 SETLOCAL
-REM Records the demo video in German and English into branding\<id>\videos\introduction.<de|en>.mp4 (committed with the
+REM Records the demo video in German and English into branding\<id>\videos\introduction.<de|en>.mp4, and those of the web
+REM version into branding\<id>\videos\web\ (committed with the
 REM brand and shipped with the app: the button in the header plays it). ffmpeg is not installed: it is
 REM downloaded into a temporary folder, used and deleted again. Needs the .NET SDK. The brand is the one the build
 REM selects (EASYPDF_BRAND); branding\<id>\make-presentation-videos.cmd sets it and calls this.
@@ -40,6 +41,10 @@ ECHO Recording in German, this takes a few minutes...
 dotnet run -c Release --project DemoVideo.csproj -- --ffmpeg "%FFMPEG%" --language de || GOTO failed
 ECHO Recording in English, this takes a few minutes...
 dotnet run -c Release --project DemoVideo.csproj -- --ffmpeg "%FFMPEG%" --language en || GOTO failed
+ECHO Recording the web version in German...
+dotnet run -c Release --project DemoVideo.csproj -- --ffmpeg "%FFMPEG%" --language de --web || GOTO failed
+ECHO Recording the web version in English...
+dotnet run -c Release --project DemoVideo.csproj -- --ffmpeg "%FFMPEG%" --language en --web || GOTO failed
 
 RMDIR /S /Q "%WORK%"
 POPD
