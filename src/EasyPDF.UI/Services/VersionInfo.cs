@@ -42,6 +42,14 @@ public static class VersionInfo
         return plus < 0 ? informationalVersion : $"{informationalVersion[..plus]} ({informationalVersion[(plus + 1)..]})";
     }
 
+    /// <summary>Web version: how the server is deployed (from its configuration at start); null on the desktop or if unknown.</summary>
+    public static WebServerInfo? WebServer { get; set; }
+
+    /// <summary>Badge after the deployment time in Help &gt; About: "Containerized" or "Native" (web version only).</summary>
+    public static string? HostingBadge => PlatformFeatures.Current.IsWeb && WebServer is { } server
+        ? Localization.Loc.T(server.InContainer ? "InfoHostingContainer" : "InfoHostingNative")
+        : null;
+
     /// <summary>Label key (resources) and value pairs.</summary>
     public static IReadOnlyList<(string LabelKey, string Value)> Collect()
     {
@@ -67,7 +75,12 @@ public static class VersionInfo
             rows.Add(("InfoWebVersion", WebAppUrl));
         // In the browser there is no program file (no build date) and no text recognition yet
         if (PlatformFeatures.Current.IsWeb)
+        {
             rows.RemoveAll(r => r.Item1 is "InfoBuildDate" or "InfoOcr");
+            // Instead the server's deployment: when its image was built (the badge says whether it runs in a container)
+            if (WebServer is { } server)
+                rows.Insert(1, ("InfoDeployed", server.DeployedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture)));
+        }
         return rows;
     }
 
@@ -99,3 +112,6 @@ public static class VersionInfo
         }
     }
 }
+
+/// <summary>The web version's server: when it was deployed and whether it runs in a container.</summary>
+public sealed record WebServerInfo(DateTimeOffset DeployedAt, bool InContainer);

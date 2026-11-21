@@ -177,4 +177,79 @@ public class AttachmentTests
         Assert.True(dialog.FindControl<TextBlock>("CannotOpenText")!.IsVisible);
         dialog.Close();
     }
+
+    [AvaloniaFact]
+    public async Task OnTheWebTheInvoiceOpensInABrowserTabAndOtherFilesAreSaved()
+    {
+        using var dir = new TempDir();
+        var files = new FakeWebFiles();
+        PlatformFeatures.Current = PlatformFeatures.Web((_, _) => true);
+        PlatformFeatures.Files = files;
+        try
+        {
+            var (vm, dialogs) = await OpenAsync(dir.AttachmentPdf("a.pdf", ("notes.txt", Notes), ("factur-x.xml", Invoice)));
+
+            await vm.OpenEInvoiceCommand.ExecuteAsync(null);
+            Assert.Equal(["factur-x.xml"], files.Shown);
+            Assert.Empty(dialogs.OpenedFiles); // not a program of the system
+            Assert.Empty(dialogs.Errors);
+
+            files.Blocked = true;
+            await vm.OpenEInvoiceCommand.ExecuteAsync(null);
+            Assert.Single(dialogs.Errors); // the browser blocked the tab: the user is told how to allow it
+            await vm.ReleaseDocumentAsync();
+        }
+        finally
+        {
+            PlatformFeatures.Current = PlatformFeatures.Desktop;
+            PlatformFeatures.Files = new LocalPlatformFiles();
+        }
+    }
+
+    [AvaloniaFact]
+    public void OnTheWebTheDialogOpensXmlFilesAndSavesTheOthers()
+    {
+        PlatformFeatures.Current = PlatformFeatures.Web((_, _) => true);
+        try
+        {
+            var dialog = new AttachmentsDialog([new PdfAttachment(0, "photo.png", 4), new PdfAttachment(1, "factur-x.xml", 2048)]);
+            dialog.Show();
+            var list = dialog.FindControl<ListBox>("AttachmentList")!;
+            var open = dialog.FindControl<Button>("OpenButton")!;
+            var save = dialog.FindControl<Button>("SaveButton")!;
+
+            Assert.True(open.IsVisible && open.IsEnabled && open.IsDefault); // the invoice: shown in a tab
+            list.SelectedIndex = 0;
+            Assert.False(open.IsVisible); // a browser cannot open a picture in a program of the system: only Save
+            Assert.True(save.IsDefault);
+            Assert.False(dialog.FindControl<TextBlock>("CannotOpenText")!.IsVisible);
+            dialog.Close();
+        }
+        finally
+        {
+            PlatformFeatures.Current = PlatformFeatures.Desktop;
+        }
+    }
+
+    /// <summary>The web version's files: records which XML attachments are shown in a tab.</summary>
+    private sealed class FakeWebFiles : IPlatformFiles
+    {
+        public readonly System.Collections.Generic.List<string> Shown = [];
+        public bool Blocked;
+
+        public Task<bool> ShowXmlAttachmentAsync(IPdfSource source, PdfAttachment attachment)
+        {
+            if (!Blocked)
+                Shown.Add(attachment.Name);
+            return Task.FromResult(!Blocked);
+        }
+
+        public Task<string?> ToOpenPathAsync(Avalonia.Platform.Storage.IStorageFile file) => throw new System.NotSupportedException();
+        public string? ToSavePath(Avalonia.Platform.Storage.IStorageFile file) => throw new System.NotSupportedException();
+        public Task WriteAsync(string path, byte[] content) => throw new System.NotSupportedException();
+        public Task<bool> ShowForPrintingAsync(System.Collections.Generic.IReadOnlyList<EasyPDF.Core.Documents.PageEntry> pages, string name) =>
+            throw new System.NotSupportedException();
+        public Task<string> PrepareForSharingAsync(EasyPDF.Core.Documents.EditableDocument document, string name) => throw new System.NotSupportedException();
+        public Task<ShareOutcome> ShareAsync(string prepared, string name) => throw new System.NotSupportedException();
+    }
 }

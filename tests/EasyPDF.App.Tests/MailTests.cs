@@ -164,6 +164,7 @@ public class MailTests
         public string? ToSavePath(Avalonia.Platform.Storage.IStorageFile file) => throw new NotSupportedException();
         public Task WriteAsync(string path, byte[] content) => throw new NotSupportedException();
         public Task<bool> ShowForPrintingAsync(IReadOnlyList<EasyPDF.Core.Documents.PageEntry> pages, string name) => throw new NotSupportedException();
+        public Task<bool> ShowXmlAttachmentAsync(EasyPDF.Core.Pdfium.IPdfSource source, PdfAttachment attachment) => throw new NotSupportedException();
     }
 
     private static async Task<(MainViewModel Vm, FakeDialogs Dialogs, FakeMail Mail)> WebDocumentAsync(TempDir dir, IPlatformFiles files)

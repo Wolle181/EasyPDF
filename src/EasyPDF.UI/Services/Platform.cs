@@ -39,6 +39,12 @@ public interface IPlatformFiles
     /// Web version: hands the prepared PDF to the system's share sheet (which offers the email program, among others).
     /// </summary>
     Task<ShareOutcome> ShareAsync(string prepared, string name);
+
+    /// <summary>
+    /// Web version: shows an XML attachment (<see cref="EasyPDF.Core.Pdfium.PdfAttachment.IsXml"/>) as text in a new
+    /// browser tab. False if the browser blocked the tab. The desktop opens attachments in the system's program.
+    /// </summary>
+    Task<bool> ShowXmlAttachmentAsync(EasyPDF.Core.Pdfium.IPdfSource source, EasyPDF.Core.Pdfium.PdfAttachment attachment);
 }
 
 /// <summary>How handing a file to the system's share sheet ended.</summary>
@@ -68,6 +74,9 @@ public sealed class LocalPlatformFiles : IPlatformFiles
 
     public Task<ShareOutcome> ShareAsync(string prepared, string name) =>
         throw new NotSupportedException("The desktop program sends emails itself.");
+
+    public Task<bool> ShowXmlAttachmentAsync(EasyPDF.Core.Pdfium.IPdfSource source, EasyPDF.Core.Pdfium.PdfAttachment attachment) =>
+        throw new NotSupportedException("The desktop program opens attachments in the system's program.");
 }
 
 /// <summary>What the program runs on: the desktop program, or the web version with the subset of features it offers.</summary>

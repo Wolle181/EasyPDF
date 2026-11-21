@@ -243,6 +243,9 @@
   <data name="AboutTagline" xml:space="preserve"><value>Read and reorganize PDF documents</value></data>
   <data name="AboutCopy" xml:space="preserve"><value>Copy version info</value></data>
   <data name="InfoVersion" xml:space="preserve"><value>Version</value></data>
+  <data name="InfoDeployed" xml:space="preserve"><value>Deployed</value></data>
+  <data name="InfoHostingContainer" xml:space="preserve"><value>Containerized</value></data>
+  <data name="InfoHostingNative" xml:space="preserve"><value>Native</value></data>
   <data name="InfoBuildDate" xml:space="preserve"><value>Build date</value></data>
   <data name="InfoRuntime" xml:space="preserve"><value>.NET runtime</value></data>
   <data name="InfoOs" xml:space="preserve"><value>Operating system</value></data>
@@ -514,7 +517,7 @@
   <data name="BrandSubtitleWeb" xml:space="preserve"><value>Read, organize and combine PDFs – in the browser</value></data>
   <data name="InfoWebVersion" xml:space="preserve"><value>Web version</value></data>
   <data name="MsgPrintInBrowser" xml:space="preserve"><value>The document opened in a new tab: print it there with the browser's print button.</value></data>
-  <data name="ErrPrintTabBlocked" xml:space="preserve"><value>The browser blocked the new tab. Allow pop-ups for this page and try again.</value></data>
+  <data name="ErrTabBlocked" xml:space="preserve"><value>The browser blocked the new tab. Allow pop-ups for this page and try again.</value></data>
   <data name="LibraryExport" xml:space="preserve"><value>Export stamps and templates…</value></data>
   <data name="LibraryExportTip" xml:space="preserve"><value>Saves your own stamps and text templates as one ZIP file, as a backup or for another computer or browser.</value></data>
   <data name="LibraryExportFailed" xml:space="preserve"><value>The stamps and templates could not be saved.</value></data>

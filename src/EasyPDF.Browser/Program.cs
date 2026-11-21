@@ -24,7 +24,8 @@ internal static class Program
         // main.js passes the page's address: the API is next to it
         var page = new Uri(args.Length > 0 ? args[0] : "http://localhost/");
         var http = new HttpClient { BaseAddress = new Uri(page, "./") };
-        var files = new RemoteFiles(new RemoteApi(http));
+        var api = new RemoteApi(http);
+        var files = new RemoteFiles(api);
         var targets = new BrowserSaveTargets();
         PdfBackend.Current = new RemotePdfBackend(files, targets);
         PlatformFeatures.Files = new BrowserFiles(files, targets);
@@ -41,6 +42,15 @@ internal static class Program
             File.WriteAllText(AppSettings.DefaultPath, stored);
         }
         AppSettings.Saved += Interop.SaveSettings;
+        // When and how the server is deployed (Help > About)
+        try
+        {
+            var config = await api.GetConfigAsync();
+            VersionInfo.WebServer = new WebServerInfo(config.DeployedAt, config.InContainer);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or RemoteApiException or System.Text.Json.JsonException)
+        {
+        }
         // Stamps and templates: the user's own from the browser's storage, samples and shared ones from the server
         PlatformFeatures.Library = await BrowserLibrary.LoadAsync(http);
         // The brand's introduction videos that are next to the page (none: the video button stays hidden)

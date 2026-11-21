@@ -136,9 +136,11 @@ Start: `dotnet run --project src/EasyPDF.App -- <file.pdf>` or the published bui
 - [ ] Stamps: gallery with samples, "Shared" sections from `/volume1/docker/easypdf-web/shared/stamps`; place one, double-click → date dialog; New stamp… → editor, OK → in the gallery; right-click → Delete asks first
 - [ ] Stamps and templates survive reloading the page and closing the browser; Export… downloads a ZIP; in another browser Import… brings them back; a private window starts with the samples only
 - [ ] Templates: shared ones from `…/shared/templates` appear; an edited shared template is kept as the user's own
+- [ ] E-invoice PDF: "Open XML" in the bar (and Open in Attachments) shows the XML indented as text in a new tab; other attachments only Save
 - [ ] Placed text: the preview looks like the saved text (same width, Helvetica/Times/Courier)
 - [ ] Two browsers (or a private window) at the same time see only their own files; after 30 minutes idle a file is gone (the app reports it)
 - [ ] Settings: theme and language switch live and are kept after reloading
+- [ ] About: "Deployed" shows the time of the last container build, badge "Containerized" ("Native" with `dotnet run`)
 
 ## Installers
 - [ ] Two brands side by side (e.g. `installeruild-windows.cmd` and `installeruild-windows.cmd -Brand <id>`): both MSIs install next to each other, each with its own name, icon, colours, start menu entry, context menu and settings folder; both apps run at the same time, and "Read with" of one brand opens in that brand's window

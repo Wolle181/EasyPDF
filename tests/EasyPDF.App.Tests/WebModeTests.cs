@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -154,6 +155,37 @@ public class WebModeTests
             Assert.Contains(rows, r => r.LabelKey == "InfoWebVersion" && r.Value == VersionInfo.WebAppUrl);
         else
             Assert.DoesNotContain(rows, r => r.LabelKey == "InfoWebVersion");
+    }
+
+    [AvaloniaFact]
+    public void AboutShowsWhenTheServerWasDeployedAndWhetherInAContainer()
+    {
+        PlatformFeatures.Current = PlatformFeatures.Web((_, _) => true);
+        VersionInfo.WebServer = new WebServerInfo(new DateTimeOffset(2026, 11, 21, 13, 5, 0, TimeSpan.Zero), InContainer: true);
+        try
+        {
+            var deployed = new DateTimeOffset(2026, 11, 21, 13, 5, 0, TimeSpan.Zero).ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+            var view = new AboutView();
+            var window = new Window { Content = view };
+            window.Show();
+            var row = Assert.Single(((IEnumerable<AboutRow>)view.FindControl<ItemsControl>("InfoList")!.ItemsSource!), r => r.Value == deployed);
+            Assert.Equal(Loc.T("InfoDeployed"), row.Label);
+            Assert.Equal(Loc.T("InfoHostingContainer"), row.Badge);
+            Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), t => t.Text == row.Badge && t.IsEffectivelyVisible);
+            Assert.Contains($"{Loc.T("InfoDeployed")}: {deployed} ({Loc.T("InfoHostingContainer")})", AboutView.BuildText());
+
+            VersionInfo.WebServer = VersionInfo.WebServer with { InContainer = false };
+            Assert.Equal(Loc.T("InfoHostingNative"), VersionInfo.HostingBadge);
+            window.Close();
+        }
+        finally
+        {
+            PlatformFeatures.Current = PlatformFeatures.Desktop;
+            VersionInfo.WebServer = null;
+        }
+        // The desktop program shows its build date, no deployment
+        Assert.DoesNotContain(VersionInfo.Collect(), r => r.LabelKey == "InfoDeployed");
+        Assert.Null(VersionInfo.HostingBadge);
     }
 
     private static (Window Window, DialogLayer Layer) LayerWindow()

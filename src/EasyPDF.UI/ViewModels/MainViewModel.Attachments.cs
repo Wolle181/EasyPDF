@@ -104,13 +104,18 @@ public partial class MainViewModel
     [RelayCommand]
     private void DismissEInvoiceBar() => IsEInvoiceBarDismissed = true;
 
-    /// <summary>Writes the attachment to a temporary folder and opens it in the system's program (only harmless types).</summary>
+    /// <summary>
+    /// Writes the attachment to a temporary folder and opens it in the system's program (only harmless types). The web
+    /// version shows an XML file as text in a new browser tab and saves (downloads) the others.
+    /// </summary>
     private async Task OpenAttachmentAsync(PdfAttachment attachment)
     {
         if (PlatformFeatures.Current.IsWeb)
         {
-            // A browser cannot hand the file to a program of the system: it is saved (downloaded) instead
-            await SaveAttachmentAsync(attachment);
+            if (!attachment.IsXml || _attachmentSource is not { } remote)
+                await SaveAttachmentAsync(attachment);
+            else if (!await PlatformFeatures.Files.ShowXmlAttachmentAsync(remote, attachment))
+                await Dialogs.ShowErrorAsync(Loc.T("ErrTabBlocked"));
             return;
         }
         if (!attachment.CanOpen || _attachmentSource is not { } source)

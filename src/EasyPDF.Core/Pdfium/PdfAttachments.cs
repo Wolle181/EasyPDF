@@ -22,6 +22,9 @@ public sealed record PdfAttachment(int Index, string Name, long Size)
 
     /// <summary>Files that open in the system's program without risk (documents and pictures; no programs, scripts or macros).</summary>
     public bool CanOpen => PdfAttachments.OpenableExtensions.Contains(Path.GetExtension(SafeFileName), StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>An XML file (like the e-invoice): the web version shows it as text in a new browser tab.</summary>
+    public bool IsXml => string.Equals(Path.GetExtension(SafeFileName), ".xml", StringComparison.OrdinalIgnoreCase);
 }
 
 internal static class PdfAttachments

@@ -7,6 +7,7 @@ using Avalonia.Platform.Storage;
 using System.Collections.Generic;
 using EasyPDF.App.Services;
 using EasyPDF.Core.Documents;
+using EasyPDF.Core.Pdfium;
 using EasyPDF.Remote;
 
 namespace EasyPDF.Browser;
@@ -50,6 +51,9 @@ internal sealed class BrowserFiles(RemoteFiles files, BrowserSaveTargets targets
         var info = await files.Api.BuildAsync(request, CancellationToken.None);
         return $"api/files/{info.Id}/content";
     }
+
+    public Task<bool> ShowXmlAttachmentAsync(IPdfSource source, PdfAttachment attachment) =>
+        Task.FromResult(Interop.OpenTab($"api/files/{RemotePdfBackend.IdOf(source)}/attachments/{attachment.Index}?view=true"));
 
     public async Task<ShareOutcome> ShareAsync(string prepared, string name) =>
         await Interop.ShareFile(prepared, name, Path.GetFileNameWithoutExtension(name)) switch

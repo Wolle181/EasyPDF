@@ -245,6 +245,32 @@ public class ApiTests
     }
 
     [Fact]
+    public async Task ShowsXmlAttachmentsAsIndentedPlainText()
+    {
+        await using var server = await TestServerHost.StartAsync();
+        var browser = server.NewBrowser();
+        var path = Path.Combine(server.Folder, "with-invoice.pdf");
+        Directory.CreateDirectory(server.Folder);
+        var invoice = Encoding.UTF8.GetBytes("<?xml version=\"1.0\" encoding=\"UTF-8\"?><r:Invoice xmlns:r=\"urn:x\"><r:Id>Grüße</r:Id></r:Invoice>");
+        Core.Tests.TestPdf.WithAttachments(path, ("factur-x.xml", invoice), ("notes.txt", Encoding.UTF8.GetBytes("notes")));
+        var info = (await (await browser.UploadAsync(await File.ReadAllBytesAsync(path))).Content.ReadFromJsonAsync(RemoteJson.Default.RemoteFileInfo))!;
+        var list = (await (await browser.GetAsync($"/api/files/{info.Id}/attachments")).Content
+            .ReadFromJsonAsync(RemoteJson.Default.IReadOnlyListPdfAttachment))!;
+
+        var response = await browser.GetAsync($"/api/files/{info.Id}/attachments/{list.Single(a => a.IsXml).Index}?view=true");
+        response.EnsureSuccessStatusCode();
+        Assert.Equal("text/plain", response.Content.Headers.ContentType?.MediaType);
+        Assert.Null(response.Content.Headers.ContentDisposition); // shown in the tab, not downloaded
+        Assert.StartsWith("sandbox", response.Headers.GetValues("Content-Security-Policy").Single());
+        var text = await response.Content.ReadAsStringAsync();
+        Assert.Contains("\n  <r:Id>Grüße</r:Id>", text.ReplaceLineEndings("\n"));
+        Assert.Contains("encoding=\"UTF-8\"", text, StringComparison.OrdinalIgnoreCase);
+        // Only XML is shown this way
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await browser.GetAsync($"/api/files/{info.Id}/attachments/{list.Single(a => !a.IsXml).Index}?view=true")).StatusCode);
+    }
+
+    [Fact]
     public async Task BlankPageHasTheRequestedSize()
     {
         await using var server = await TestServerHost.StartAsync();
@@ -356,7 +382,19 @@ public class ApiTests
         var config = await (await server.NewBrowser().GetAsync("/api/config")).Content.ReadFromJsonAsync(RemoteJson.Default.ServerConfig);
         Assert.Equal("None", config!.AuthenticationMode);
         Assert.Equal(50L * 1024 * 1024, config.MaxUploadBytes);
+        // Help > About of the browser program: when the server was built, and whether it runs in a container
+        Assert.InRange(config.DeployedAt, DateTimeOffset.UtcNow.AddDays(-30), DateTimeOffset.UtcNow.AddMinutes(1));
+        Assert.Equal(ServerHosting.InContainer, config.InContainer);
     }
+
+    [Theory]
+    [InlineData("true", true)]
+    [InlineData("True", true)]
+    [InlineData("false", false)]
+    [InlineData("", false)]
+    [InlineData(null, false)]
+    public void TheContainerIsRecognizedByTheVariableOfTheDotnetImages(string? value, bool inContainer) =>
+        Assert.Equal(inContainer, ServerHosting.IsTrue(value));
 
     [Fact]
     public async Task ServesTheBrowserProgramWithFallbackToIndex()

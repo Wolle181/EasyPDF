@@ -21,7 +21,13 @@
         <DataTemplate x:DataType="dlg:AboutRow">
           <Grid ColumnDefinitions="140,*" Margin="0,2">
             <TextBlock Text="{Binding Label}" Opacity="0.7" />
-            <SelectableTextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap" />
+            <DockPanel Grid.Column="1">
+              <Border DockPanel.Dock="Right" Background="{DynamicResource Pill.Background}" CornerRadius="8" Padding="8,0" Margin="8,0,0,0"
+                      VerticalAlignment="Center" IsVisible="{Binding Badge, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <TextBlock Text="{Binding Badge}" FontSize="12" Foreground="{DynamicResource Pill.Foreground}" />
+              </Border>
+              <SelectableTextBlock Text="{Binding Value}" TextWrapping="Wrap" />
+            </DockPanel>
           </Grid>
         </DataTemplate>
       </ItemsControl.ItemTemplate>

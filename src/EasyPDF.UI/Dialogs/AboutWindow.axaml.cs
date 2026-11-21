@@ -8,7 +8,8 @@ using EasyPDF.App.Services;
 
 namespace EasyPDF.App.Dialogs;
 
-public sealed record AboutRow(string Label, string Value);
+/// <summary>A line of Help &gt; About; <paramref name="Badge"/> is shown as a pill after the value (deployment: container or native).</summary>
+public sealed record AboutRow(string Label, string Value, string? Badge = null);
 
 public partial class AboutView : DialogView
 {
@@ -17,7 +18,7 @@ public partial class AboutView : DialogView
         InitializeComponent();
         // The web version has no license folder next to it (the texts are in the repository)
         LicensesButton.IsVisible = !PlatformFeatures.Current.IsWeb;
-        InfoList.ItemsSource = VersionInfo.Collect().Select(i => new AboutRow(Loc.T(i.LabelKey), i.Value)).ToList();
+        InfoList.ItemsSource = VersionInfo.Collect().Select(i => new AboutRow(Loc.T(i.LabelKey), i.Value, BadgeOf(i.LabelKey))).ToList();
         ShowCompanyLogo(EasyPDF.App.Styles.BrandLogo.Company);
     }
 
@@ -30,9 +31,12 @@ public partial class AboutView : DialogView
         Avalonia.Automation.AutomationProperties.SetName(CompanyLogo, VersionInfo.Company);
     }
 
+    private static string? BadgeOf(string labelKey) => labelKey == "InfoDeployed" ? VersionInfo.HostingBadge : null;
+
     /// <summary>All details as plain text, for bug reports.</summary>
     public static string BuildText() =>
-        Loc.T("AppName") + "\n" + string.Join("\n", VersionInfo.Collect().Select(i => $"{Loc.T(i.LabelKey)}: {i.Value}"));
+        Loc.T("AppName") + "\n" + string.Join("\n", VersionInfo.Collect().Select(i =>
+            BadgeOf(i.LabelKey) is { } badge ? $"{Loc.T(i.LabelKey)}: {i.Value} ({badge})" : $"{Loc.T(i.LabelKey)}: {i.Value}"));
 
     private async void OnCopy(object? sender, RoutedEventArgs e)
     {

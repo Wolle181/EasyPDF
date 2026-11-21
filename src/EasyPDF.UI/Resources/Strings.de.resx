@@ -243,6 +243,9 @@
   <data name="AboutTagline" xml:space="preserve"><value>PDF-Dokumente lesen und neu ordnen</value></data>
   <data name="AboutCopy" xml:space="preserve"><value>Versionsinfo kopieren</value></data>
   <data name="InfoVersion" xml:space="preserve"><value>Version</value></data>
+  <data name="InfoDeployed" xml:space="preserve"><value>Bereitgestellt</value></data>
+  <data name="InfoHostingContainer" xml:space="preserve"><value>Containerized</value></data>
+  <data name="InfoHostingNative" xml:space="preserve"><value>Nativ</value></data>
   <data name="InfoBuildDate" xml:space="preserve"><value>Build-Datum</value></data>
   <data name="InfoRuntime" xml:space="preserve"><value>.NET-Laufzeit</value></data>
   <data name="InfoOs" xml:space="preserve"><value>Betriebssystem</value></data>
@@ -514,7 +517,7 @@
   <data name="BrandSubtitleWeb" xml:space="preserve"><value>PDFs lesen, ordnen und zusammenführen – im Browser</value></data>
   <data name="InfoWebVersion" xml:space="preserve"><value>Web-Version</value></data>
   <data name="MsgPrintInBrowser" xml:space="preserve"><value>Das Dokument wurde in einem neuen Tab geöffnet: dort mit der Drucktaste des Browsers drucken.</value></data>
-  <data name="ErrPrintTabBlocked" xml:space="preserve"><value>Der Browser hat den neuen Tab blockiert. Erlauben Sie Pop-ups für diese Seite und versuchen Sie es erneut.</value></data>
+  <data name="ErrTabBlocked" xml:space="preserve"><value>Der Browser hat den neuen Tab blockiert. Erlauben Sie Pop-ups für diese Seite und versuchen Sie es erneut.</value></data>
   <data name="LibraryExport" xml:space="preserve"><value>Stempel und Vorlagen exportieren…</value></data>
   <data name="LibraryExportTip" xml:space="preserve"><value>Speichert deine eigenen Stempel und Textvorlagen als eine ZIP-Datei, zur Sicherung oder für einen anderen Rechner oder Browser.</value></data>
   <data name="LibraryExportFailed" xml:space="preserve"><value>Die Stempel und Vorlagen konnten nicht gespeichert werden.</value></data>

@@ -1413,7 +1413,7 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
             if (shown)
                 ShowMessage(Loc.T("MsgPrintInBrowser"));
             else
-                await dialogs.ShowErrorAsync(Loc.T("ErrPrintTabBlocked"));
+                await dialogs.ShowErrorAsync(Loc.T("ErrTabBlocked"));
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {

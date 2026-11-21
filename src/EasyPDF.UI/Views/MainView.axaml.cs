@@ -129,10 +129,7 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
 
         AddHandler(DragDrop.DropEvent, OnDrop);
         if (PlatformFeatures.Current.IsWeb)
-        {
             BrandSubtitle.Text = Loc.T("BrandSubtitleWeb");
-            EInvoiceOpenButton.IsVisible = false; // a browser cannot open it in a program of the system: Save downloads it
-        }
         ZoomBox.LostFocus += (_, _) => _viewModel.ApplyZoomInputCommand.Execute(null);
         BuildMenuAndShortcuts();
         RebuildRecentFiles();

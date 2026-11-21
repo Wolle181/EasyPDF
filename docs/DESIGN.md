@@ -349,9 +349,14 @@ Mail, …), which opens a new message with the PDF attached. Offered only where 
 Browsers allow sharing only shortly after a click: if preparing took longer (`NotAllowedError`), a message says the
 attachment is ready and its OK click shares the already fetched file.
 
+**About on the web:** instead of the build date of a program file it shows when the server was deployed (`/api/config`:
+the time its program file was built, in the container the image build) with a badge "Containerized" or "Native"
+(`DOTNET_RUNNING_IN_CONTAINER`, set by the .NET images).
+
 **Intentionally not in the web version** (hidden): several windows (another browser tab does the same), recent files (the files on the server are
-temporary). Split writes the parts as one ZIP file (no folder to choose in a browser); attachments and the e-invoice are saved
-(downloaded), a browser cannot open them in a program of the system.
+temporary). Split writes the parts as one ZIP file (no folder to choose in a browser); attachments are saved
+(downloaded), a browser cannot open them in a program of the system; only XML files (the e-invoice) open, as indented plain
+text in a new tab (`/api/files/{id}/attachments/{n}?view=true`, under a sandbox CSP: nothing in the file runs).
 
 ## Stamps, text and templates
 

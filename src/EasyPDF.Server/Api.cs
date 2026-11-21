@@ -33,7 +33,7 @@ public static class Api
         {
             var o = options.Value;
             return Results.Json(new ServerConfig(o.Authentication.Mode.ToString(), o.Storage.MaxUploadBytes, o.Storage.IdleTimeoutMinutes,
-                o.Storage.MaxAgeHours), RemoteJson.Default.ServerConfig);
+                o.Storage.MaxAgeHours, ServerHosting.DeployedAt, ServerHosting.InContainer), RemoteJson.Default.ServerConfig);
         });
         // Sample stamps and the shared stamps and templates of the installation, as one ZIP (read at start of the program)
         api.MapGet("/library", (IOptions<ServerOptions> options) =>
@@ -208,16 +208,27 @@ public static class Api
         return Results.Json(await source.ListAttachmentsAsync(job.Token), RemoteJson.Default.IReadOnlyListPdfAttachment);
     }
 
-    private static async Task<IResult> AttachmentAsync(HttpContext context, string id, int index, FileStore files, OpenDocuments documents)
+    /// <summary>
+    /// An attachment as download; with <paramref name="view"/> an XML attachment as indented plain text to be read in a
+    /// browser tab (plain text and a sandbox: whatever the file contains, nothing in it runs).
+    /// </summary>
+    private static async Task<IResult> AttachmentAsync(HttpContext context, string id, int index, FileStore files, OpenDocuments documents,
+        bool view = false)
     {
         using var job = Job(context);
         var (_, source) = await OpenAsync(context, id, files, documents, job.Token);
         if (source == null)
             return NotFound();
         var list = await source.ListAttachmentsAsync(job.Token);
-        if (!list.Any(a => a.Index == index))
+        if (list.FirstOrDefault(a => a.Index == index) is not { } attachment)
             return NotFound();
-        return Results.Bytes(await source.ReadAttachmentAsync(index, job.Token), "application/octet-stream");
+        var content = await source.ReadAttachmentAsync(index, job.Token);
+        if (!view)
+            return Results.Bytes(content, "application/octet-stream");
+        if (!attachment.IsXml)
+            return Error(ApiErrors.Invalid, StatusCodes.Status400BadRequest);
+        context.Response.Headers.ContentSecurityPolicy = "sandbox; default-src 'none'";
+        return Results.Text(XmlText.Indented(content), "text/plain; charset=utf-8");
     }
 
     /// <summary>The PDF itself: as download, or with <paramref name="inline"/> to be shown in the browser's viewer (printing).</summary>

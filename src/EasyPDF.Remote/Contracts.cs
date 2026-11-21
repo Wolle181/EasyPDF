@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using EasyPDF.Core.Documents;
@@ -40,7 +41,10 @@ public sealed record SplitDocumentRequest(IReadOnlyList<RemotePage> Pages, IRead
 public sealed record BlankRequest(double Width, double Height);
 
 /// <summary>What the browser program needs to know about the server.</summary>
-public sealed record ServerConfig(string AuthenticationMode, long MaxUploadBytes, int IdleTimeoutMinutes, int MaxAgeHours);
+/// <param name="DeployedAt">When the server was built (in the container: when its image was built), shown in Help &gt; About.</param>
+/// <param name="InContainer">The server runs in a container (otherwise natively), shown in Help &gt; About.</param>
+public sealed record ServerConfig(string AuthenticationMode, long MaxUploadBytes, int IdleTimeoutMinutes, int MaxAgeHours,
+    DateTimeOffset DeployedAt, bool InContainer);
 
 /// <summary>An error the browser shows in the user's language: <see cref="Code"/> is one of <see cref="ApiErrors"/>.</summary>
 public sealed record ApiError(string Code);

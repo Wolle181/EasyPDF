@@ -48,18 +48,23 @@ public partial class AttachmentsDialogView : DialogView
     private void UpdateButtons()
     {
         var selected = Selected;
-        // The web version cannot hand a file to a program of the system: it only saves (downloads)
+        // The web version cannot hand a file to a program of the system: it shows XML files in a browser tab and saves
+        // (downloads) the others
         var web = PlatformFeatures.Current.IsWeb;
-        OpenButton.IsVisible = !web;
-        OpenButton.IsEnabled = selected is { CanOpen: true };
+        var canOpen = selected != null && CanOpen(selected);
+        OpenButton.IsVisible = !web || canOpen;
+        OpenButton.IsEnabled = canOpen;
+        OpenButton.IsDefault = canOpen;
         SaveButton.IsEnabled = selected != null;
-        SaveButton.IsDefault = web;
+        SaveButton.IsDefault = !canOpen;
         CannotOpenText.IsVisible = !web && selected is { CanOpen: false };
     }
 
+    private static bool CanOpen(PdfAttachment attachment) => PlatformFeatures.Current.IsWeb ? attachment.IsXml : attachment.CanOpen;
+
     private void Answer(AttachmentAction action)
     {
-        if (Selected is { } attachment && (action != AttachmentAction.Open || attachment.CanOpen))
+        if (Selected is { } attachment && (action != AttachmentAction.Open || CanOpen(attachment)))
             Close(new AttachmentChoice(attachment, action));
     }
 
@@ -70,7 +75,7 @@ public partial class AttachmentsDialogView : DialogView
     private void OnClose(object? sender, RoutedEventArgs e) => Close(null);
 
     private void OnDoubleTapped(object? sender, TappedEventArgs e) =>
-        Answer(PlatformFeatures.Current.IsWeb ? AttachmentAction.Save : AttachmentAction.Open);
+        Answer(Selected is { } attachment && CanOpen(attachment) ? AttachmentAction.Open : AttachmentAction.Save);
 }
 
 /// <summary>The dialog as a window (desktop).</summary>
