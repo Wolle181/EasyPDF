@@ -149,7 +149,7 @@ open the main file again → `FPDF_ImportPagesByIndex` for pages from other file
 - Add files (picker, multi-select) or drop them from the file manager into the list; Remove; reorder via Move up/down buttons and drag & drop inside the list; Sort by name.
 - Each row shows file name, folder and page count (read via PDFium on the worker when added; unreadable/password-protected files are marked red and block OK).
 - Checkbox **"Include current document"** (only if one is open, default on): adds it as a movable entry "(current document)" with its *current* edits.
-- Button **"Open documents"** (only if other windows have a document when the dialog opens): one click appends the documents of all other windows (named as in their title) that are not listed yet; unwanted ones are removed from the list (no menu, to keep it simple). An entry is a *copy* of that document as it is at that moment, with its unsaved edits (`EditableDocument.CopyAsync` opens its files again), so it does not depend on the other window staying open or unchanged. The row says "Open in another window" (and "with its unsaved changes" if it had any).
+- Button **"Open documents"** (only if other windows have a document when the dialog opens; web version: other browser tabs, see "Documents of other tabs on the web"): one click appends the documents of all other windows (named as in their title) that are not listed yet; unwanted ones are removed from the list (no menu, to keep it simple). An entry is a *copy* of that document as it is at that moment, with its unsaved edits (`EditableDocument.CopyAsync` opens its files again), so it does not depend on the other window staying open or unchanged. The row says "Open in another window" (and "with its unsaved changes" if it had any).
 - OK (needs ≥ 2 entries) → result opens as a **new, unsaved document** "Concatenated.pdf" in the viewer (= `EditableDocument` with several sources, so you can still reorder/rotate/delete before saving); Save asks for a file name (Save As). If the current document has unsaved changes and is *not* included, the unsaved-changes prompt comes first.
 - Saving: the first file in the list is the base for `PdfSaver` (its bookmarks are kept), the others are imported. Large files are not loaded into memory (streaming sources, `FPDF_SaveAsCopy`).
 - Difference to "Insert before/after": Insert adds files into the *open* document at a page; Concatenate builds a new document from a list of files.
@@ -360,6 +360,17 @@ packages are not in the image, so new installers need no new image (see BUILDING
 **About on the web:** instead of the build date of a program file it shows when the server was deployed (`/api/config`:
 the time its program file was built, in the container the image build) with a badge "Containerized" or "Native"
 (`DOTNET_RUNNING_IN_CONTAINER`, set by the .NET images).
+
+**Documents of other tabs on the web:** several windows are another browser tab each, every tab a program of its own,
+so the merge dialog's "Open documents" asks the other tabs of the same site instead (`IBrowserTabs`, `TabExchange` in
+`EasyPDF.Remote`, small JSON messages over the browser's `BroadcastChannel`, `interop.js`). When the dialog opens it asks
+"who has a document?" and shows the button if a tab answers within 300 ms. A click asks each tab for a copy: that tab has
+the server write its document as it is now, with its unsaved changes (`/api/build`, like Share), and hands back the new
+file. Tabs of one browser share the session cookie (with sign-in: the user), so the asking tab may open it; it owns it
+from then on (deleted when its entry or the merged document lets go of it; a copy that arrives after the asking tab gave
+up waiting is deleted right away). A tab that was closed or could not write its document gives a row marked as failed. A
+private window has a cookie of its own and is not reached (the channel is per browser profile anyway). Replace pages
+does not offer other tabs (yet).
 
 **Intentionally not in the web version** (hidden): several windows (another browser tab does the same), recent files (the files on the server are
 temporary). Split writes the parts as one ZIP file (no folder to choose in a browser); attachments are saved

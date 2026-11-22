@@ -29,6 +29,8 @@ public partial class ConcatenateDialogView : DialogView
         FileList.PointerCaptureLost += (_, _) => EndRowDrag();
         if (context.InitialFiles is { Count: > 0 } files)
             Shown += async (_, _) => await Model.AddFilesAsync(files);
+        if (context.OtherTabs != null)
+            Shown += async (_, _) => await Model.FindOtherTabsAsync();
         // Cancelled (or closed with [X]): release the opened files; on OK the caller owns them
         Closed += async (_, _) =>
         {

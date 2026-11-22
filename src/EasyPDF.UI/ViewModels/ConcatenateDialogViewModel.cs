@@ -15,7 +15,7 @@ namespace EasyPDF.App.ViewModels;
 
 /// <summary>
 /// One row of the concatenate list: a file (opened to count its pages), the current document or the document of another
-/// window (copied with its edits when it was added).
+/// window or browser tab (copied with its edits when it was added).
 /// </summary>
 public partial class ConcatItem(string? path, IPdfSource? source, int pageCount, string? error)
     : ObservableObject
@@ -31,7 +31,18 @@ public partial class ConcatItem(string? path, IPdfSource? source, int pageCount,
     public static ConcatItem FailedWindow(OpenDocumentInfo info) =>
         new(info.Document.FilePath, null, 0, Loc.T("ConcatWindowFailed")) { WindowName = info.Name, Origin = info.Document };
 
+    /// <summary>The entry for another browser tab's document: <paramref name="source"/> is the copy that tab wrote.</summary>
+    public static ConcatItem FromTab(TabDocumentInfo document, string path, IPdfSource source) =>
+        new(path, source, source.PageCount, null) { WindowName = document.Name, TabId = document.TabId, WasEdited = document.IsEdited };
+
+    /// <summary>Another browser tab's document that could not be copied (the tab was closed or could not write it).</summary>
+    public static ConcatItem FailedTab(TabDocumentInfo document) =>
+        new(null, null, 0, Loc.T("ConcatTabFailed")) { WindowName = document.Name, TabId = document.TabId };
+
     public bool IsCurrent { get; private init; }
+
+    /// <summary>The browser tab this entry was copied from; null for files, windows and the current document.</summary>
+    public string? TabId { get; private init; }
 
     /// <summary>The document of the other window this entry was taken from; null for files and the current document.</summary>
     public EditableDocument? Origin { get; private init; }
@@ -62,6 +73,7 @@ public partial class ConcatItem(string? path, IPdfSource? source, int pageCount,
     public string Name => IsCurrent ? Loc.T("ConcatCurrentDocument") : WindowName ?? System.IO.Path.GetFileName(Path) ?? "";
 
     public string Folder => IsCurrent ? ""
+        : TabId != null ? Loc.T(WasEdited ? "ConcatFromTabEdited" : "ConcatFromTab")
         : IsFromWindow ? Loc.T(WasEdited ? "ConcatFromWindowEdited" : "ConcatFromWindow")
         : Services.PlatformFeatures.Current.IsWeb ? "" // uploaded files have no folder of their own
         : System.IO.Path.GetDirectoryName(Path) ?? "";
@@ -86,12 +98,14 @@ public partial class ConcatenateDialogViewModel : ObservableObject
     private bool _includeCurrent;
 
     private readonly Func<IReadOnlyList<OpenDocumentInfo>>? _otherDocuments;
+    private readonly IBrowserTabs? _tabs;
 
     public ConcatenateDialogViewModel(ConcatenateContext context, int currentPageCount)
     {
         HasCurrentDocument = context.HasCurrentDocument;
         _otherDocuments = context.OtherDocuments;
-        HasOtherDocuments = OtherDocuments().Count > 0;
+        _tabs = context.OtherTabs;
+        _hasOtherDocuments = OtherDocuments().Count > 0;
         _currentPageCount = currentPageCount;
         IncludeCurrent = context.HasCurrentDocument;
         Items.CollectionChanged += (_, _) => Changed();
@@ -101,8 +115,19 @@ public partial class ConcatenateDialogViewModel : ObservableObject
 
     public bool HasCurrentDocument { get; }
 
-    /// <summary>Whether other windows had a document when the dialog opened (shows the "Open documents" button that adds them all).</summary>
-    public bool HasOtherDocuments { get; }
+    /// <summary>
+    /// Whether other windows had a document when the dialog opened, or other browser tabs answered with one (shows the
+    /// "Open documents" button that adds them all).
+    /// </summary>
+    [ObservableProperty]
+    private bool _hasOtherDocuments;
+
+    /// <summary>Web version: asks the other browser tabs whether they have a document (when the dialog is shown).</summary>
+    public async Task FindOtherTabsAsync()
+    {
+        if (_tabs != null && (await _tabs.OtherDocumentsAsync()).Count > 0)
+            HasOtherDocuments = true;
+    }
 
     /// <summary>The documents of the other windows right now (they can be opened or closed while the dialog is shown).</summary>
     public IReadOnlyList<OpenDocumentInfo> OtherDocuments() => _otherDocuments?.Invoke() ?? [];
@@ -166,14 +191,41 @@ public partial class ConcatenateDialogViewModel : ObservableObject
     }
 
     /// <summary>
-    /// The "Open documents" button: appends the documents of all other windows at once, except those already listed
-    /// (unwanted ones are removed from the list; a removed one comes back with the next click).
+    /// The "Open documents" button: appends the documents of all other windows (web version: browser tabs) at once, except
+    /// those already listed (unwanted ones are removed from the list; a removed one comes back with the next click).
     /// </summary>
     [RelayCommand]
     private async Task AddAllOpenDocumentsAsync()
     {
         foreach (var info in OtherDocuments())
             await AddOpenDocumentAsync(info);
+        if (_tabs != null)
+            foreach (var document in await _tabs.OtherDocumentsAsync())
+                await AddTabDocumentAsync(_tabs, document);
+    }
+
+    /// <summary>
+    /// Appends another browser tab's document as it is now: that tab has its document written as a new file (with its
+    /// unsaved changes), which this entry then owns.
+    /// </summary>
+    private async Task AddTabDocumentAsync(IBrowserTabs tabs, TabDocumentInfo document)
+    {
+        if (Items.Any(i => i.TabId == document.TabId))
+            return;
+        if (await tabs.CopyDocumentAsync(document) is not { } path)
+        {
+            Items.Add(ConcatItem.FailedTab(document));
+            return;
+        }
+        try
+        {
+            var source = await PdfBackend.Current.OpenAsync(path);
+            Items.Add(ConcatItem.FromTab(document, path, source));
+        }
+        catch (PdfOpenException)
+        {
+            Items.Add(ConcatItem.FailedTab(document));
+        }
     }
 
     public void Remove(ConcatItem? item)

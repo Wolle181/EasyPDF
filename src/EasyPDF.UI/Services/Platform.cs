@@ -108,6 +108,28 @@ public interface IUserLibrary
     Task<bool> ImportAsync(TopLevel host);
 }
 
+/// <summary>The document another browser tab of the web version has open.</summary>
+public sealed record TabDocumentInfo(string TabId, string Name, int PageCount, bool IsEdited);
+
+/// <summary>
+/// Web version: the documents of the other tabs of the same site in this browser (each tab is a program of its own, like
+/// a window on the desktop).
+/// </summary>
+public interface IBrowserTabs
+{
+    /// <summary>Lets the other tabs see and copy this tab's document (null: none).</summary>
+    void ShareDocument(Func<OpenDocumentInfo?> current);
+
+    /// <summary>The documents of the other tabs right now (asks them and waits briefly for their answers).</summary>
+    Task<IReadOnlyList<TabDocumentInfo>> OtherDocumentsAsync();
+
+    /// <summary>
+    /// Has the tab write its document as it is now (with its unsaved changes) and returns a path to open the copy with;
+    /// null if the tab is gone or could not write it.
+    /// </summary>
+    Task<string?> CopyDocumentAsync(TabDocumentInfo document);
+}
+
 public sealed class PlatformFeatures
 {
     private readonly Func<ViewModels.MainViewModel, ICommand, bool>? _available;
@@ -138,6 +160,9 @@ public sealed class PlatformFeatures
 
     /// <summary>The stamps and templates in the browser (web version); null on the desktop, where they are normal folders.</summary>
     public static IUserLibrary? Library { get; set; }
+
+    /// <summary>The other tabs of the web version; null on the desktop, where other documents are in other windows.</summary>
+    public static IBrowserTabs? Tabs { get; set; }
 
     public bool IsWeb { get; }
 

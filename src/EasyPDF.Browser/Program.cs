@@ -33,6 +33,7 @@ internal static class Program
         TextMetrics.EmbeddedFonts = "avares://EasyPDF.Browser/Assets/Fonts";
         PlatformFeatures.Current = WebCommands.Features;
         await Interop.LoadAsync();
+        PlatformFeatures.Tabs = BrowserTabs.TryCreate(files);
         Interop.SetTitle(AppInfo.Name);
         // Settings (theme, language) from the browser's storage into the file the program reads, and back after each change
         var stored = Interop.LoadSettings();

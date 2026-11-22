@@ -55,4 +55,15 @@ internal static partial class Interop
     [JSImport("shareFile", "interop")]
     [return: JSMarshalAs<JSType.Promise<JSType.String>>]
     public static partial Task<string> ShareFile(string url, string name, string title);
+
+    /// <summary>
+    /// Opens the channel to the other tabs of this site (BroadcastChannel) and calls <paramref name="receive"/> with each of
+    /// their messages; false if the browser has none.
+    /// </summary>
+    [JSImport("openTabChannel", "interop")]
+    public static partial bool OpenTabChannel([JSMarshalAs<JSType.Function<JSType.String>>] System.Action<string> receive);
+
+    /// <summary>Sends a message to all other tabs of this site.</summary>
+    [JSImport("postTabMessage", "interop")]
+    public static partial void PostTabMessage(string message);
 }

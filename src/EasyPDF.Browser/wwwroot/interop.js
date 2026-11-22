@@ -126,3 +126,19 @@ export async function shareFile(url, name, title) {
         throw e;
     }
 }
+
+// The other tabs of this site in this browser (Concatenate: "Open documents"): the program exchanges small JSON messages
+// with them. A BroadcastChannel reaches all tabs of the same origin except the sending one.
+let tabChannel = null;
+
+export function openTabChannel(receive) {
+    if (typeof BroadcastChannel === 'undefined')
+        return false;
+    tabChannel = new BroadcastChannel('documents');
+    tabChannel.onmessage = e => { if (typeof e.data === 'string') receive(e.data); };
+    return true;
+}
+
+export function postTabMessage(message) {
+    tabChannel?.postMessage(message);
+}

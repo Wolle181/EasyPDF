@@ -46,8 +46,9 @@ public sealed record SplitRequest(IReadOnlyList<EasyPDF.Core.Documents.SplitPart
 /// <param name="HasCurrentDocument">Whether the open document can be included as an entry.</param>
 /// <param name="InitialFiles">Files listed right away, in this order (e.g. several PDFs given on the command line).</param>
 /// <param name="OtherDocuments">The documents of the other windows at the moment of asking; null without several windows (tests).</param>
+/// <param name="OtherTabs">Web version: the other browser tabs, whose documents can be added like those of other windows.</param>
 public sealed record ConcatenateContext(bool HasCurrentDocument, IReadOnlyList<string>? InitialFiles = null,
-    Func<IReadOnlyList<OpenDocumentInfo>>? OtherDocuments = null);
+    Func<IReadOnlyList<OpenDocumentInfo>>? OtherDocuments = null, IBrowserTabs? OtherTabs = null);
 
 /// <param name="Name">Shown name (as in the window title).</param>
 /// <param name="Document">The window's document; not owned, it is copied when added to the list.</param>

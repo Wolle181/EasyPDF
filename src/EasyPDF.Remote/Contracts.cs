@@ -81,4 +81,5 @@ public static class ApiHeaders
 [JsonSerializable(typeof(IReadOnlyList<OcrWord>))]
 [JsonSerializable(typeof(IReadOnlyList<PdfAttachment>))]
 [JsonSerializable(typeof(int))]
+[JsonSerializable(typeof(TabMessage))]
 public sealed partial class RemoteJson : JsonSerializerContext;

@@ -103,7 +103,11 @@ public class App : Application
                     TrySave(settings);
                 library.Changed();
             }
-            single.MainView = new MainView(settings);
+            var view = new MainView(settings);
+            single.MainView = view;
+            // The other tabs of this site can add this tab's document to theirs (Concatenate: "Open documents")
+            Services.PlatformFeatures.Tabs?.ShareDocument(() => view.ViewModel.Document is { } document
+                ? new Services.OpenDocumentInfo(view.ViewModel.DocumentName, document) : null);
         }
         base.OnFrameworkInitializationCompleted();
     }

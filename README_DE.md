@@ -64,7 +64,7 @@ werden beide pro Marke mit `branding/<id>/make-presentation-videos.cmd`.
 
 ### Web-Version
 Dieselbe Oberfläche läuft auch **im Browser** (WebAssembly), mit Drag & Drop von Seiten und von Dateien vom Desktop:
-öffnen, lesen, Seiten ordnen, drehen, löschen und einfügen, Dateien zusammenführen, Seiten extrahieren, ein Dokument
+öffnen, lesen, Seiten ordnen, drehen, löschen und einfügen, Dateien zusammenführen (auch mit den in anderen Tabs geöffneten Dokumenten, samt ungespeicherter Änderungen), Seiten extrahieren, ein Dokument
 teilen (ZIP) und das Ergebnis herunterladen. Die PDFs verarbeitet ein Server im Container (pdfium), dort liegen sie nur vorübergehend (30 Minuten nach
 der letzten Nutzung, höchstens 8 Stunden). Ohne Anmeldung für den privaten Gebrauch oder mit Single Sign-on (OpenID
 Connect: Keycloak, Entra ID, …) im Unternehmen; Bauen und Betrieb in [docs/BUILDING.md](docs/BUILDING.md#web-version-container).

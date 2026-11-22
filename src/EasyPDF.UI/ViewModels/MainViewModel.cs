@@ -1686,7 +1686,8 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
     private async Task ConcatenateFilesAsync(IReadOnlyList<string> initialFiles)
     {
         var otherDocuments = windows == null ? null : (Func<IReadOnlyList<OpenDocumentInfo>>)(() => windows.OtherDocuments(this));
-        var result = await dialogs.ShowConcatenateDialogAsync(new ConcatenateContext(HasDocument, initialFiles, otherDocuments));
+        var result = await dialogs.ShowConcatenateDialogAsync(new ConcatenateContext(HasDocument, initialFiles, otherDocuments,
+            Services.PlatformFeatures.Tabs));
         if (result == null)
             return;
 
