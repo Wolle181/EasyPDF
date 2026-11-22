@@ -372,6 +372,17 @@ public class ApiTests
     }
 
     [Fact]
+    public async Task HttpsResponsesCarryHstsForOneYear()
+    {
+        await using var server = await TestServerHost.StartAsync();
+        var client = new HttpClient(server.Handler) { BaseAddress = new Uri("https://pdf.example.org") };
+        var response = await client.GetAsync("/health");
+        Assert.Equal("max-age=31536000", response.Headers.GetValues("Strict-Transport-Security").Single());
+        // Not over plain HTTP (the browser would ignore it there anyway)
+        Assert.False((await server.NewBrowser().GetAsync("/health")).Headers.Contains("Strict-Transport-Security"));
+    }
+
+    [Fact]
     public async Task SingleSignOnModeNeedsASignedInUser()
     {
         await using var server = await TestServerHost.StartAsync(("Web:Authentication:Mode", "Oidc"),

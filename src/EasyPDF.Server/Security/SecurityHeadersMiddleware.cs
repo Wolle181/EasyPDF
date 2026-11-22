@@ -9,7 +9,8 @@ namespace EasyPDF.Server.Security;
 /// <c>X-Content-Type-Options</c>, <c>Referrer-Policy</c>, <c>Permissions-Policy</c> and a <c>Content-Security-Policy</c>.
 ///
 /// They come from the app, not from the reverse proxy: on a Synology the proxy's "custom headers" only apply to the
-/// request to the app, not to the response. HSTS and <c>X-Frame-Options</c> are set by the proxy (DSM) already.
+/// request to the app, not to the response. HSTS (one year) comes from <c>UseHsts</c> in <c>Program</c>;
+/// <c>X-Frame-Options</c> is not needed, the CSP's <c>frame-ancestors 'self'</c> takes its place in current browsers.
 ///
 /// The CSP allows only resources from the own host. The browser program is .NET WebAssembly, which needs
 /// <c>'wasm-unsafe-eval'</c> (compiling WebAssembly, not JavaScript <c>eval</c>); inline scripts are not allowed at all.

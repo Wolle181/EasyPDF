@@ -317,7 +317,7 @@ session takes its files with it. In mode `None` the browser keeps settings, stam
 
 **Hardening** (as in the other web apps on the same host): security headers from the app (`SecurityHeadersMiddleware`:
 CSP `default-src 'self'` with `'wasm-unsafe-eval'` only, no inline scripts; `nosniff`, `Referrer-Policy`,
-`Permissions-Policy`; HSTS and `X-Frame-Options` from the reverse proxy); `X-Forwarded-*` only from loopback, the container
+`Permissions-Policy`; `frame-ancestors 'self'` instead of `X-Frame-Options`; HSTS for one year from the app itself, `UseHsts`); `X-Forwarded-*` only from loopback, the container
 gateway (read from `/proc/net/route`) and configured proxies; changing requests need the header `X-App-Request` (CSRF; no
 CORS); rate limits per client address (all API requests, uploads/writes); upload, per-owner and total quotas; render size
 limit; a time limit per pdfium job; no details in error responses, no file names in the log; no server header; Kestrel

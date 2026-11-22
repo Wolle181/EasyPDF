@@ -93,6 +93,10 @@ public static class Program
                 RateLimitPartition.GetFixedWindowLimiter(ClientKey(context), _ => Window(options.RateLimits.UploadsPerMinute)));
         });
 
+        // HSTS from the app itself, so it also holds behind a proxy that sets none: one year (the default is 30 days), renewed
+        // with every HTTPS response; not for localhost and not over plain HTTP (ASP.NET Core leaves these out)
+        builder.Services.AddHsts(hsts => hsts.MaxAge = TimeSpan.FromDays(365));
+
         if (options.Authentication.Mode == AuthenticationMode.Oidc)
             AddSingleSignOn(builder.Services, options.Authentication);
 
