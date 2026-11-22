@@ -129,7 +129,7 @@ Start: `dotnet run --project src/EasyPDF.App -- <file.pdf>` or the published bui
 - [ ] macOS (Apple Silicon, macOS 14+) and Linux: recognition works in the installed app (ONNX Runtime is found; the CI runs the OCR tests on both)
 
 ## Web version (real browsers: Chrome/Edge, Firefox, Safari)
-- [ ] First visit: the splash shows, then the app; dropping a PDF from the desktop opens it (progress for big files); a ~50 MB file passes the reverse proxy
+- [ ] First visit (empty cache, throttled network in the developer tools): the splash shows a spinner, "Loading … n %" with a bar in the language of the settings or the browser, then "Starting …", then the app; dropping a PDF from the desktop opens it (progress for big files); a ~50 MB file passes the reverse proxy
 - [ ] Organize: drag pages, rotate, delete, undo/redo; Save as… downloads (Chrome/Edge: save dialog of the system) and the file opens in the desktop app as edited
 - [ ] Print: a new tab shows the PDF; the browser's print dialog prints it (a popup blocker shows a hint instead)
 - [ ] Share (button "Share" with the three-dot icon; Windows Chrome/Edge, macOS Safari/Chrome, phone): the share sheet opens, the email program shows a new message with the PDF attached under the document's name; a big file first shows "document is ready", OK opens the share sheet; on Linux and in Firefox a message says the browser cannot share files and Save as follows

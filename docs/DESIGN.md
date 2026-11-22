@@ -361,6 +361,13 @@ packages are not in the image, so new installers need no new image (see BUILDING
 the time its program file was built, in the container the image build) with a badge "Containerized" or "Native"
 (`DOTNET_RUNNING_IN_CONTAINER`, set by the .NET images).
 
+**Start on the web:** the first visit downloads about 6.7 MB (Brotli; 25 MB unpacked: the .NET runtime with Skia and
+HarfBuzz is 2.7 MB of it, then CoreLib, Avalonia, the program; the ICU data of only one culture group is loaded). Until the
+program shows itself the page has a splash (`index.html`, `main.js`): spinner, "Loading … n %" with a bar from the
+runtime's `onDownloadResourceProgress` (counts files, not bytes), then "Starting …" while .NET starts and the program asks
+the server for its configuration, library and videos. Its language is the one of the settings in `localStorage`,
+otherwise the browser's. The splash lies above the program's canvas and goes once the program has started.
+
 **Documents of other tabs on the web:** several windows are another browser tab each, every tab a program of its own,
 so the merge dialog's "Open documents" asks the other tabs of the same site instead (`IBrowserTabs`, `TabExchange` in
 `EasyPDF.Remote`, small JSON messages over the browser's `BroadcastChannel`, `interop.js`). When the dialog opens it asks
