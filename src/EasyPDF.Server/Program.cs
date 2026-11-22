@@ -131,18 +131,29 @@ public static class Program
         app.UseMiddleware<OwnerMiddleware>();
         Api.Map(app);
 
-        // The browser program (published .NET WebAssembly); precompressed files (.br) where the browser accepts them
+        // The browser program (published .NET WebAssembly); precompressed files (.br) where the browser accepts them; cached
+        // as StaticCaching says (files with a content hash in the name for a month, the others asked for every time)
         var webRoot = string.IsNullOrEmpty(options.WebRoot) ? Path.Combine(AppContext.BaseDirectory, "wwwroot") : options.WebRoot;
         if (Directory.Exists(webRoot))
         {
             var files = new PhysicalFileProvider(webRoot);
             app.UseMiddleware<PrecompressedFilesMiddleware>(files);
             app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = files });
-            app.UseStaticFiles(new StaticFileOptions { FileProvider = files, ContentTypeProvider = StaticContentTypes.Provider });
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = files,
+                ContentTypeProvider = StaticContentTypes.Provider,
+                OnPrepareResponse = c => c.Context.Response.Headers.CacheControl = StaticCaching.CacheControlFor(c.Context.Request.Path.Value ?? ""),
+            });
             app.MapFallback(async context =>
             {
+                // Also "/" itself: the fallback endpoint takes it before the static files
+                var index = files.GetFileInfo("index.html");
+                context.Response.Headers.CacheControl = StaticCaching.Revalidate;
+                if (StaticCaching.AnswerIfNotModified(context, index, "i"))
+                    return;
                 context.Response.ContentType = "text/html; charset=utf-8";
-                await context.Response.SendFileAsync(files.GetFileInfo("index.html"));
+                await context.Response.SendFileAsync(index);
             });
         }
         else

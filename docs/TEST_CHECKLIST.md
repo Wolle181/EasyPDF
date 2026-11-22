@@ -138,6 +138,7 @@ Start: `dotnet run --project src/EasyPDF.App -- <file.pdf>` or the published bui
 - [ ] Templates: shared ones from `…/shared/templates` appear; an edited shared template is kept as the user's own
 - [ ] E-invoice PDF: "Open XML" in the bar (and Open in Attachments) shows the XML indented as text in a new tab; other attachments only Save
 - [ ] Placed text: the preview looks like the saved text (same width, Helvetica/Times/Courier)
+- [ ] Caching: reload the page with the developer tools open (network, not "Disable cache"): the `_framework/*.<hash>.wasm` files come from the cache ("cached"/"disk cache"), `index.html` and `dotnet.js` answer 304; after deploying a new image the app shows the new version on the next reload
 - [ ] Merge with other tabs: open two tabs of the app, a PDF in each, edit one (rotate/delete a page, unsaved); in the other tab Merge PDFs shows "Open documents", a click adds the edited one ("Open in another tab (with its unsaved changes)") and a second click adds nothing; OK gives the combined document with the edits; closing the other tab before the click gives no row; with only one tab the button is hidden
 - [ ] Replace pages with other tabs: with a PDF in another tab the dialog lists it (preselected) after a moment; OK puts its pages, with that tab's unsaved edits, in place of the chosen ones; with only one tab only "File" is offered
 - [ ] Two browsers (or a private window) at the same time see only their own files; after 30 minutes idle a file is gone (the app reports it)

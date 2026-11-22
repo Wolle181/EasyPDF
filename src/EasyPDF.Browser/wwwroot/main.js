@@ -25,7 +25,9 @@ let builder = dotnet
     .withDiagnosticTracing(false)
     // The runtime loads only the satellite assemblies of the start culture; switching the language in the settings
     // needs the others too (otherwise the texts stay in the fallback language)
-    .withConfig({ loadAllSatelliteResources: true });
+    // The files are named after their content and the server lets the browser keep them for a month (StaticCaching): the
+    // runtime's default "no-cache" fetching would ask the server for every one of them on each visit
+    .withConfig({ loadAllSatelliteResources: true, disableNoCacheFetch: true });
 if (typeof builder.withModuleConfig === 'function')
     builder = builder.withModuleConfig({
         onDownloadResourceProgress: (loaded, total) => {

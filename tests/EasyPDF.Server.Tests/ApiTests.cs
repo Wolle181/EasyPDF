@@ -418,6 +418,61 @@ public class ApiTests
     }
 
     [Fact]
+    public async Task FilesNamedAfterTheirContentAreCachedForAMonthAndTheOthersRevalidated()
+    {
+        await using var probe = await TestServerHost.StartAsync();
+        var root = Path.Combine(probe.Folder, "site");
+        Directory.CreateDirectory(Path.Combine(root, "_framework", "de"));
+        await File.WriteAllTextAsync(Path.Combine(root, "index.html"), "<html>app</html>");
+        await File.WriteAllTextAsync(Path.Combine(root, "main.js"), "// main");
+        await File.WriteAllTextAsync(Path.Combine(root, "_framework", "dotnet.js"), "// boot");
+        await File.WriteAllTextAsync(Path.Combine(root, "_framework", "avalonia.js"), "// no hash");
+        await File.WriteAllBytesAsync(Path.Combine(root, "_framework", "App.a1b2c3d4e5.wasm"), [0, 0x61, 0x73, 0x6d]);
+        await File.WriteAllBytesAsync(Path.Combine(root, "_framework", "App.a1b2c3d4e5.wasm.br"), [1, 2, 3]);
+        await File.WriteAllBytesAsync(Path.Combine(root, "_framework", "de", "App.resources.0z9y8x7w6v.wasm"), [0, 0x61, 0x73, 0x6d]);
+        await using var server = await TestServerHostWithRoot(root);
+        var browser = server.NewBrowser();
+
+        async Task<HttpResponseMessage> Get(string url, bool brotli = false, string? etag = null)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            if (brotli)
+                request.Headers.Add("Accept-Encoding", "br");
+            if (etag != null)
+                request.Headers.Add("If-None-Match", etag);
+            return await browser.SendAsync(request);
+        }
+
+        var month = "public, max-age=2592000, immutable";
+        foreach (var brotli in new[] { false, true })
+        {
+            var hashed = await Get("/_framework/App.a1b2c3d4e5.wasm", brotli);
+            Assert.Equal(HttpStatusCode.OK, hashed.StatusCode);
+            Assert.Equal(month, hashed.Headers.CacheControl!.ToString());
+            Assert.Equal(brotli, hashed.Content.Headers.ContentEncoding.Contains("br"));
+            Assert.Equal(brotli ? 3 : 4, (await hashed.Content.ReadAsByteArrayAsync()).Length);
+            var again = await Get("/_framework/App.a1b2c3d4e5.wasm", brotli, hashed.Headers.ETag!.ToString());
+            Assert.Equal(HttpStatusCode.NotModified, again.StatusCode);
+        }
+        Assert.Equal(month, (await Get("/_framework/de/App.resources.0z9y8x7w6v.wasm")).Headers.CacheControl!.ToString());
+
+        // Names that stay the same across versions: asked for every time, "not modified" while unchanged
+        foreach (var url in new[] { "/_framework/dotnet.js", "/_framework/avalonia.js", "/main.js", "/" })
+        {
+            var response = await Get(url);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.True(response.Headers.CacheControl!.NoCache, url);
+            Assert.Null(response.Headers.CacheControl.MaxAge);
+            Assert.True(response.Headers.ETag != null, url);
+            Assert.Equal(HttpStatusCode.NotModified, (await Get(url, etag: response.Headers.ETag!.ToString())).StatusCode);
+        }
+        Assert.True((await Get("/some/deep/link")).Headers.CacheControl!.NoCache);
+
+        // A new version (another hash) is another file: the old name is gone, nothing stale can be served under it
+        Assert.Equal(HttpStatusCode.NotFound, (await Get("/_framework/App.ffffffffff.wasm")).StatusCode);
+    }
+
+    [Fact]
     public async Task LibraryHasTheSampleStampsAndTheSharedStampsAndTemplates()
     {
         await using var probe = await TestServerHost.StartAsync();

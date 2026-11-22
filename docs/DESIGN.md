@@ -368,6 +368,16 @@ runtime's `onDownloadResourceProgress` (counts files, not bytes), then "Starting
 the server for its configuration, library and videos. Its language is the one of the settings in `localStorage`,
 otherwise the browser's. The splash lies above the program's canvas and goes once the program has started.
 
+**Caching on the web** (`StaticCaching`): the publish names every file of `_framework/` after a hash of its content
+(`System.Text.Json.aucta6todm.wasm`), so a new .NET version or a change of the app gives changed files new names. Those
+files are sent with `Cache-Control: public, max-age=2592000, immutable`: the browser keeps them for 30 days without
+asking, afterwards it asks again (ETag) or loads them anew. Files whose names stay across versions (`index.html`, also as
+the fallback for deep links, `_framework/dotnet.js` with the list of the hashed names, `main.js`, `interop.js`, styles,
+Avalonia's scripts, videos) get `no-cache`: the browser asks every time and gets "not modified" (304) while they are
+unchanged, so a new version is picked up on the next visit. The precompressed `.br` copies have ETags of their own. The
+.NET runtime fetches its files with `cache: "no-cache"` by default, which would ask for each of them on every visit;
+`main.js` turns that off (`disableNoCacheFetch`), the integrity check against the hashes stays on.
+
 **Documents of other tabs on the web:** several windows are another browser tab each, every tab a program of its own,
 so the merge dialog's "Open documents" asks the other tabs of the same site instead (`IBrowserTabs`, `TabExchange` in
 `EasyPDF.Remote`, small JSON messages over the browser's `BroadcastChannel`, `interop.js`). When the dialog opens it asks
