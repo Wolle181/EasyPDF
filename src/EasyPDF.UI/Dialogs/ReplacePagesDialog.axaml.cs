@@ -18,6 +18,8 @@ public partial class ReplacePagesDialogView : DialogView
     public ReplacePagesDialogView(ReplacePagesContext context) : this()
     {
         DataContext = new ReplacePagesDialogViewModel(context);
+        if (context.OtherTabs != null)
+            Shown += async (_, _) => await Model.FindOtherTabsAsync();
         // A chosen file that is not used (Cancel, [X], another choice) is closed again
         Closed += async (_, _) =>
         {

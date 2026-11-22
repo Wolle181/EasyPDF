@@ -185,7 +185,8 @@
   <data name="ConcatWindowFailed" xml:space="preserve"><value>Dateien nicht lesbar</value></data>
   <data name="ConcatFromTab" xml:space="preserve"><value>In einem anderen Tab geöffnet</value></data>
   <data name="ConcatFromTabEdited" xml:space="preserve"><value>In einem anderen Tab geöffnet (mit nicht gespeicherten Änderungen)</value></data>
-  <data name="ConcatTabFailed" xml:space="preserve"><value>Der andere Tab hat es nicht übergeben</value></data>
+  <data name="TabCopyFailed" xml:space="preserve"><value>Der andere Tab hat sein Dokument nicht übergeben</value></data>
+  <data name="TabDocumentChanged" xml:space="preserve"><value>Das Dokument im anderen Tab hat sich inzwischen geändert: bitte die einzufügenden Seiten prüfen</value></data>
   <data name="MenuFile" xml:space="preserve"><value>Datei</value></data>
   <data name="MenuEdit" xml:space="preserve"><value>Bearbeiten</value></data>
   <data name="MenuView" xml:space="preserve"><value>Ansicht</value></data>

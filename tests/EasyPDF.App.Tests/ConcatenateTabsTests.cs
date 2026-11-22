@@ -20,23 +20,6 @@ namespace EasyPDF.App.Tests;
 /// <summary>Web version: the Concatenate dialog adds the documents of the other browser tabs (like other windows on the desktop).</summary>
 public class ConcatenateTabsTests
 {
-    /// <summary>Other tabs: each document's copy is a file, or null for a tab that does not hand it over.</summary>
-    private sealed class FakeTabs(params (TabDocumentInfo Document, string? Copy)[] tabs) : IBrowserTabs
-    {
-        public int Copies { get; private set; }
-
-        public void ShareDocument(Func<OpenDocumentInfo?> current) { }
-
-        public Task<IReadOnlyList<TabDocumentInfo>> OtherDocumentsAsync() =>
-            Task.FromResult<IReadOnlyList<TabDocumentInfo>>([.. tabs.Select(t => t.Document)]);
-
-        public Task<string?> CopyDocumentAsync(TabDocumentInfo document)
-        {
-            Copies++;
-            return Task.FromResult(tabs.Single(t => t.Document == document).Copy);
-        }
-    }
-
     private static async Task Pump(int ms = 300)
     {
         var until = DateTime.UtcNow.AddMilliseconds(ms);
@@ -51,7 +34,7 @@ public class ConcatenateTabsTests
     public async Task TheDocumentsOfOtherTabsAreAddedOnceAndAFailedOneIsMarked()
     {
         using var dir = new TempDir();
-        var tabs = new FakeTabs((new TabDocumentInfo("t1", "b.pdf", 3, true), dir.Pdf("copy-b.pdf", 3)),
+        var tabs = new FakeBrowserTabs((new TabDocumentInfo("t1", "b.pdf", 3, true), dir.Pdf("copy-b.pdf", 3)),
             (new TabDocumentInfo("t2", "c.pdf", 2, false), null));
         var vm = new ConcatenateDialogViewModel(new ConcatenateContext(true, OtherTabs: tabs), 1);
         Assert.False(vm.HasOtherDocuments);                          // known only once the tabs answered
@@ -64,7 +47,7 @@ public class ConcatenateTabsTests
         Assert.Equal(new[] { Loc.T("ConcatCurrentDocument"), "b.pdf", "c.pdf" }, vm.Items.Select(i => i.Name).ToArray());
         Assert.Equal(Loc.T("ConcatFromTabEdited"), vm.Items[1].Folder);
         Assert.Equal(3, vm.Items[1].PageCount);
-        Assert.Equal(Loc.T("ConcatTabFailed"), vm.Items[2].Error);
+        Assert.Equal(Loc.T("TabCopyFailed"), vm.Items[2].Error);
         Assert.False(vm.IsValid);
 
         vm.Remove(vm.Items[2]);
@@ -78,7 +61,7 @@ public class ConcatenateTabsTests
     [Fact]
     public async Task WithoutDocumentsInOtherTabsTheButtonStaysHidden()
     {
-        var vm = new ConcatenateDialogViewModel(new ConcatenateContext(true, OtherTabs: new FakeTabs()), 1);
+        var vm = new ConcatenateDialogViewModel(new ConcatenateContext(true, OtherTabs: new FakeBrowserTabs()), 1);
         await vm.FindOtherTabsAsync();
         Assert.False(vm.HasOtherDocuments);
     }
@@ -87,7 +70,7 @@ public class ConcatenateTabsTests
     public async Task TheOverlayShowsTheButtonWhenOtherTabsHaveADocumentAndAddsItOnClick()
     {
         using var dir = new TempDir();
-        var tabs = new FakeTabs((new TabDocumentInfo("t1", "b.pdf", 2, false), dir.Pdf("copy-b.pdf", 2)));
+        var tabs = new FakeBrowserTabs((new TabDocumentInfo("t1", "b.pdf", 2, false), dir.Pdf("copy-b.pdf", 2)));
         var window = new MainWindow { Width = 1200, Height = 800 };
         window.Show();
         await Pump();

@@ -789,7 +789,8 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
         var document = OpenDocument;
         var (current, selected) = DialogPages(page);
         var otherDocuments = windows == null ? null : (Func<IReadOnlyList<OpenDocumentInfo>>)(() => windows.OtherDocuments(this));
-        var result = await dialogs.ShowReplacePagesDialogAsync(new ReplacePagesContext(document.PageCount, current, selected, otherDocuments));
+        var result = await dialogs.ShowReplacePagesDialogAsync(new ReplacePagesContext(document.PageCount, current, selected, otherDocuments,
+            Services.PlatformFeatures.Tabs));
         if (result == null)
             return;
         if (Document != document)   // the document was closed meanwhile

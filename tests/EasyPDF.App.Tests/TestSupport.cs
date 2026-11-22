@@ -388,3 +388,21 @@ internal static class RepoPaths
     public static string BrandProp(string name) =>
         System.Xml.Linq.XDocument.Load(System.IO.Path.Combine(BrandDir, "Branding.props")).Descendants(name).SingleOrDefault()?.Value.Trim() ?? "";
 }
+
+/// <summary>Web version's other browser tabs: each document's copy is a file, or null for a tab that does not hand it over.</summary>
+internal sealed class FakeBrowserTabs(params (EasyPDF.App.Services.TabDocumentInfo Document, string? Copy)[] tabs)
+    : EasyPDF.App.Services.IBrowserTabs
+{
+    public int Copies { get; private set; }
+
+    public void ShareDocument(Func<EasyPDF.App.Services.OpenDocumentInfo?> current) { }
+
+    public Task<IReadOnlyList<EasyPDF.App.Services.TabDocumentInfo>> OtherDocumentsAsync() =>
+        Task.FromResult<IReadOnlyList<EasyPDF.App.Services.TabDocumentInfo>>([.. tabs.Select(t => t.Document)]);
+
+    public Task<string?> CopyDocumentAsync(EasyPDF.App.Services.TabDocumentInfo document)
+    {
+        Copies++;
+        return Task.FromResult(tabs.Single(t => t.Document == document).Copy);
+    }
+}

@@ -136,7 +136,7 @@ open the main file again → `FPDF_ImportPagesByIndex` for pages from other file
 
 **Page context menu (right-click, identical in Reading AND Organize mode):** shared `PageContextMenu`, bound to commands with the clicked page as parameter (in Organize mode a right-click on an unselected page selects it first):
 - **Insert before this page…** / **Insert after this page…** → file picker (PDF, multi-select) → `InsertFrom(files, index / index + 1)`, one undo step; then jump to / select the first inserted page
-- **Replace pages…** (Edit menu, ribbon *Replace*, context menu) → dialog: which **consecutive** pages (current / selected / range; gaps are refused), replaced by another window's document (copied with its unsaved changes) or a PDF file (picker), all or a range of its pages → `EditableDocument.Replace(first, count, document, pages)`, one undo step; the new pages take the place of the first replaced one (only consecutive pages; bookmarks to removed pages are treated like Delete)
+- **Replace pages…** (Edit menu, ribbon *Replace*, context menu) → dialog: which **consecutive** pages (current / selected / range; gaps are refused), replaced by another window's document (web version: another tab's; copied with its unsaved changes) or a PDF file (picker), all or a range of its pages → `EditableDocument.Replace(first, count, document, pages)`, one undo step; the new pages take the place of the first replaced one (only consecutive pages; bookmarks to removed pages are treated like Delete)
 - Rotate left / Rotate right · Delete page(s) · Extract page(s)… (Organize mode: selection)
 
 **Rotate dialog (`RotateDialog`, opened by the ribbon button "Rotate…" / Edit ▸ Rotate Pages…):** modal, two separate groups:
@@ -370,7 +370,9 @@ file. Tabs of one browser share the session cookie (with sign-in: the user), so 
 from then on (deleted when its entry or the merged document lets go of it; a copy that arrives after the asking tab gave
 up waiting is deleted right away). A tab that was closed or could not write its document gives a row marked as failed. A
 private window has a cookie of its own and is not reached (the channel is per browser profile anyway). Replace pages
-does not offer other tabs (yet).
+lists the other tabs' documents the same way (asked when the dialog is shown, preselected unless the user already chose a
+file) and copies the chosen one on OK; if the copy has fewer pages than the tab said and the range no longer fits, it
+says so and the dialog stays open.
 
 **Intentionally not in the web version** (hidden): several windows (another browser tab does the same), recent files (the files on the server are
 temporary). Split writes the parts as one ZIP file (no folder to choose in a browser); attachments are saved

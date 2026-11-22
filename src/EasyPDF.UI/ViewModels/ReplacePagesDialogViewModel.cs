@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,10 +20,26 @@ public enum ReplaceTarget
     Range,
 }
 
-/// <summary>An entry of the "open document" list: another window's document.</summary>
-public sealed record ReplaceDocumentItem(OpenDocumentInfo Info)
+/// <summary>
+/// An entry of the "open document" list: another window's document (<see cref="Info"/>), or in the web version another
+/// browser tab's (<see cref="Tab"/>, copied from that tab on OK).
+/// </summary>
+public sealed class ReplaceDocumentItem
 {
-    public string Label => Loc.F("ReplaceDocumentEntry", Info.Name, Loc.Pages(Info.Document.PageCount));
+    public ReplaceDocumentItem(OpenDocumentInfo info) => Info = info;
+
+    public ReplaceDocumentItem(TabDocumentInfo tab) => Tab = tab;
+
+    public OpenDocumentInfo? Info { get; }
+
+    public TabDocumentInfo? Tab { get; }
+
+    public string Name => Info?.Name ?? Tab!.Name;
+
+    /// <summary>A window's document as it is now; a tab's as the tab described it when asked.</summary>
+    public int PageCount => Info?.Document.PageCount ?? Tab!.PageCount;
+
+    public string Label => Loc.F("ReplaceDocumentEntry", Name, Loc.Pages(PageCount));
 }
 
 /// <summary>
@@ -33,14 +50,33 @@ public partial class ReplacePagesDialogViewModel : ObservableObject, IAsyncDispo
 {
     private readonly ReplacePagesContext _context;
     private EditableDocument? _file;
+    private readonly ObservableCollection<ReplaceDocumentItem> _openDocuments;
 
     public ReplacePagesDialogViewModel(ReplacePagesContext context)
     {
         _context = context;
         _target = context.SelectedPages.Count > 1 ? ReplaceTarget.Selected : ReplaceTarget.Current;
-        OpenDocuments = [.. (context.OtherDocuments?.Invoke() ?? []).Select(d => new ReplaceDocumentItem(d))];
-        _selectedOpenDocument = OpenDocuments.FirstOrDefault();
+        _openDocuments = [.. (context.OtherDocuments?.Invoke() ?? []).Select(d => new ReplaceDocumentItem(d))];
+        _selectedOpenDocument = _openDocuments.FirstOrDefault();
         _useOpenDocument = HasOpenDocuments;
+    }
+
+    /// <summary>
+    /// Web version: adds the documents of the other browser tabs to the list (when the dialog is shown); the first one is
+    /// chosen unless the user already chose something.
+    /// </summary>
+    public async Task FindOtherTabsAsync()
+    {
+        if (_context.OtherTabs == null)
+            return;
+        var found = await _context.OtherTabs.OtherDocumentsAsync();
+        if (found.Count == 0)
+            return;
+        foreach (var tab in found)
+            _openDocuments.Add(new ReplaceDocumentItem(tab));
+        OnPropertyChanged(nameof(HasOpenDocuments));
+        if (SelectedOpenDocument == null && FilePath == null)
+            SelectedOpenDocument = _openDocuments[0];   // also selects "open document"
     }
 
     #region Pages to replace
@@ -109,10 +145,10 @@ public partial class ReplacePagesDialogViewModel : ObservableObject, IAsyncDispo
 
     #region Replacement
 
-    public IReadOnlyList<ReplaceDocumentItem> OpenDocuments { get; }
+    public IReadOnlyList<ReplaceDocumentItem> OpenDocuments => _openDocuments;
 
-    /// <summary>Whether other windows had a document when the dialog opened; otherwise only a file can be chosen.</summary>
-    public bool HasOpenDocuments => OpenDocuments.Count > 0;
+    /// <summary>Whether other windows (web version: browser tabs) have a document; otherwise only a file can be chosen.</summary>
+    public bool HasOpenDocuments => _openDocuments.Count > 0;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(UseFile))]
@@ -170,10 +206,10 @@ public partial class ReplacePagesDialogViewModel : ObservableObject, IAsyncDispo
         Revalidate();
     }
 
-    /// <summary>The document the new pages come from (not yet copied for an open document); null if none is usable.</summary>
-    private EditableDocument? ReplacementDocument => UseOpenDocument ? SelectedOpenDocument?.Info.Document : _file;
+    /// <summary>The pages of the document the new pages come from (not yet copied for an open document); null if none is usable.</summary>
+    private int? ReplacementPageCount => UseOpenDocument ? SelectedOpenDocument?.PageCount : _file?.PageCount;
 
-    private string ReplacementName => UseOpenDocument ? SelectedOpenDocument?.Info.Name ?? "" : Path.GetFileName(FilePath ?? "");
+    private string ReplacementName => UseOpenDocument ? SelectedOpenDocument?.Name ?? "" : Path.GetFileName(FilePath ?? "");
 
     #endregion
 
@@ -196,12 +232,11 @@ public partial class ReplacePagesDialogViewModel : ObservableObject, IAsyncDispo
     private IReadOnlyList<int>? InsertPages(out string error)
     {
         error = "";
-        var document = ReplacementDocument;
-        if (document == null)
+        if (ReplacementPageCount is not { } pageCount)
             return null;
         if (InsertAllPages)
-            return [.. Enumerable.Range(0, document.PageCount)];
-        var range = PageRangeParser.Parse(InsertRangeText, document.PageCount);
+            return [.. Enumerable.Range(0, pageCount)];
+        var range = PageRangeParser.Parse(InsertRangeText, pageCount);
         if (!range.Success)
         {
             error = RangeErrors.Text(range);
@@ -230,7 +265,7 @@ public partial class ReplacePagesDialogViewModel : ObservableObject, IAsyncDispo
         {
             var target = TargetPages(out _);
             var insert = InsertPages(out _);
-            if (ReplacementDocument == null)
+            if (ReplacementPageCount == null)
                 return Loc.T("ReplaceChooseSource");
             if (target == null || insert == null)
                 return "";
@@ -259,17 +294,29 @@ public partial class ReplacePagesDialogViewModel : ObservableObject, IAsyncDispo
         if (target == null || insert == null)
             return null;
         EditableDocument replacement;
-        if (UseOpenDocument)
+        if (UseOpenDocument && SelectedOpenDocument!.Tab is { } tab)
+        {
+            if (await CopyFromTabAsync(tab) is not { } copy)
+                return Failed("TabCopyFailed");
+            // The tab's document may have changed since it was asked: all pages means all of the copy
+            if (InsertAllPages)
+                insert = [.. Enumerable.Range(0, copy.PageCount)];
+            else if (insert.Any(p => p >= copy.PageCount))
+            {
+                await copy.DisposeAsync();
+                return Failed("TabDocumentChanged");
+            }
+            replacement = copy;
+        }
+        else if (UseOpenDocument)
         {
             try
             {
-                replacement = await SelectedOpenDocument!.Info.Document.CopyAsync();
+                replacement = await SelectedOpenDocument!.Info!.Document.CopyAsync();
             }
             catch (PdfOpenException)
             {
-                _copyError = Loc.T("ErrOpenFailed");
-                OnPropertyChanged(nameof(SourceErrorText));
-                return null;
+                return Failed("ErrOpenFailed");
             }
         }
         else
@@ -278,6 +325,28 @@ public partial class ReplacePagesDialogViewModel : ObservableObject, IAsyncDispo
             _file = null;   // handed over to the caller
         }
         return new ReplacePagesResult(target[0], target.Count, replacement, insert);
+    }
+
+    private ReplacePagesResult? Failed(string errorKey)
+    {
+        _copyError = Loc.T(errorKey);
+        OnPropertyChanged(nameof(SourceErrorText));
+        return null;
+    }
+
+    /// <summary>Has the other tab write its document as it is now and opens that copy; null if it did not hand it over.</summary>
+    private async Task<EditableDocument?> CopyFromTabAsync(TabDocumentInfo tab)
+    {
+        if (await _context.OtherTabs!.CopyDocumentAsync(tab) is not { } path)
+            return null;
+        try
+        {
+            return EditableDocument.FromSource(await PdfBackend.Current.OpenAsync(path));
+        }
+        catch (PdfOpenException)
+        {
+            return null;
+        }
     }
 
     /// <summary>Closes a chosen file that was not handed over.</summary>

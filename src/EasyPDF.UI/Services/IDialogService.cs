@@ -65,8 +65,9 @@ public sealed record InsertRangeContext(string FileName, int PageCount);
 /// <param name="CurrentPage">Zero-based current (or right-clicked) page.</param>
 /// <param name="SelectedPages">Zero-based selected pages (Organize mode); enables and preselects "selected pages".</param>
 /// <param name="OtherDocuments">The documents of the other windows; null without several windows (tests).</param>
+/// <param name="OtherTabs">Web version: the other browser tabs, whose documents are offered like those of other windows.</param>
 public sealed record ReplacePagesContext(int PageCount, int CurrentPage, IReadOnlyList<int> SelectedPages,
-    Func<IReadOnlyList<OpenDocumentInfo>>? OtherDocuments = null)
+    Func<IReadOnlyList<OpenDocumentInfo>>? OtherDocuments = null, IBrowserTabs? OtherTabs = null)
 {
     public bool HasSelection => SelectedPages is { Count: > 0 };
 }

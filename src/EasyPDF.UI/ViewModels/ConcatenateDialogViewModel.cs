@@ -37,7 +37,7 @@ public partial class ConcatItem(string? path, IPdfSource? source, int pageCount,
 
     /// <summary>Another browser tab's document that could not be copied (the tab was closed or could not write it).</summary>
     public static ConcatItem FailedTab(TabDocumentInfo document) =>
-        new(null, null, 0, Loc.T("ConcatTabFailed")) { WindowName = document.Name, TabId = document.TabId };
+        new(null, null, 0, Loc.T("TabCopyFailed")) { WindowName = document.Name, TabId = document.TabId };
 
     public bool IsCurrent { get; private init; }
 
