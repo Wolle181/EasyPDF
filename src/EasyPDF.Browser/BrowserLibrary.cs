@@ -52,15 +52,52 @@ internal sealed class BrowserLibrary : IUserLibrary
         catch (Exception ex) when (ex is FormatException or System.Runtime.InteropServices.JavaScript.JSException)
         {
         }
-        byte[]? server = null;
+        return new BrowserLibrary(stored, await LoadServerLibraryAsync(http));
+    }
+
+    private const string ServerCopyKey = "server-library";
+    private const string ServerETagKey = "server-library-etag";
+
+    /// <summary>
+    /// The server's samples and shared stamps and templates (about 1 MB and more). The last copy is kept in IndexedDB
+    /// with its ETag; the server answers "not modified" while it is the same, so only changes come over the network.
+    /// (The browser's own cache does not help here: .NET's HttpClient does not let it revalidate.)
+    /// </summary>
+    private static async Task<byte[]?> LoadServerLibraryAsync(HttpClient http)
+    {
         try
         {
-            server = await http.GetByteArrayAsync("api/library");
+            var etag = await Interop.LoadStored(ServerETagKey);
+            using var request = new HttpRequestMessage(HttpMethod.Get, "api/library");
+            if (etag.Length > 0)
+                request.Headers.TryAddWithoutValidation("If-None-Match", etag);
+            using var response = await http.SendAsync(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.NotModified
+                && await Interop.LoadStored(ServerCopyKey) is { Length: > 0 } copy)
+            {
+                try
+                {
+                    return Convert.FromBase64String(copy);
+                }
+                catch (FormatException)
+                {
+                }
+            }
+            if (response.StatusCode == System.Net.HttpStatusCode.NotModified)
+                return await http.GetByteArrayAsync("api/library"); // the kept copy is gone: the whole file once more
+            response.EnsureSuccessStatusCode();
+            var zip = await response.Content.ReadAsByteArrayAsync();
+            if (response.Headers.ETag is { } newTag)
+            {
+                await Interop.SaveStored(ServerCopyKey, Convert.ToBase64String(zip));
+                await Interop.SaveStored(ServerETagKey, newTag.ToString());
+            }
+            return zip;
         }
-        catch (HttpRequestException)
+        catch (Exception ex) when (ex is HttpRequestException or System.Runtime.InteropServices.JavaScript.JSException)
         {
+            return null;
         }
-        return new BrowserLibrary(stored, server);
     }
 
     public void Prepare(AppSettings settings)

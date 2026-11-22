@@ -9,7 +9,16 @@
     <!-- German and English texts and number formats: the culture data is needed -->
     <InvariantGlobalization>false</InvariantGlobalization>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <!-- WebAssembly AOT (only when publishing): the code runs compiled instead of on .NET's interpreter. Measured with
+         tools/web-timing: dialogs open 2-3 times faster, the program shows itself 2-3 s earlier; the download grows from
+         about 8 to 12 MB (cached for 30 days, see StaticCaching) and the publish takes about 15 minutes. -->
+    <RunAOTCompilation>true</RunAOTCompilation>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- Mono's AOT compiler of .NET 11 aborts on these two (assertion in sgen-alloc.c); they mostly call native code and
+         stay interpreted. The item is internal to WasmApp.Common.targets: check it when updating .NET. -->
+    <_AOT_InternalForceInterpretAssemblies Include="SkiaSharp.dll;HarfBuzzSharp.dll" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia.Browser" Version="12.1.3" />
     <!-- Skia and HarfBuzz built for the Emscripten of .NET 11 (Avalonia 12 itself brings the builds for .NET 9/10 only) -->

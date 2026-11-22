@@ -134,6 +134,16 @@ browser program inside the SDK container and runs the core and server tests once
 of the NAS, `-Registry host:port` for another). Options: `-NoPush` (trial build, local only), `-NoTests`, `-NoPull`,
 `-AllowDirty` (uncommitted changes stop it otherwise), `-Brand <id>`. The runtime image is `runtime-deps` *chiseled-extra*
 (no shell, non-root), the server is published self-contained with ReadyToRun (Native AOT is not needed on the server).
+The browser program is published with WebAssembly AOT, which takes about 15 minutes of the image build (and a few GB of
+memory); a plain `dotnet build` is not affected.
+
+**Measuring the web version** (`tools/web-timing/measure.mjs`, Node 22+, or Node 20 with `--experimental-websocket`;
+Firefox): starts Firefox headless with a fresh profile, opens `<url>?benchmark` twice (empty cache, second visit) and prints
+the program's timings (start phases, dialogs opened by the program itself) and the bytes that came over the network:
+```
+node tools/web-timing/measure.mjs http://localhost:5199/
+```
+In a normal browser `?timing` writes the same lines (`[timing] …`) to the developer console.
 
 **Run it locally** (development, without container):
 ```

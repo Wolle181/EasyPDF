@@ -22,7 +22,12 @@ public class App : Application
     /// <summary>Receives the files of later starts (null if another process already had that role).</summary>
     public static InstanceChannel? Instance { get; set; }
 
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    public override void Initialize()
+    {
+        Services.WebTiming.Mark("App.Initialize");
+        AvaloniaXamlLoader.Load(this);
+        Services.WebTiming.Mark("App.axaml loaded");
+    }
 
     public override void OnFrameworkInitializationCompleted()
     {
@@ -93,8 +98,10 @@ public class App : Application
         else if (ApplicationLifetime is ISingleViewApplicationLifetime single)
         {
             // Web version: one view, the page itself; settings live in the browser's memory for this visit
+            Services.WebTiming.Mark("framework initialized");
             var settings = AppSettings.Load();
             AppEnvironment.Apply(settings);
+            Services.WebTiming.Mark("settings applied");
             // Stamps and templates from the browser's storage, with the samples and the server's shared ones
             if (Services.PlatformFeatures.Library is { } library)
             {
@@ -103,7 +110,10 @@ public class App : Application
                     TrySave(settings);
                 library.Changed();
             }
+            Services.WebTiming.Mark("library prepared");
             var view = new MainView(settings);
+            Services.WebTiming.Mark("MainView built");
+            Services.WebTiming.MarkFirstFrame(view);
             single.MainView = view;
             // The other tabs of this site can add this tab's document to theirs (Concatenate: "Open documents")
             Services.PlatformFeatures.Tabs?.ShareDocument(() => view.ViewModel.Document is { } document

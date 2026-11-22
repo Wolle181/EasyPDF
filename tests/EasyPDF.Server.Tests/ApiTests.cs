@@ -498,6 +498,29 @@ public class ApiTests
         Assert.DoesNotContain("shared/templates/Huge.txt", names);
     }
 
+    [Fact]
+    public async Task LibraryAnswersNotModifiedWhileItsFilesAreTheSame()
+    {
+        await using var probe = await TestServerHost.StartAsync();
+        var shared = Path.Combine(probe.Folder, "shared");
+        Directory.CreateDirectory(Path.Combine(shared, "templates"));
+        await File.WriteAllTextAsync(Path.Combine(shared, "templates", "Greeting.txt"), "Kind regards");
+        await using var server = await TestServerHost.StartAsync(("Web:Storage:SharedFolder", shared));
+        var browser = server.NewBrowser();
+
+        var first = await browser.GetAsync("/api/library");
+        var etag = first.Headers.ETag!.ToString();
+        Assert.True(first.Headers.CacheControl!.NoCache);
+        await Task.Delay(1100);                                   // a ZIP made a second later is the same ZIP
+        var again = await browser.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/api/library") { Headers = { { "If-None-Match", etag } } });
+        Assert.Equal(HttpStatusCode.NotModified, again.StatusCode);
+
+        await File.WriteAllTextAsync(Path.Combine(shared, "templates", "Greeting.txt"), "Best wishes");
+        var changed = await browser.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/api/library") { Headers = { { "If-None-Match", etag } } });
+        Assert.Equal(HttpStatusCode.OK, changed.StatusCode);
+        Assert.NotEqual(etag, changed.Headers.ETag!.ToString());
+    }
+
     private static Task<TestServerHost> TestServerHostWithRoot(string root) => TestServerHost.StartAsync(("Web:WebRoot", root));
 }
 

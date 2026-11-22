@@ -35,7 +35,12 @@ if (typeof builder.withModuleConfig === 'function')
                 status(`${loading} ${Math.round(loaded * 100 / total)} %`, loaded / total);
         },
     });
+const timing = /[?&](timing|benchmark)\b/.test(location.search);
+if (timing)
+    console.log(`[timing] main.js at ${performance.now().toFixed(0)} ms`);
 const runtime = await builder.create();
+if (timing)
+    console.log(`[timing] runtime created at ${performance.now().toFixed(0)} ms`);
 status(german ? 'Wird gestartet …' : 'Starting …', 1);
 
 const config = runtime.getConfig();

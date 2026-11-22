@@ -70,23 +70,32 @@ function openStore() {
     });
 }
 
-export async function loadLibrary() {
+export function loadLibrary() {
+    return loadStored('library');
+}
+
+export function saveLibrary(zipBase64) {
+    return saveStored('library', zipBase64);
+}
+
+// A text under a key of the store (also the server's library with its ETag); empty if there is none or storage is blocked
+export async function loadStored(key) {
     try {
         const db = await openStore();
         return await new Promise(resolve => {
-            const get = db.transaction('files').objectStore('files').get('library');
+            const get = db.transaction('files').objectStore('files').get(key);
             get.onsuccess = () => resolve(typeof get.result === 'string' ? get.result : '');
             get.onerror = () => resolve('');
         });
     } catch { return ''; }
 }
 
-export async function saveLibrary(zipBase64) {
+export async function saveStored(key, value) {
     try {
         const db = await openStore();
         await new Promise(resolve => {
             const transaction = db.transaction('files', 'readwrite');
-            transaction.objectStore('files').put(zipBase64, 'library');
+            transaction.objectStore('files').put(value, key);
             transaction.oncomplete = resolve;
             transaction.onerror = resolve;
             transaction.onabort = resolve;

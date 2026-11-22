@@ -66,4 +66,17 @@ internal static partial class Interop
     /// <summary>Sends a message to all other tabs of this site.</summary>
     [JSImport("postTabMessage", "interop")]
     public static partial void PostTabMessage(string message);
+
+    /// <summary>Milliseconds since the page started loading.</summary>
+    [JSImport("globalThis.performance.now")]
+    public static partial double Now();
+
+    /// <summary>A text kept in the site's IndexedDB under <paramref name="key"/>; empty if there is none.</summary>
+    [JSImport("loadStored", "interop")]
+    [return: JSMarshalAs<JSType.Promise<JSType.String>>]
+    public static partial Task<string> LoadStored(string key);
+
+    [JSImport("saveStored", "interop")]
+    [return: JSMarshalAs<JSType.Promise<JSType.Void>>]
+    public static partial Task SaveStored(string key, string value);
 }

@@ -27,6 +27,9 @@ public sealed class DialogLayer : Panel
 
     public bool HasOpenDialog => _open.Count > 0;
 
+    /// <summary>The dialog that takes input (the top one); null if none is open.</summary>
+    public DialogView? TopView => _open.Count > 0 ? _open[^1].View : null;
+
     public Task<object?> ShowAsync(DialogView view)
     {
         var done = new TaskCompletionSource<object?>();

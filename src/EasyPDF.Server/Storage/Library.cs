@@ -1,8 +1,13 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.IO.Compression;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
+using System;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 
 namespace EasyPDF.Server.Storage;
 
@@ -21,6 +26,27 @@ public static class Library
 
     /// <summary>The sample stamps next to the server (the same as next to the desktop program).</summary>
     public static string SampleFolder => Path.Combine(AppContext.BaseDirectory, "sample-stamps");
+
+    /// <summary>
+    /// <c>GET /api/library</c>: the ZIP with an ETag (hash of its content); the browser asks every time (the shared folder
+    /// can change) and gets "not modified" while it is the same, instead of 1 MB and more on every start.
+    /// </summary>
+    public static async Task ServeAsync(HttpContext context, IOptions<ServerOptions> options)
+    {
+        var zip = BuildZip(SampleFolder, options.Value.Storage.SharedFolder);
+        var etag = new EntityTagHeaderValue($"\"{Convert.ToHexStringLower(SHA256.HashData(zip))[..32]}\"");
+        context.Response.Headers.CacheControl = "private, no-cache";
+        context.Response.Headers.ETag = etag.ToString();
+        if (context.Request.GetTypedHeaders().IfNoneMatch is { Count: > 0 } known
+            && known.Any(t => t.Equals(EntityTagHeaderValue.Any) || t.Compare(etag, useStrongComparison: false)))
+        {
+            context.Response.StatusCode = StatusCodes.Status304NotModified;
+            return;
+        }
+        context.Response.ContentType = "application/zip";
+        context.Response.ContentLength = zip.Length;
+        await context.Response.Body.WriteAsync(zip, context.RequestAborted);
+    }
 
     public static byte[] BuildZip(string sampleFolder, string sharedFolder)
     {
@@ -45,6 +71,9 @@ public static class Library
                     total += length;
                     // PNG is compressed already
                     var entry = archive.CreateEntry(name, name.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ? CompressionLevel.Fastest : CompressionLevel.NoCompression);
+                    // The file's own time instead of now: the same files give the same ZIP (its hash is the ETag)
+                    var written = File.GetLastWriteTimeUtc(file);
+                    entry.LastWriteTime = written.Year < 1980 ? new DateTimeOffset(1980, 1, 1, 0, 0, 0, TimeSpan.Zero) : written;
                     using var target = entry.Open();
                     using var source = File.OpenRead(file);
                     source.CopyTo(target);

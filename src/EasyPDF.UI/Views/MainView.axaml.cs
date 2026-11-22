@@ -1109,8 +1109,17 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
     {
         if (OwnerWindow is { } owner)
             return await window().ShowDialog<T?>(owner);
-        var result = await Dialogs.ShowAsync(view());
+        var result = await WebTiming.MeasureDialogAsync(this, view, Dialogs.ShowAsync);
         return result is T value ? value : default;
+    }
+
+    /// <summary>Web version: closes the top dialog overlay as Cancel would (<see cref="WebTiming"/>'s benchmark).</summary>
+    internal bool CloseTopDialog()
+    {
+        if (Dialogs.TopView is not { } top)
+            return false;
+        top.Close(null);
+        return true;
     }
 
     /// <summary>A dialog overlay is open (web version): the page's shortcuts must not act on the document behind it.</summary>
@@ -1239,7 +1248,7 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
     public Task ShowQuickGuideAsync()
     {
         if (OwnerWindow == null)
-            return Dialogs.ShowAsync(new QuickGuideView()); // web version: an overlay
+            return WebTiming.MeasureDialogAsync(this, () => new QuickGuideView(), Dialogs.ShowAsync); // web version: an overlay
         if (_guide != null)
             _guide.Activate();
         else

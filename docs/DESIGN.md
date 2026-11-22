@@ -361,8 +361,28 @@ packages are not in the image, so new installers need no new image (see BUILDING
 the time its program file was built, in the container the image build) with a badge "Containerized" or "Native"
 (`DOTNET_RUNNING_IN_CONTAINER`, set by the .NET images).
 
-**Start on the web:** the first visit downloads about 6.7 MB (Brotli; 25 MB unpacked: the .NET runtime with Skia and
-HarfBuzz is 2.7 MB of it, then CoreLib, Avalonia, the program; the ICU data of only one culture group is loaded). Until the
+**Start on the web:** the browser program is published with **WebAssembly AOT** (`RunAOTCompilation` in
+`EasyPDF.Browser.csproj`): the code runs compiled, not on .NET's interpreter. The first visit downloads about 12 MB
+(Brotli; the native module with all compiled code is 9 MB of it; without AOT it was about 8 MB); afterwards the files come
+from the browser's cache (see "Caching on the web"). Mono's AOT compiler of .NET 11 aborts on `SkiaSharp.dll` and
+`HarfBuzzSharp.dll` (assertion in `sgen-alloc.c`), so these two stay interpreted (`_AOT_InternalForceInterpretAssemblies`,
+an item internal to the WebAssembly SDK: check it when updating .NET). Measured with `tools/web-timing` (Firefox
+headless, local server, one run each):
+
+| | interpreter | AOT |
+|---|---|---|
+| runtime ready (empty cache / second visit) | 1.2 / 0.9 s | 3.4 / 2.2 s (compiling the larger module) |
+| program shown (first frame) | 8.5 / 8.4 s | 6.7 / 5.2 s |
+| of that: Avalonia start, main view, first layout | 6.5 s | 2.5 s |
+| dialogs, first / second opening | 360–970 / 210–680 ms | 150–360 / 85–200 ms |
+
+Building a dialog is the small part (10–160 ms interpreted); most of the time is the first layout and drawing (styles,
+control templates, text). Before the program shows itself it asks the server for its configuration first (on the first
+visit that answer sets the session cookie), then for the downloads list and the library side by side; the videos are
+looked up in parallel from the start. The library (`/api/library`, about 1.3 MB) has an ETag (hash of the ZIP, whose
+entries carry the files' own times); the browser program keeps the last copy with its ETag in IndexedDB and asks with
+`If-None-Match`, so a second visit gets "not modified" (.NET's `HttpClient` in the browser does not let the browser's own
+cache revalidate). With everything cached a second visit transfers about 30 KB. Until the
 program shows itself the page has a splash (`index.html`, `main.js`): spinner, "Loading … n %" with a bar from the
 runtime's `onDownloadResourceProgress` (counts files, not bytes), then "Starting …" while .NET starts and the program asks
 the server for its configuration, library and videos. Its language is the one of the settings in `localStorage`,

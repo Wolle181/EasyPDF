@@ -36,8 +36,7 @@ public static class Api
                 o.Storage.MaxAgeHours, ServerHosting.DeployedAt, ServerHosting.InContainer), RemoteJson.Default.ServerConfig);
         });
         // Sample stamps and the shared stamps and templates of the installation, as one ZIP (read at start of the program)
-        api.MapGet("/library", (IOptions<ServerOptions> options) =>
-            Results.Bytes(Library.BuildZip(Library.SampleFolder, options.Value.Storage.SharedFolder), "application/zip"));
+        api.MapGet("/library", Library.ServeAsync);
         api.MapGet("/downloads", (IOptions<ServerOptions> options) =>
             Results.Json(Downloads.List(options.Value.Storage.DownloadsFolder), RemoteJson.Default.IReadOnlyListDesktopPackage));
         api.MapGet("/downloads/{name}", (string name, IOptions<ServerOptions> options) =>
