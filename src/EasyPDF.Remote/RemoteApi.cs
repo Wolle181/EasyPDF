@@ -86,6 +86,16 @@ public sealed class RemoteApi
         return (await response.Content.ReadFromJsonAsync(RemoteJson.Default.IReadOnlyListOcrWord, token).ConfigureAwait(false))!;
     }
 
+    /// <summary>The font most of the page's visible text is written in; null if the page has none (answer 204).</summary>
+    public async Task<EasyPDF.Core.Fonts.PageFont?> ReadMainFontAsync(string id, int page, CancellationToken token)
+    {
+        using var response = await _http.GetAsync($"api/files/{id}/pages/{page}/font", token).ConfigureAwait(false);
+        await EnsureAsync(response, token).ConfigureAwait(false);
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+            return null;
+        return await response.Content.ReadFromJsonAsync(RemoteJson.Default.PageFont, token).ConfigureAwait(false);
+    }
+
     /// <summary>Text recognition of the page on the server (as shown, turned by <paramref name="rotation"/>).</summary>
     public async Task<IReadOnlyList<OcrWord>> RecognizeAsync(string id, int page, int rotation, CancellationToken token)
     {

@@ -395,28 +395,72 @@ public static class PdfSaver
         return stamp with { Bgra = pixels };
     }
 
-    /// <summary>Writes the placed texts as real PDF text objects (standard fonts, one object per line), before the extra rotation.</summary>
+    /// <summary>
+    /// Writes the placed texts as real PDF text objects (one object per line), before the extra rotation: standard fonts
+    /// as they are, installed fonts embedded (each font file once per document).
+    /// </summary>
     private static void ApplyTexts(FpdfDocumentT doc, IReadOnlyList<PageEntry> pages)
     {
-        for (var i = 0; i < pages.Count; i++)
+        var embedded = new Dictionary<string, FpdfFontT?>();
+        try
         {
-            if (pages[i].Texts.Count == 0)
-                continue;
-            var page = fpdfview.FPDF_LoadPage(doc, i);
-            if (page == null)
-                throw new InvalidOperationException($"Page {i + 1} could not be loaded.");
-            try
+            for (var i = 0; i < pages.Count; i++)
             {
-                foreach (var text in pages[i].Texts)
-                    AddText(doc, page, pages[i].BaseSize, text);
-                if (fpdf_edit.FPDFPageGenerateContent(page) == 0)
-                    throw new InvalidOperationException($"The texts of page {i + 1} could not be written.");
-            }
-            finally
-            {
-                fpdfview.FPDF_ClosePage(page);
+                if (pages[i].Texts.Count == 0)
+                    continue;
+                var page = fpdfview.FPDF_LoadPage(doc, i);
+                if (page == null)
+                    throw new InvalidOperationException($"Page {i + 1} could not be loaded.");
+                try
+                {
+                    foreach (var text in pages[i].Texts)
+                        AddText(doc, page, pages[i].BaseSize, text, embedded);
+                    if (fpdf_edit.FPDFPageGenerateContent(page) == 0)
+                        throw new InvalidOperationException($"The texts of page {i + 1} could not be written.");
+                }
+                finally
+                {
+                    fpdfview.FPDF_ClosePage(page);
+                }
             }
         }
+        finally
+        {
+            foreach (var font in embedded.Values)
+                if (font != null)
+                    fpdf_edit.FPDFFontClose(font);
+        }
+    }
+
+    // pdfium embeds the whole font file; larger ones (e.g. Asian fonts) would make every saved file that big
+    private const long MaxEmbeddedFontBytes = 30L * 1024 * 1024;
+    private const int FontTypeTrueType = 2; // FPDF_FONT_TRUETYPE
+
+    /// <summary>The installed font of an overlay loaded into the document (once per file), or null when it is missing or cannot be embedded.</summary>
+    private static unsafe (FpdfFontT Font, double Ascent)? EmbeddedFont(FpdfDocumentT doc, TextOverlay text, Dictionary<string, FpdfFontT?> embedded)
+    {
+        if (Fonts.FontLibrary.Shared.Find(text.Font, text.Bold, text.Italic) is not { } face)
+            return null;
+        if (!embedded.TryGetValue(face.Path, out var font))
+        {
+            font = null;
+            try
+            {
+                var info = new FileInfo(face.Path);
+                if (info.Length <= MaxEmbeddedFontBytes)
+                {
+                    var bytes = File.ReadAllBytes(face.Path);
+                    fixed (byte* p = bytes)
+                        font = fpdf_edit.FPDFTextLoadFont(doc, p, (uint)bytes.Length, FontTypeTrueType, 1);
+                }
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+            {
+                font = null;
+            }
+            embedded[face.Path] = font;
+        }
+        return font == null ? null : (font, face.Ascent);
     }
 
     internal static (double X, double Y) ToUser(FpdfPageT page, PageSizePt size, double x, double y)
@@ -427,14 +471,17 @@ public static class PdfSaver
         return (ux, uy);
     }
 
-    private static void AddText(FpdfDocumentT doc, FpdfPageT page, PageSizePt size, TextOverlay text)
+    private static void AddText(FpdfDocumentT doc, FpdfPageT page, PageSizePt size, TextOverlay text, Dictionary<string, FpdfFontT?> embedded)
     {
-        var font = Settings.TextStyle.NormalizeFont(text.Font);
-        var (pdfFont, ascent) = font switch
+        // An installed font is embedded; a standard font, or an installed one missing here, is written as standard font
+        var installed = Settings.TextStyle.IsStandard(text.Font) ? null : EmbeddedFont(doc, text, embedded);
+        var font = Settings.TextStyle.IsStandard(text.Font) ? Settings.TextStyle.NormalizeFont(text.Font) : Settings.TextStyle.SimilarStandard(text.Font);
+        var pdfFont = Settings.TextStyle.StandardPdfName(font, text.Bold, text.Italic);
+        var ascent = installed?.Ascent ?? font switch
         {
-            "Times" => ("Times-Roman", 0.805),
-            "Courier" => ("Courier", 0.735),
-            _ => ("Helvetica", 0.81),
+            "Times" => 0.805,
+            "Courier" => 0.735,
+            _ => 0.81,
         }; // ascent = share of the line height above the baseline (matches the on-screen fonts)
         var (r, g, b) = Settings.TextStyle.ToRgb(text.Color);
         var lines = text.Text.Replace("\r\n", "\n").Split('\n');
@@ -445,7 +492,9 @@ public static class PdfSaver
         {
             if (lines[n].Length == 0)
                 continue;
-            var obj = fpdf_edit.FPDFPageObjNewTextObj(doc, pdfFont, (float)text.FontSize);
+            var obj = installed is { } face
+                ? fpdf_edit.FPDFPageObjCreateTextObj(doc, face.Font, (float)text.FontSize)
+                : fpdf_edit.FPDFPageObjNewTextObj(doc, pdfFont, (float)text.FontSize);
             if (obj == null)
                 throw new InvalidOperationException("The text could not be created.");
             var chars = (lines[n] + "\0").Select(ch => (ushort)ch).ToArray();

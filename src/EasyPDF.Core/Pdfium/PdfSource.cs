@@ -155,6 +155,10 @@ public sealed class PdfSource : IPdfSource
     public Task<IReadOnlyList<Ocr.OcrWord>> ReadWordsAsync(int pageIndex, CancellationToken token = default) =>
         _worker.Run<IReadOnlyList<Ocr.OcrWord>>(() => PageTextReader.ReadWords(Handle, pageIndex), PdfiumWorker.PriorityBackground, token);
 
+    /// <summary>The font most of the page's visible text is written in (see <see cref="PageTextReader.ReadMainFont"/>).</summary>
+    public Task<Fonts.PageFont?> ReadMainFontAsync(int pageIndex, CancellationToken token = default) =>
+        _worker.Run(() => PageTextReader.ReadMainFont(Handle, pageIndex), PdfiumWorker.PriorityVisible, token);
+
     /// <summary>
     /// Reads all page sizes in batches on the worker (other jobs can interleave).
     /// <paramref name="progress"/> receives the number of sizes known so far.

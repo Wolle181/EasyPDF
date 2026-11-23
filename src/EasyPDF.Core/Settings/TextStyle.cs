@@ -54,6 +54,45 @@ public static class TextStyle
     public static string NormalizeFont(string? font) =>
         Fonts.FirstOrDefault(f => string.Equals(f, font, StringComparison.OrdinalIgnoreCase)) ?? Fonts[0];
 
+    /// <summary>True for one of the standard fonts (else it is the family of an installed font, embedded when saving).</summary>
+    public static bool IsStandard(string? font) => Fonts.Any(f => string.Equals(f, font, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// The standard font a PDF font name stands for when it is one of the base fonts Helvetica, Times or Courier (in
+    /// any style, e.g. "Times-Bold"); null for any other font.
+    /// </summary>
+    public static string? StandardFor(string pdfName)
+    {
+        var name = pdfName.Split('-', ',')[0];
+        return name switch
+        {
+            "Helvetica" => "Helvetica",
+            "Times" or "Times-Roman" or "TimesRoman" => "Times",
+            "Courier" => "Courier",
+            _ => null,
+        };
+    }
+
+    /// <summary>The standard font that looks most like a font of that name: Courier for monospaced, Times for serif names, else Helvetica.</summary>
+    public static string SimilarStandard(string name)
+    {
+        bool Has(string word) => name.Contains(word, StringComparison.OrdinalIgnoreCase);
+        if (Has("Courier") || Has("Mono") || Has("Consol") || Has("Typewriter"))
+            return "Courier";
+        if (Has("Times") || Has("Roman") || Has("Serif") && !Has("Sans") || Has("Georgia") || Has("Garamond") || Has("Cambria")
+            || Has("Book") || Has("Palatino") || Has("Minion") || Has("Baskerville"))
+            return "Times";
+        return "Helvetica";
+    }
+
+    /// <summary>The name of a standard font in a style as PDF knows it (e.g. "Times-BoldItalic", "Helvetica-Oblique").</summary>
+    public static string StandardPdfName(string font, bool bold, bool italic) => NormalizeFont(font) switch
+    {
+        "Times" => bold ? (italic ? "Times-BoldItalic" : "Times-Bold") : italic ? "Times-Italic" : "Times-Roman",
+        "Courier" => bold ? (italic ? "Courier-BoldOblique" : "Courier-Bold") : italic ? "Courier-Oblique" : "Courier",
+        _ => bold ? (italic ? "Helvetica-BoldOblique" : "Helvetica-Bold") : italic ? "Helvetica-Oblique" : "Helvetica",
+    };
+
     public static double ClampSize(double size) =>
         double.IsNaN(size) ? 12 : Math.Clamp(size, MinSize, MaxSize);
 }

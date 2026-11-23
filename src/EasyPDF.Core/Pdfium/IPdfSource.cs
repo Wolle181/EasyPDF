@@ -42,6 +42,9 @@ public interface IPdfSource : IAsyncDisposable, IDisposable
     /// <summary>The words of the page's text layer, boxes in the page's own space (see <see cref="Ocr.OcrWord"/>).</summary>
     Task<IReadOnlyList<Ocr.OcrWord>> ReadWordsAsync(int pageIndex, CancellationToken token = default);
 
+    /// <summary>The font most of the page's visible text is written in, with its size on the page; null if the page has no visible text.</summary>
+    Task<Fonts.PageFont?> ReadMainFontAsync(int pageIndex, CancellationToken token = default);
+
     /// <summary>Renders a page to <paramref name="width"/> × <paramref name="height"/> pixels, additionally rotated by 0/90/180/270° clockwise.</summary>
     Task<RenderedPage> RenderAsync(int pageIndex, int width, int height, int extraRotation = 0,
         int priority = PdfiumWorker.PriorityVisible, CancellationToken token = default);

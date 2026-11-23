@@ -38,7 +38,8 @@ werden beide pro Marke mit `branding/<id>/make-presentation-videos.cmd`.
 - **Stempel**: Unterschriften, Firmenstempel, „Bezahlt“, Nummernstempel 00–20 … aus einem Stempelordner; Stempel mit
   Feldern setzen beim Platzieren das Datum ein („Eingegangen 9. Nov. 2026“)
 - **Text**: auf die Seite klicken und tippen; Farbe, Schrift und Größe werden gemerkt; gespeichert als echter,
-  durchsuchbarer PDF-Text
+  durchsuchbarer PDF-Text; auf Wunsch in Schriftart und -größe des Textes der Seite (eine installierte Schriftart dieses
+  Namens wird eingebettet)
 - **Vorlagen**: Textbausteine mit Platzhaltern für Datum, Uhrzeit, Benutzer, Dateiname, Seitenzahl
 - **Bereich kopieren**: einen Teil einer Seite einrahmen und als Bild auf einer anderen Seite oder in einem anderen
   Dokument einfügen

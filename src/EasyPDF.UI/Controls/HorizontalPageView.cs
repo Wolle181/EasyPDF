@@ -1147,8 +1147,16 @@ public sealed partial class HorizontalPageView : Grid
 
     public double PenSize { get; set; } = 12;
 
-    /// <summary>A new text was typed: page index, the area it covers in the page as shown (points), the text.</summary>
-    public event Action<int, RectPt, string>? TextPlaceRequested;
+    /// <summary>
+    /// The pen for new text on the page with the given index, when it depends on the page (the font and size of the
+    /// page's own text); null = <see cref="PenFont"/> and <see cref="PenSize"/> everywhere.
+    /// </summary>
+    public Func<int, Core.Fonts.TextPen>? PenForPage { get; set; }
+
+    private Core.Fonts.TextPen PenAt(int pageIndex) => PenForPage?.Invoke(pageIndex) ?? new Core.Fonts.TextPen(PenFont, PenSize);
+
+    /// <summary>A new text was typed: page index, the area it covers in the page as shown (points), the text and the pen it was written with.</summary>
+    public event Action<int, RectPt, string, Core.Fonts.TextPen>? TextPlaceRequested;
 
     /// <summary>A placed text was edited: page index, text id, new area in the page as shown, new text (empty = remove).</summary>
     public event Action<int, int, RectPt, string>? TextChangeRequested;
@@ -1160,8 +1168,7 @@ public sealed partial class HorizontalPageView : Grid
     private int _editPage = -1;
     private int _editTextId = -1; // -1 = new text
     private Point _editOrigin;    // top-left of the text in the page as shown (points)
-    private string _editFont = "Helvetica";
-    private double _editSize = 12;
+    private Core.Fonts.TextPen _editPen = new("Helvetica", 12);
 
     private static Avalonia.Media.IBrush BrushFor(string color) =>
         new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse(color));
@@ -1179,13 +1186,13 @@ public sealed partial class HorizontalPageView : Grid
         {
             // A template is placed at once where its preview was; double click edits it
             TextEditorOpened?.Invoke(); // the tool is used up
-            TextPlaceRequested?.Invoke(index, area, template);
+            TextPlaceRequested?.Invoke(index, area, template, PenAt(index));
             return;
         }
         var b = _layout.PageBounds[index];
         var pxPerPt = b.Width / pages[index].DisplaySize.Width;
         var origin = new Point((_scrollX + position.X - b.X) / pxPerPt, (_scrollY + position.Y - b.Y) / pxPerPt);
-        OpenTextEditor(index, -1, origin, "", PenFont, PenSize, PenColor);
+        OpenTextEditor(index, -1, origin, "", PenAt(index), PenColor);
         TextEditorOpened?.Invoke(); // the tool is used up: Esc now belongs to the editor
     }
 
@@ -1204,7 +1211,8 @@ public sealed partial class HorizontalPageView : Grid
         var x = (_scrollX + position.X - b.X) / pxPerPt;
         var y = (_scrollY + position.Y - b.Y) / pxPerPt;
         template = template.Replace("\r\n", "\n").TrimEnd();
-        var (w, h) = template.Length == 0 ? (0.0, 0.0) : TextMetrics.Measure(template, PenFont, PenSize);
+        var pen = PenAt(index);
+        var (w, h) = template.Length == 0 ? (0.0, 0.0) : TextMetrics.Measure(template, pen.Font, pen.Size, pen.Bold, pen.Italic);
         return (index, template, PageGeometry.CenteredInside(x + w / 2, y + h / 2, w, h, pages[index].DisplaySize));
     }
 
@@ -1227,7 +1235,10 @@ public sealed partial class HorizontalPageView : Grid
         var pxPerPt = b.Width / _document!.Pages[index].DisplaySize.Width;
         var covered = StampScreenRect(index, rect);
         using (context.PushClip(new Rect(b.X - _scrollX, b.Y - _scrollY, b.Width, b.Height)))
-            context.DrawText(TextMetrics.Format(text, PenFont, PenSize * pxPerPt, BrushFor(PenColor)), covered.TopLeft);
+        {
+            var pen = PenAt(index);
+            context.DrawText(TextMetrics.Format(text, pen.Font, pen.Size * pxPerPt, BrushFor(PenColor), pen.Bold, pen.Italic), covered.TopLeft);
+        }
         context.DrawRectangle(new Pen(Brushes.DodgerBlue, 1, DashStyle.Dash), covered);
     }
 
@@ -1268,13 +1279,13 @@ public sealed partial class HorizontalPageView : Grid
                 continue;
             if ((text.Rotation + page.ExtraRotation) % 360 != 0)
                 return false; // turned text cannot be edited in place
-            OpenTextEditor(index, text.Id, new Point(shown.X, shown.Y), text.Text, text.Font, text.FontSize, text.Color);
+            OpenTextEditor(index, text.Id, new Point(shown.X, shown.Y), text.Text, new Core.Fonts.TextPen(text.Font, text.FontSize, text.Bold, text.Italic), text.Color);
             return true;
         }
         return false;
     }
 
-    private void OpenTextEditor(int pageIndex, int textId, Point origin, string initial, string font, double sizePt, string color)
+    private void OpenTextEditor(int pageIndex, int textId, Point origin, string initial, Core.Fonts.TextPen pen, string color)
     {
         CommitTextEditor();
         var b = _layout.PageBounds[pageIndex];
@@ -1284,8 +1295,10 @@ public sealed partial class HorizontalPageView : Grid
             Text = initial,
             AcceptsReturn = true,
             TextWrapping = Avalonia.Media.TextWrapping.NoWrap,
-            FontFamily = TextMetrics.Family(font),
-            FontSize = Math.Max(4, sizePt * pxPerPt),
+            FontFamily = TextMetrics.Family(pen.Font),
+            FontWeight = pen.Bold ? Avalonia.Media.FontWeight.Bold : Avalonia.Media.FontWeight.Normal,
+            FontStyle = pen.Italic ? Avalonia.Media.FontStyle.Italic : Avalonia.Media.FontStyle.Normal,
+            FontSize = Math.Max(4, pen.Size * pxPerPt),
             Foreground = BrushFor(color),
             CaretBrush = BrushFor(color),
             Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.White, 0.7),
@@ -1303,8 +1316,7 @@ public sealed partial class HorizontalPageView : Grid
         _editPage = pageIndex;
         _editTextId = textId;
         _editOrigin = origin;
-        _editFont = font;
-        _editSize = sizePt;
+        _editPen = pen;
         // Tunnelling and also when already handled: the window's own Esc shortcuts must not swallow the end of editing
         editor.AddHandler(KeyDownEvent, (_, e) =>
         {
@@ -1336,17 +1348,17 @@ public sealed partial class HorizontalPageView : Grid
         if (_textEditor is not { } editor)
             return;
         var text = (editor.Text ?? "").Replace("\r\n", "\n").TrimEnd();
-        var (page, id, origin, font, size) = (_editPage, _editTextId, _editOrigin, _editFont, _editSize);
+        var (page, id, origin, pen) = (_editPage, _editTextId, _editOrigin, _editPen);
         CancelTextEditor(); // first: raising the events below may move focus and re-enter
         if (_document == null || page < 0 || page >= _document.PageCount)
             return;
         var shown = _document.Pages[page].DisplaySize;
-        var (w, h) = text.Length == 0 ? (0.0, 0.0) : TextMetrics.Measure(text, font, size);
+        var (w, h) = text.Length == 0 ? (0.0, 0.0) : TextMetrics.Measure(text, pen.Font, pen.Size, pen.Bold, pen.Italic);
         var rect = PageGeometry.CenteredInside(origin.X + w / 2, origin.Y + h / 2, w, h, shown);
         if (id >= 0)
             TextChangeRequested?.Invoke(page, id, rect, text);
         else
-            TextPlaceRequested?.Invoke(page, rect, text);
+            TextPlaceRequested?.Invoke(page, rect, text, pen);
     }
 
     private void DrawPlacedTexts(DrawingContext context, PageEntry page, Rect target)
@@ -1368,7 +1380,7 @@ public sealed partial class HorizontalPageView : Grid
                 var sideways = degrees is 90 or 270;
                 var (w, h) = sideways ? (covered.Height, covered.Width) : (covered.Width, covered.Height);
                 var transform = Matrix.CreateTranslation(-centre.X, -centre.Y) * Matrix.CreateRotation(degrees * Math.PI / 180) * Matrix.CreateTranslation(centre.X, centre.Y);
-                var formatted = TextMetrics.Format(text.Text, text.Font, fontSize * pxPerPt, BrushFor(text.Color));
+                var formatted = TextMetrics.Format(text.Text, text.Font, fontSize * pxPerPt, BrushFor(text.Color), text.Bold, text.Italic);
                 using (context.PushTransform(transform))
                     context.DrawText(formatted, new Point(centre.X - w / 2, centre.Y - h / 2));
                 if (text.Id == SelectedStampId && !_capturing)

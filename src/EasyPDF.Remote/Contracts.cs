@@ -79,6 +79,7 @@ public static class ApiHeaders
 [JsonSerializable(typeof(IReadOnlyList<EasyPDF.Core.Downloads.DesktopPackage>))]
 [JsonSerializable(typeof(ApiError))]
 [JsonSerializable(typeof(IReadOnlyList<OcrWord>))]
+[JsonSerializable(typeof(EasyPDF.Core.Fonts.PageFont))]
 [JsonSerializable(typeof(IReadOnlyList<PdfAttachment>))]
 [JsonSerializable(typeof(int))]
 [JsonSerializable(typeof(TabMessage))]

@@ -75,7 +75,11 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
             if (e.PropertyName is nameof(MainViewModel.PendingStampPath) or nameof(MainViewModel.PendingPaste))
                 ApplyPendingStamp();
             else if (e.PropertyName is nameof(MainViewModel.IsTextToolActive))
+            {
                 PageView.IsTextToolActive = _viewModel.IsTextToolActive;
+                if (_viewModel.IsTextToolActive)
+                    _viewModel.PenFor(_viewModel.CurrentPage); // read the page's font now, before the click
+            }
             else if (e.PropertyName is nameof(MainViewModel.IsSelectTextToolActive))
             {
                 PageView.IsSelectTextToolActive = _viewModel.IsSelectTextToolActive;
@@ -103,7 +107,8 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
         PageView.AreaCopied += area => _viewModel.AreaCopied(area);
         PageView.AreaCopyFailed += ex => _ = ShowErrorAsync(Loc.T("ErrCopyAreaFailed"), ex.Message);
         PageView.StampPlaceRequested += OnStampPlaceRequested;
-        PageView.TextPlaceRequested += (page, rect, text) => _viewModel.PlaceText(page, rect, text);
+        PageView.TextPlaceRequested += (page, rect, text, pen) => _viewModel.PlaceText(page, rect, text, pen);
+        PageView.PenForPage = _viewModel.PenFor;
         PageView.TextChangeRequested += (page, id, rect, text) => _viewModel.ChangeText(page, id, rect, text);
         // A click of the text tool opens the editor: the tool is used up (Esc then belongs to the editor)
         PageView.TextEditorOpened += () => _viewModel.IsTextToolActive = false;
@@ -797,6 +802,12 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
                 vm.TextFontSize = size;
         };
 
+        // New text like the page's own text; font and size above are then the default for pages without text
+        var matchPage = new CheckBox { Content = Loc.T("TextMatchPage"), IsChecked = vm.TextMatchPage, Name = "TextMatchPageBox" };
+        ToolTip.SetTip(matchPage, Loc.T("TextMatchPageHint"));
+        matchPage.IsCheckedChanged += (_, _) => vm.TextMatchPage = matchPage.IsChecked == true;
+        var matchHint = new TextBlock { Text = Loc.T("TextMatchPageHint"), TextWrapping = Avalonia.Media.TextWrapping.Wrap, MaxWidth = 240, FontSize = 11, Opacity = 0.75 };
+
         static Control Row(string key, Control editor) => new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -813,6 +824,8 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
                 Row("TextColorCode", hexBox),
                 Row("TextFont", fontBox),
                 Row("TextSize", sizeBox),
+                matchPage,
+                matchHint,
             },
         };
         return new Flyout { Placement = PlacementMode.BottomEdgeAlignedLeft, Content = content };

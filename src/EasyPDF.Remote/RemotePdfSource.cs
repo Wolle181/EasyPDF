@@ -66,6 +66,9 @@ public sealed class RemotePdfSource : IPdfSource, IServerOcr
     public Task<IReadOnlyList<OcrWord>> ReadWordsAsync(int pageIndex, CancellationToken token = default) =>
         _files.Api.ReadWordsAsync(Id, pageIndex, token);
 
+    public Task<EasyPDF.Core.Fonts.PageFont?> ReadMainFontAsync(int pageIndex, CancellationToken token = default) =>
+        _files.Api.ReadMainFontAsync(Id, pageIndex, token);
+
     public Task<RenderedPage> RenderAsync(int pageIndex, int width, int height, int extraRotation = 0,
         int priority = PdfiumWorker.PriorityVisible, CancellationToken token = default) =>
         _files.Api.RenderAsync(Id, pageIndex, Math.Max(1, width), Math.Max(1, height), extraRotation, token);

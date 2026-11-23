@@ -43,6 +43,12 @@ public sealed class AppSettings
     /// <summary>Size of inserted text in points.</summary>
     public double TextFontSize { get; set; } = 12;
 
+    /// <summary>
+    /// New text takes the font and size most of the page's text is written in (installed fonts are embedded when
+    /// saving); <see cref="TextFont"/> and <see cref="TextFontSize"/> stay the default for pages without text.
+    /// </summary>
+    public bool TextMatchPage { get; set; }
+
     /// <summary>Folder with the text templates (one .txt file each); "" = Documents/&lt;app name&gt;/Templates.</summary>
     public string TemplateFolder { get; set; } = "";
 

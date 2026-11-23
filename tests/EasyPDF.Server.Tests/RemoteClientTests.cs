@@ -85,6 +85,20 @@ public class RemoteClientTests
     }
 
     [Fact]
+    public async Task TheMainFontOfAPageComesFromTheServerAndAPageWithoutTextHasNone()
+    {
+        await using var server = await TestServerHost.StartAsync();
+        var (backend, _) = Client(server);
+        await using var source = await backend.OpenAsync(await UploadDemoAsync(backend));
+        var font = await source.ReadMainFontAsync(2);
+        Assert.NotNull(font);
+        Assert.InRange(font!.Size, 6, 20);
+        Assert.False(string.IsNullOrEmpty(font.BaseFont));
+        await using var blank = await backend.CreateBlankAsync(new PageSizePt(200, 100));
+        Assert.Null(await blank.ReadMainFontAsync(0));                // answer 204
+    }
+
+    [Fact]
     public async Task SavingAnEditedDocumentWritesTheTargetAndReopensTheResult()
     {
         await using var server = await TestServerHost.StartAsync();

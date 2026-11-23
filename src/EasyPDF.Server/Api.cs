@@ -47,6 +47,7 @@ public static class Api
         api.MapGet("/files/{id}/pages/{page:int}", RenderAsync);
         api.MapGet("/files/{id}/pages/{page:int}/area", RenderAreaAsync);
         api.MapGet("/files/{id}/pages/{page:int}/words", WordsAsync);
+        api.MapGet("/files/{id}/pages/{page:int}/font", MainFontAsync);
         api.MapGet("/files/{id}/pages/{page:int}/chars", CharsAsync);
         api.MapGet("/files/{id}/pages/{page:int}/ocr", OcrAsync).RequireRateLimiting(UploadPolicy);
         api.MapGet("/files/{id}/attachments", AttachmentsAsync);
@@ -179,6 +180,18 @@ public static class Api
         if (page < 0 || page >= source.PageCount)
             return Error(ApiErrors.Invalid, StatusCodes.Status400BadRequest);
         return Results.Json(await source.ReadWordsAsync(page, job.Token), RemoteJson.Default.IReadOnlyListOcrWord);
+    }
+
+    /// <summary>The font most of the page's visible text is written in (text that matches it); 204 if the page has none.</summary>
+    private static async Task<IResult> MainFontAsync(HttpContext context, string id, int page, FileStore files, OpenDocuments documents)
+    {
+        using var job = Job(context);
+        var (_, source) = await OpenAsync(context, id, files, documents, job.Token);
+        if (source == null)
+            return NotFound();
+        if (page < 0 || page >= source.PageCount)
+            return Error(ApiErrors.Invalid, StatusCodes.Status400BadRequest);
+        return await source.ReadMainFontAsync(page, job.Token) is { } font ? Results.Json(font, RemoteJson.Default.PageFont) : Results.NoContent();
     }
 
     private static async Task<IResult> OcrAsync(HttpContext context, string id, int page, int rot, FileStore files, OpenDocuments documents,

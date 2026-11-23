@@ -80,6 +80,7 @@ cancelled when the browser aborts the request.
 | `GET /api/files/{id}/pages/{n}?w&h&rot` | Renders a page as PNG (`PngCodec` in Core, no native image library); at most `RateLimits:MaxRenderPixels` (40 million) |
 | `GET /api/files/{id}/pages/{n}/area` | Renders part of a page (zoom, copy area) |
 | `GET /api/files/{id}/pages/{n}/words` | Words of the text layer with their boxes (find, select) |
+| `GET /api/files/{id}/pages/{n}/font` | The font most of the page's visible text is written in, with its size (`PageFont`; new text "like the text on the page"); 204 without visible text |
 | `GET /api/files/{id}/pages/{n}/chars` | Number of characters of the text layer (whether a page is a scan) |
 | `GET /api/files/{id}/pages/{n}/ocr?rot` | Text recognition of one page (see "pdfium and OCR") |
 | `GET /api/files/{id}/attachments` | List of the embedded files |

@@ -234,11 +234,13 @@ public sealed class EditableDocument : IAsyncDisposable
     }
 
     /// <summary>Places a text on a page as one undo step. <paramref name="rect"/> is in page space (see <see cref="TextOverlay"/>).</summary>
-    public TextOverlay AddText(int pageIndex, string text, string font, double fontSize, string color, RectPt rect, int rotation = 0)
+    public TextOverlay AddText(int pageIndex, string text, string font, double fontSize, string color, RectPt rect, int rotation = 0,
+        bool bold = false, bool italic = false)
     {
         if (pageIndex < 0 || pageIndex >= _pages.Length)
             throw new ArgumentOutOfRangeException(nameof(pageIndex));
-        var overlay = new TextOverlay(Interlocked.Increment(ref _nextStampId), text, font, fontSize, color, rect, ((rotation % 360) + 360) % 360);
+        var overlay = new TextOverlay(Interlocked.Increment(ref _nextStampId), text, font, fontSize, color, rect, ((rotation % 360) + 360) % 360,
+            bold, italic);
         var result = (PageEntry[])_pages.Clone();
         result[pageIndex] = result[pageIndex] with { Texts = [.. result[pageIndex].Texts, overlay] };
         Apply(result);

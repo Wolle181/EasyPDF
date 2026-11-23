@@ -11,6 +11,7 @@ using EasyPDF.App.Localization;
 using EasyPDF.App.Services;
 using EasyPDF.Core;
 using EasyPDF.Core.Documents;
+using EasyPDF.Core.Fonts;
 using EasyPDF.Core.Layout;
 using EasyPDF.Core.Ocr;
 using EasyPDF.Core.Pdfium;
@@ -193,6 +194,7 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
 
     partial void OnDocumentChanged(EditableDocument? value)
     {
+        _pagePens.Clear(); // another document: its sources are others
         IsEInvoiceBarDismissed = false;
         RefreshAttachments();
         if (value != null)
@@ -1154,6 +1156,53 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
             settings.TextFontSize = value;
     }
 
+    /// <summary>New text takes the font and size of the page's own text (see <see cref="PenFor"/>); remembered in the settings.</summary>
+    [ObservableProperty]
+    private bool _textMatchPage = settings.TextMatchPage;
+
+    partial void OnTextMatchPageChanged(bool value) => settings.TextMatchPage = value;
+
+    // The pen of each page's main font, by source page (null = the page has no visible text); filled in the background
+    private readonly Dictionary<(IPdfSource Source, int Index), TextPen?> _pagePens = [];
+    private readonly HashSet<(IPdfSource Source, int Index)> _pagePensLoading = [];
+
+    /// <summary>
+    /// The pen for new text on a page: with <see cref="TextMatchPage"/> the font and size most of the page's visible
+    /// text is written in (an installed font of that name, else the most similar standard font; read once per page in
+    /// the background, until then and on pages without text the default); otherwise the default font and size.
+    /// </summary>
+    public TextPen PenFor(int pageIndex)
+    {
+        var fallback = new TextPen(TextFont, TextFontSize);
+        if (!TextMatchPage || Document is not { } document || pageIndex < 0 || pageIndex >= document.PageCount)
+            return fallback;
+        var page = document.Pages[pageIndex];
+        var key = (page.Source, page.SourceIndex);
+        if (_pagePens.TryGetValue(key, out var pen))
+            return pen ?? fallback;
+        if (_pagePensLoading.Add(key))
+            _ = LoadPagePenAsync(key);
+        return fallback;
+    }
+
+    /// <summary>Reads the main font of a page (worker or server) and turns it into a pen (reading the installed fonts may take a moment the first time).</summary>
+    public async Task<TextPen?> LoadPagePenAsync((IPdfSource Source, int Index) key)
+    {
+        TextPen? pen = null;
+        try
+        {
+            if (await key.Source.ReadMainFontAsync(key.Index) is { } font)
+                pen = await Task.Run(() => font.ToPen(EasyPDF.Core.Fonts.FontLibrary.Shared));
+        }
+        catch (Exception e) when (e is not OutOfMemoryException)
+        {
+            pen = null; // no usable font information: the default pen
+        }
+        _pagePens[key] = pen;
+        _pagePensLoading.Remove(key);
+        return pen;
+    }
+
     /// <summary>True while the text tool waits for a click on a page.</summary>
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(CancelStampCommand))]
@@ -1163,7 +1212,7 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
     /// Places a typed text: <paramref name="viewRect"/> is the area it covers in the page as shown (points). Empty text places nothing.
     /// One undo step; the text tool is used up.
     /// </summary>
-    public void PlaceText(int pageIndex, RectPt viewRect, string text)
+    public void PlaceText(int pageIndex, RectPt viewRect, string text, TextPen? pen = null)
     {
         _pendingTemplate = null;
         IsTextToolActive = false;
@@ -1172,7 +1221,8 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
             return;
         var page = Document.Pages[pageIndex];
         var rect = PageGeometry.Unrotate(viewRect, page.BaseSize, page.ExtraRotation);
-        Document.AddText(pageIndex, text, TextFont, TextFontSize, TextColor, rect, 360 - page.ExtraRotation);
+        pen ??= new TextPen(TextFont, TextFontSize);
+        Document.AddText(pageIndex, text, pen.Font, pen.Size, TextColor, rect, 360 - page.ExtraRotation, pen.Bold, pen.Italic);
         ShowMessage(Loc.T("TextPlaced"));
     }
 

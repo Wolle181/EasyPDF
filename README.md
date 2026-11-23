@@ -35,7 +35,8 @@ brand with `branding/<id>/make-presentation-videos.cmd`.
 ### Add to pages
 - **Stamps**: signatures, company stamps, "Paid", number stamps 00–20 … from a stamp folder; stamps with fields fill in
   the date when placed ("Received 9 Nov 2026")
-- **Text**: click on the page and type; colour, font and size are remembered; saved as real, searchable PDF text
+- **Text**: click on the page and type; colour, font and size are remembered; saved as real, searchable PDF text;
+  optionally in the font and size of the page's own text (an installed font of that name is embedded)
 - **Templates**: text snippets with placeholders for date, time, user, file name, page number
 - **Copy area**: frame part of a page and paste it as a picture on another page or into another document
 
