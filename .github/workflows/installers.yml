@@ -173,7 +173,9 @@ jobs:
   linux:
     needs: release
     if: ${{ !inputs.platform || inputs.platform == 'all' || inputs.platform == 'linux' }}
-    runs-on: ubuntu-latest
+    # Not ubuntu-latest: Native AOT links against the runner's glibc, and the program then needs at least that version.
+    # Built on ubuntu-latest (glibc 2.43) it did not start on Debian 13 (2.41); 24.04 has 2.39 (Debian 13, Ubuntu 24.04, Mint 22)
+    runs-on: ubuntu-24.04
     permissions:
       contents: write   # the .deb and .tar.gz go into the release "latest"
     steps:

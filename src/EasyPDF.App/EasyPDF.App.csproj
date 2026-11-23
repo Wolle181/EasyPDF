@@ -43,4 +43,13 @@
       <ResolvedFileToPublish Remove="@(_NativeBuildFile)" />
     </ItemGroup>
   </Target>
+  <!-- Native AOT compiles satellite assemblies (the UI texts of other languages, de/EasyPDF.UI.resources.dll) into the
+       program only if they are marked AssetType=resources, which those of referenced projects are not: they were copied
+       next to the program, which cannot load managed assemblies, and the app stayed English whatever the language
+       setting. Hand them to the compiler as well; it then also leaves them out of the publish folder. -->
+  <Target Name="CompileReferencedSatellitesIntoNativeProgram" AfterTargets="_ComputeIlcCompileInputs" Condition="'$(PublishAot)' == 'true'">
+    <ItemGroup>
+      <IlcSatelliteAssembly Include="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.AssetType)' != 'resources' And $([System.String]::Copy('%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)').EndsWith('.resources.dll'))" />
+    </ItemGroup>
+  </Target>
 </Project>
