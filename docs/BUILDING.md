@@ -63,7 +63,7 @@ WiX is restored as a NuGet package, nothing else has to be installed. The MSI in
 The **portable version** (`-Windows-portable.zip`) is the same publish output in a folder `<App>-<version>`: unpack anywhere (e.g. a USB stick) and start `<App>.exe`, no installation and no administrator rights. It adds no Start menu entry, no Explorer context menu and no registration as a PDF program; the settings live in `%AppData%\<App>` as with the MSI. To remove it, delete the folder.
 
 ## Linux (x64)
-Running the app needs fontconfig, X11 and ICU, e.g. on Debian/Ubuntu: `sudo apt install libfontconfig1 libx11-6 libice6 libsm6 libicu74` (the ICU version depends on the distribution), and glibc 2.28 or newer for the text recognition (Debian 10, Ubuntu 20.04 and later).
+Running the app needs fontconfig, X11 and ICU, e.g. on Debian/Ubuntu: `sudo apt install libfontconfig1 libx11-6 libice6 libsm6 libicu74` (the ICU version depends on the distribution), and at least the glibc of the system that built it: the CI builds the packages on Ubuntu 24.04 (glibc 2.39: Debian 13, Ubuntu 24.04, Mint 22 and later; Native AOT links against the build system's glibc).
 ```bash
 dotnet build EasyPDF.slnx
 dotnet test EasyPDF.slnx                                      # headless, no display needed
@@ -191,7 +191,12 @@ git push origin main
   of the newest commit (`git log -1`).
 - On a conflict in one of the files above, keep the release repository's address and default brand and take
   everything else from `main`.
-- Check before the push: `git diff --stat FETCH_HEAD HEAD` lists only the files above.
+- Brands for the development repository only (their `README.md` starts a paragraph with "Development repository only": `grep -l "Development repository only" branding/*/README.md`) never go into a public
+  release repository: when a carried commit adds or changes such a folder, remove it there before the push
+  (`git rm -r branding/<id>` and `git commit --amend --no-edit` on the cherry-picked commit, which is not pushed yet).
+  Private release repositories may hold them.
+- Check before the push: `git diff --stat FETCH_HEAD HEAD` lists only the files above (and, in a public release
+  repository, the folders of development-only brands as missing).
 
 The build number is the number of commits, so the same change has a lower one in a release repository.
 
