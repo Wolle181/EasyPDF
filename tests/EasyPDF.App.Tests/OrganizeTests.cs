@@ -625,6 +625,33 @@ public class OrganizeUiTests
     }
 
     [AvaloniaFact]
+    public async Task APageRotatedToLandscapeLiesOnALandscapeCard()
+    {
+        using var dir = new TempDir();
+        var (window, grid) = await OpenOrganizeAsync(dir, 3);
+        var origin = grid.TranslatePoint(new Point(0, 0), window)!.Value;
+        // Just inside the top edge of the cards of pages 1 and 2 (cells 174 x 236, the card 4 px inside the cell)
+        Point NearTop(int index) => new(InCell(window, grid, index).X, origin.Y + 6 + 12);
+        var background = PixelAt(window.CaptureRenderedFrame()!, new Point(origin.X + 3, origin.Y + 3));
+        Assert.NotEqual(background, PixelAt(window.CaptureRenderedFrame()!, NearTop(0)));    // upright: the card is there
+
+        window.ViewModel.RotateRightCommand.Execute(0);
+        await Pump(400);
+        var frame = window.CaptureRenderedFrame()!;
+        Assert.Equal(background, PixelAt(frame, NearTop(0)));       // landscape: the card is lower, it has the page's shape
+        Assert.NotEqual(background, PixelAt(frame, NearTop(1)));    // the upright neighbour keeps its tall card
+        window.Close();
+        await window.ViewModel.ReleaseDocumentAsync();
+    }
+
+    private static unsafe (byte, byte, byte) PixelAt(Avalonia.Media.Imaging.WriteableBitmap frame, Point p)
+    {
+        using var fb = frame.Lock();
+        var px = (byte*)fb.Address + (int)p.Y * fb.RowBytes + (int)p.X * 4;
+        return (px[0], px[1], px[2]);
+    }
+
+    [AvaloniaFact]
     public async Task OrganizeRibbonTabHasModeAndOutputCommands()
     {
         using var dir = new TempDir();

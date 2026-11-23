@@ -289,6 +289,17 @@ public sealed class ThumbnailGrid : Grid
         return new Rect(cell.X + CellPad + (BoxWidth - w) / 2, cell.Y + CellPad + (boxHeight - h) / 2, w, h);
     }
 
+    /// <summary>
+    /// The card around a page box (<see cref="ThumbRect"/>) with the page number below it: it takes the page's shape, so
+    /// a page rotated to landscape (or any landscape page) lies on a landscape card, not on the portrait card of the
+    /// uniform Organize cell. For an upright page that fills its box it is the whole cell less a small margin.
+    /// </summary>
+    private static Rect CardRect(Rect thumb)
+    {
+        const double margin = CellPad - 4;
+        return new Rect(thumb.X - margin, thumb.Y - margin, thumb.Width + 2 * margin, thumb.Height + LabelHeight + 2 * margin);
+    }
+
     private (int First, int Last) VisibleRange()
     {
         if (Pages.Count == 0)
@@ -590,9 +601,9 @@ public sealed class ThumbnailGrid : Grid
                 continue;
 
             var isSelected = IsNavigator ? i == ActivePage : selected.Contains(entry.Id);
-            context.DrawRectangle(isSelected ? selectedBrush : cardBrush, isSelected ? null : cardPen, cell.Deflate(4), 6, 6);
-
             var thumb = ThumbRect(i).Translate(new Vector(0, -_scrollY));
+            context.DrawRectangle(isSelected ? selectedBrush : cardBrush, isSelected ? null : cardPen, CardRect(thumb), 6, 6);
+
             context.FillRectangle(Brushes.White, thumb);
             if (_cache.TryGet(entry.Id, out var cached) && cached.Rotation == entry.ExtraRotation && cached.Bitmap != null)
                 context.DrawWholeBitmap(cached.Bitmap, thumb);
@@ -607,7 +618,7 @@ public sealed class ThumbnailGrid : Grid
             }
 
             var label = new FormattedText((i + 1).ToString(CultureInfo.CurrentCulture), CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, typeface, 12, isSelected ? selectedTextBrush : textBrush);
-            context.DrawText(label, new Point(cell.X + (cell.Width - label.Width) / 2, cell.Bottom - CellPad - LabelHeight + 6));
+            context.DrawText(label, new Point(thumb.X + (thumb.Width - label.Width) / 2, thumb.Bottom + 6));
         }
 
         if (_dragging)
