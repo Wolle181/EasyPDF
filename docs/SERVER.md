@@ -40,7 +40,7 @@ Every request passes these steps in order:
    cookies, redirects). The start log lists the trusted proxies.
 2. **Security headers** (`Security/SecurityHeadersMiddleware.cs`): CSP (only the own host, `'wasm-unsafe-eval'` for
    WebAssembly, no inline scripts, `frame-ancestors 'self'`), `X-Content-Type-Options: nosniff`, `Referrer-Policy`,
-   `Permissions-Policy`. They come from the app because a Synology reverse proxy does not add custom headers to responses.
+   `Permissions-Policy`. They come from the app because some reverse proxies can add custom headers only to the request, not to the response.
    They are set in `OnStarting` (so they survive the exception handler) and never overwrite headers set elsewhere. PDF
    responses get no CSP, otherwise the browser's PDF viewer (printing) would not work.
 3. **Errors:** in Development the developer exception page; otherwise a generic JSON error without details, and HSTS for

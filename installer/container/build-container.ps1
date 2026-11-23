@@ -1,6 +1,6 @@
 # Builds the container image of the web version (Dockerfile: server + browser program) and pushes it to the registry
-# (default: the private registry on the NAS, 10.32.15.188:5500) as <name>:<version> and <name>:latest, where <name> is the
-# brand's shown name in lower case plus "-web". Watchtower on the host then rolls out :latest.
+# (default: the private registry in -Registry below) as <name>:<version> and <name>:latest, where <name> is the
+# brand's shown name in lower case plus "-web". An update service on the host (e.g. Watchtower) can then roll out :latest.
 # Runs on Linux and Windows with PowerShell 7 (pwsh) and Podman (Docker works too); starters: BuildContainer.sh,
 # BuildContainer.cmd in the repository root.
 #

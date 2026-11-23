@@ -3,7 +3,7 @@
 # Actions storage quota (0.5 GB on the free plan), so there are no workflow artifacts.
 # A full run ("platform" all, the default) builds all five packages the web version offers for download
 # (<App>-<version>-Windows-Installer.msi, -Windows-portable.zip, -macOS-AppleSilicon.dmg, -Linux-x64.deb, -Linux-x64.tar.gz);
-# on the NAS EasyPDFWeb/update-downloads.sh (ContainerZoo repository) copies them into the downloads folder.
+# on the host of the web version, a script kept outside this repository copies them into its downloads folder.
 # Start manually under Actions > Installers > Run workflow (or: gh workflow run installers.yml --ref <branch>);
 # "platform" builds only one installer (gh: -f platform=macos) and replaces only its files in the release,
 # "brand" picks the brand profile in branding/ (gh: -f brand=<id>); empty = the default in Directory.Build.props.

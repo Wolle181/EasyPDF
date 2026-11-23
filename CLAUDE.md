@@ -45,7 +45,7 @@ Test-PDFs mit Lesezeichen/verschiedenen Seitengrößen werden in den Tests von H
 | `src/EasyPDF.Remote` | Web: Vertrag Browser↔Server (DTOs, `RemoteJson`) und Client (`RemotePdfSource`, `RemotePdfBackend`, `RemoteFiles` mit virtuellen Pfaden `/remote/<id>/<name>`) |
 | `src/EasyPDF.Server` | Web: ASP.NET-Core-Server (REST unter `/api`, pdfium), liefert das Browser-Programm aus; Anmeldung `None`/`Oidc`, `FileStore` + `CleanupService` (Aufbewahrung), Härtung in `Security/`; Konfiguration Abschnitt `Web`; alles im Detail: [docs/SERVER.md](docs/SERVER.md) (bei Änderungen am Server pflegen) |
 | `src/EasyPDF.Browser` | Web: Browser-Programm (Avalonia.Browser, `net11.0-browser`), `BrowserFiles` (Upload, Speicherziele), `BrowserLibrary` (eigene Stempel/Vorlagen als ZIP in IndexedDB, Muster und gemeinsame vom Server `/api/library`), `wwwroot/` (index.html, main.js, interop.js) |
-| `Dockerfile`, `installer/container/` | Web-Image (Tests als Gate, Server ReadyToRun, chiseled Laufzeit-Image); `BuildContainer.sh`/`.cmd` starten `build-container.ps1`; Start auf der NAS: ContainerZoo `EasyPDFWeb/start.sh` |
+| `Dockerfile`, `installer/container/` | Web-Image (Tests als Gate, Server ReadyToRun, chiseled Laufzeit-Image); `BuildContainer.sh`/`.cmd` starten `build-container.ps1`; das Startskript des Hosts (Volumes, Härtung, Reverse Proxy) liegt außerhalb dieses Repos |
 | `tests/EasyPDF.Core.Tests` | Core-Tests |
 | `tests/EasyPDF.App.Tests` | ViewModel- und Headless-UI-Tests (Maus-/Tastatursimulation) |
 | `tests/EasyPDF.Server.Tests` | Server-Tests im Speicher (TestServer, simulierte Uhr): API, Sitzungstrennung, CSRF, Limits, Aufbewahrung, Header |

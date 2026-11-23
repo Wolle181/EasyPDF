@@ -131,7 +131,7 @@ Python 3); for the image PowerShell 7 (`pwsh`) and Podman (or Docker).
 `git pull`, vulnerability check of the NuGet packages, all tests, `podman build` (the `Dockerfile` publishes server and
 browser program inside the SDK container and runs the core and server tests once more), then pushes
 `<name>-web:<version>` and `:latest` (name = shown name of the brand in lower case) to the registry (default the private one
-of the NAS, `-Registry host:port` for another). Options: `-NoPush` (trial build, local only), `-NoTests`, `-NoPull`,
+set in `build-container.ps1`, `-Registry host:port` for another). Options: `-NoPush` (trial build, local only), `-NoTests`, `-NoPull`,
 `-AllowDirty` (uncommitted changes stop it otherwise), `-Brand <id>`. The runtime image is `runtime-deps` *chiseled-extra*
 (no shell, non-root), the server is published self-contained with ReadyToRun (Native AOT is not needed on the server).
 The browser program is published with WebAssembly AOT, which takes about 15 minutes of the image build (and a few GB of
@@ -159,16 +159,15 @@ Connect: `Authority`, `ClientId`, `ClientSecret`, optional `RequiredGroup`/`Requ
 `Storage` (folders `/data/files`, `/data/keys`, `SharedFolder` `/data/shared` with stamps and templates for all users, read-only; `DownloadsFolder` `/data/downloads` with the desktop packages offered for download, read-only; `IdleTimeoutMinutes` 30, `MaxAgeHours` 8, upload and quota limits),
 `RateLimits`, `ReverseProxy` (`TrustContainerGateway`, `TrustedProxies`) and `AllowedHosts`. The container writes only to
 `/data` and `/tmp`, so it runs with `--read-only`; it checks its own health with `/app/EasyPDF.Server --healthcheck`.
-The start script for the NAS (volumes, hardening options, reverse proxy) lives in the ContainerZoo repository
-(folder `EasyPDFWeb`).
+The start script of the host (volumes, hardening options, reverse proxy) is kept outside this repository.
 
 **Desktop downloads:** the web version offers the desktop packages (button with the download arrow in the header,
 shown only when there are some). They are not part of the image: the server lists the files in `DownloadsFolder` that are
 named like the installer scripts name them – `<App>-<version>-Windows-Installer.msi`, `-Windows-portable.zip`,
 `-macOS-AppleSilicon.dmg`, `-Linux-x64.deb`, `-Linux-x64.tar.gz` (`DesktopPackage` in Core) – the newest of each kind,
 and the dialog marks those for the browser's system. New installers only need new files in the folder (no new image); on
-the NAS `EasyPDFWeb/update-downloads.sh` in the ContainerZoo repository fetches them from the release *latest* and adds
-the Linux packages built locally.
+the host a script kept outside this repository fetches them from the release *latest* (`gh release download latest`)
+and can add packages built locally.
 
 ## Development and release repositories
 All work happens in the development repository, on `main` only; there are no brand branches. Each published brand has

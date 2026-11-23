@@ -8,7 +8,7 @@ namespace EasyPDF.Server.Security;
 /// Sets the security headers of every response (taken over from the hardening of the other web apps on the same host):
 /// <c>X-Content-Type-Options</c>, <c>Referrer-Policy</c>, <c>Permissions-Policy</c> and a <c>Content-Security-Policy</c>.
 ///
-/// They come from the app, not from the reverse proxy: on a Synology the proxy's "custom headers" only apply to the
+/// They come from the app, not from the reverse proxy: some reverse proxies apply "custom headers" only to the
 /// request to the app, not to the response. HSTS (one year) comes from <c>UseHsts</c> in <c>Program</c>;
 /// <c>X-Frame-Options</c> is not needed, the CSP's <c>frame-ancestors 'self'</c> takes its place in current browsers.
 ///
