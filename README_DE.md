@@ -128,6 +128,7 @@ gleichzeitig gestarteter Prozesse landen in einem Dialog).
 - [docs/BUILDING.md](docs/BUILDING.md) – Bauen, Installer, CI (Englisch)
 - [branding/README.md](branding/README.md) – Markenprofile (Englisch)
 - [docs/DESIGN.md](docs/DESIGN.md) – Entwurfsentscheidungen und UX-Beschreibung
+- [docs/SERVER.md](docs/SERVER.md) – der Web-Server im Detail: Ablauf, API, Dateien, Sicherheit (Englisch)
 - [CLAUDE.md](CLAUDE.md) – Architektur und Konventionen
 - [docs/TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md) – manuelle Testliste (vor allem macOS/Linux)
 

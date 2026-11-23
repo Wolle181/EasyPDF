@@ -306,7 +306,7 @@ browser has none of the system fonts: the preview of a text uses a fallback font
 returned), rendered pages as PNG (own codec in Core, `PngCodec`, so neither side needs a native image library), words,
 attachments, content, `build` (writes a page list based on a file: the snapshot of `EditableDocument`), `extract`,
 `blank`, `split` (ZIP), `ocr` (text recognition of a page: `RemotePdfSource` is an `IServerOcr`, so `PageOcr` asks the
-server; one `RapidOcrEngine`, one page at a time, `OcrService`), `DELETE`. pdfium stays on its one worker thread; opened files are kept in a small LRU (`OpenDocuments`).
+server; one `RapidOcrEngine`, one page at a time, `OcrService`), `DELETE`. pdfium stays on its one worker thread; opened files are kept in a small LRU (`OpenDocuments`). Everything the server does, endpoint by endpoint: [SERVER.md](SERVER.md).
 
 **Owners and retention.** Every file belongs to an owner: in mode `None` an anonymous session (random id in the cookie
 `__Host-session`, `Secure`, `HttpOnly`, `SameSite=Strict`), in mode `Oidc` the signed-in user (`sub`, generic OpenID

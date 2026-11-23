@@ -119,6 +119,7 @@ collected into one dialog).
 - [docs/BUILDING.md](docs/BUILDING.md) – building, installers, CI
 - [branding/README.md](branding/README.md) – brand profiles
 - [docs/DESIGN.md](docs/DESIGN.md) – design decisions and UX description
+- [docs/SERVER.md](docs/SERVER.md) – the web server in detail (pipeline, API, files, security)
 - [CLAUDE.md](CLAUDE.md) – architecture and conventions
 - [docs/TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md) – manual test list (especially macOS/Linux)
 
