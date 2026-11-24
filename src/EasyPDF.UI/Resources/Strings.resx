@@ -526,6 +526,7 @@
   <data name="WebErrDamaged" xml:space="preserve"><value>The file is damaged or is not a valid PDF document.</value></data>
   <data name="WebErrTooManyRequests" xml:space="preserve"><value>Too many requests in a short time. Please wait a moment and try again.</value></data>
   <data name="WebErrServer" xml:space="preserve"><value>The server could not handle the request. Please try again later.</value></data>
+  <data name="WebErrNoConnection" xml:space="preserve"><value>The file could not be sent to the server: the connection failed, or something in the network (e.g. a company's web filter) blocked it. Please check the connection and try again.</value></data>
   <data name="BrandSubtitleWeb" xml:space="preserve"><value>Read, organize and combine PDFs – in the browser</value></data>
   <data name="InfoWebVersion" xml:space="preserve"><value>Web version</value></data>
   <data name="MsgPrintInBrowser" xml:space="preserve"><value>The document opened in a new tab: print it there with the browser's print button.</value></data>

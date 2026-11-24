@@ -248,4 +248,27 @@ public class RemoteClientTests
         var error = await Assert.ThrowsAsync<RemoteApiException>(() => backend.Files.Api.UploadAsync(notPdf, "x.pdf", notPdf.Length));
         Assert.Equal(ApiErrors.NotPdf, error.Code);
     }
+
+    /// <summary>Stands in for the network between browser and server: fails the connection or answers with a web page.</summary>
+    private sealed class NetworkHandler(Func<HttpResponseMessage?> answer) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token) =>
+            answer() is { } response ? Task.FromResult(response) : throw new HttpRequestException("Load failed");
+    }
+
+    [Theory]
+    [InlineData(0)]     // connection failed or cut off (Safari: "Load failed")
+    [InlineData(403)]   // a company's web filter answers with its own page
+    [InlineData(200)]   // a proxy's login page
+    public async Task AnUploadThatDoesNotReachTheServerFailsWithNoConnection(int status)
+    {
+        var handler = new NetworkHandler(() => status == 0 ? null : new HttpResponseMessage((System.Net.HttpStatusCode)status)
+        {
+            Content = new StringContent("<html><body>Blocked</body></html>", Encoding.UTF8, "text/html"),
+        });
+        var api = new RemoteApi(new HttpClient(handler) { BaseAddress = new Uri("http://localhost/") });
+        await using var file = File.OpenRead(TestFiles.Demo);
+        var error = await Assert.ThrowsAsync<RemoteApiException>(() => api.UploadAsync(file, "a.pdf", file.Length));
+        Assert.Equal(ApiErrors.NoConnection, error.Code);
+    }
 }

@@ -58,9 +58,19 @@ public sealed class RemoteApi
         body.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/pdf");
         using var request = new HttpRequestMessage(HttpMethod.Post, "api/files") { Content = body };
         request.Headers.Add(ApiHeaders.FileName, Uri.EscapeDataString(fileName));
-        using var response = await _http.SendAsync(request, token).ConfigureAwait(false);
-        await EnsureAsync(response, token).ConfigureAwait(false);
-        return (await response.Content.ReadFromJsonAsync(RemoteJson.Default.RemoteFileInfo, token).ConfigureAwait(false))!;
+        try
+        {
+            using var response = await _http.SendAsync(request, token).ConfigureAwait(false);
+            await EnsureAsync(response, token).ConfigureAwait(false);
+            return await response.Content.ReadFromJsonAsync(RemoteJson.Default.RemoteFileInfo, token).ConfigureAwait(false)
+                ?? throw new RemoteApiException(ApiErrors.NoConnection, response.StatusCode);
+        }
+        // The file did not reach the server, or the answer is not the server's: the user must hear about it (the open
+        // dialog closed already, without a message nothing would happen at all)
+        catch (Exception ex) when (ex is HttpRequestException or System.Text.Json.JsonException or NotSupportedException && !token.IsCancellationRequested)
+        {
+            throw new RemoteApiException(ApiErrors.NoConnection, 0);
+        }
     }
 
     public async Task<RenderedPage> RenderAsync(string id, int page, int width, int height, int rotation, CancellationToken token)
@@ -184,6 +194,9 @@ public sealed class RemoteApi
             HttpStatusCode.RequestEntityTooLarge => ApiErrors.TooLarge,
             _ => ApiErrors.Invalid,
         };
+        // The API never answers with a web page: one comes from something on the way (a company's web filter, a proxy's login)
+        if (response.Content.Headers.ContentType?.MediaType == "text/html")
+            throw new RemoteApiException(ApiErrors.NoConnection, response.StatusCode);
         try
         {
             var error = await response.Content.ReadFromJsonAsync(RemoteJson.Default.ApiError, token).ConfigureAwait(false);

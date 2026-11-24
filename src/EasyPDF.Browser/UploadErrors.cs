@@ -18,6 +18,7 @@ internal static class UploadErrors
         ApiErrors.PasswordProtected => Loc.T("WebErrPassword"),
         ApiErrors.Damaged => Loc.T("WebErrDamaged"),
         ApiErrors.TooManyRequests => Loc.T("WebErrTooManyRequests"),
+        ApiErrors.NoConnection => Loc.T("WebErrNoConnection"),
         _ => Loc.T("WebErrServer"),
     };
 

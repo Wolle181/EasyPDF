@@ -60,6 +60,12 @@ public static class ApiErrors
     public const string NotFound = "NotFound";
     public const string TooManyRequests = "TooManyRequests";
     public const string Invalid = "Invalid";
+
+    /// <summary>
+    /// Set by the browser, never sent by the server: no answer of the server came back (connection failed or was cut off,
+    /// or something on the way, e.g. a company's web filter, answered in its place with a page that is not the API's).
+    /// </summary>
+    public const string NoConnection = "NoConnection";
 }
 
 /// <summary>Header every changing request must carry (only scripts of the app's own page can set it: protection against CSRF).</summary>

@@ -526,6 +526,7 @@
   <data name="WebErrDamaged" xml:space="preserve"><value>Die Datei ist beschädigt oder kein gültiges PDF-Dokument.</value></data>
   <data name="WebErrTooManyRequests" xml:space="preserve"><value>Zu viele Anfragen in kurzer Zeit. Bitte warten Sie einen Moment und versuchen Sie es erneut.</value></data>
   <data name="WebErrServer" xml:space="preserve"><value>Der Server konnte die Anfrage nicht bearbeiten. Bitte versuchen Sie es später erneut.</value></data>
+  <data name="WebErrNoConnection" xml:space="preserve"><value>Die Datei konnte nicht zum Server gesendet werden: Die Verbindung ist fehlgeschlagen oder etwas im Netzwerk (z. B. ein Webfilter der Firma) hat sie blockiert. Bitte prüfen Sie die Verbindung und versuchen Sie es erneut.</value></data>
   <data name="BrandSubtitleWeb" xml:space="preserve"><value>PDFs lesen, ordnen und zusammenführen – im Browser</value></data>
   <data name="InfoWebVersion" xml:space="preserve"><value>Web-Version</value></data>
   <data name="MsgPrintInBrowser" xml:space="preserve"><value>Das Dokument wurde in einem neuen Tab geöffnet: dort mit der Drucktaste des Browsers drucken.</value></data>
