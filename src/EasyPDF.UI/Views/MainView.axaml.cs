@@ -320,6 +320,7 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
             null,
             new Entry("MenuSave", vm.SaveCommand, Key.S, Primary: true),
             new Entry("MenuSaveAs", vm.SaveAsCommand, Key.S, Primary: true, Shift: true),
+            new Entry("MenuSaveAsImage", vm.SaveAsImageCommand),
             null,
             new Entry("MenuPrint", vm.PrintCommand, Key.P, Primary: true),
             new Entry(PlatformFeatures.Current.IsWeb ? "MenuShare" : "MenuSendByMail", vm.SendByMailCommand),
@@ -1308,6 +1309,9 @@ public partial class MainView : UserControl, IDialogService, IShortcutProvider
 
     public Task<ImageReduction?> ShowReduceSizeDialogAsync(ImageReduction last) =>
         ShowDialogAsync<ImageReduction?>(() => new ReduceSizeDialog(last), () => new ReduceSizeDialogView(last));
+
+    public Task<PageRasterization?> ShowSaveAsImageDialogAsync(PageRasterization last) =>
+        ShowDialogAsync<PageRasterization?>(() => new SaveAsImageDialog(last), () => new SaveAsImageDialogView(last));
 
     /// <summary>Line breaks as the platform expects them (CRLF on Windows, e.g. for Notepad and Office).</summary>
     public async Task CopyToClipboardAsync(string text)

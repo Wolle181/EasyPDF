@@ -34,11 +34,11 @@ public interface IPdfBackend
     /// Writes <paramref name="pages"/> based on <paramref name="baseSource"/> (keeps its bookmarks and metadata) to
     /// <paramref name="path"/> and opens the result. The sources in <paramref name="openSources"/> that are the target file
     /// are closed for the replace (and reopened if it fails). Returns the newly opened result (all page sizes read) and how
-    /// many pictures were scaled down.
+    /// many pictures were scaled down. With <paramref name="rasterize"/> the pages become pictures ("Save as image").
     /// </summary>
     Task<(IPdfSource Saved, int ReducedImages)> SaveAsync(IReadOnlyList<PageEntry> pages, IPdfSource baseSource, string path,
         IReadOnlyList<IPdfSource> openSources, IProgress<double>? progress = null, CancellationToken token = default,
-        ImageReduction? reduceImages = null);
+        ImageReduction? reduceImages = null, PageRasterization? rasterize = null);
 
     /// <summary>Saves the given pages (current order + rotation) as a new PDF without bookmarks.</summary>
     Task ExtractAsync(IReadOnlyList<PageEntry> pages, string targetPath, IProgress<double>? progress = null, CancellationToken token = default);
@@ -92,11 +92,11 @@ public sealed class LocalPdfBackend : IPdfBackend
 
     public async Task<(IPdfSource Saved, int ReducedImages)> SaveAsync(IReadOnlyList<PageEntry> pages, IPdfSource baseSource, string path,
         IReadOnlyList<IPdfSource> openSources, IProgress<double>? progress = null, CancellationToken token = default,
-        ImageReduction? reduceImages = null)
+        ImageReduction? reduceImages = null, PageRasterization? rasterize = null)
     {
         path = System.IO.Path.GetFullPath(path);
         var local = PdfSource.Local(baseSource);
-        var (temp, reduced) = await PdfSaver.WriteDocumentAsync(pages, baseSource, path, progress, token, reduceImages).ConfigureAwait(false);
+        var (temp, reduced) = await PdfSaver.WriteDocumentAsync(pages, baseSource, path, progress, token, reduceImages, rasterize).ConfigureAwait(false);
         if (token.IsCancellationRequested)
         {
             TryDelete(temp);

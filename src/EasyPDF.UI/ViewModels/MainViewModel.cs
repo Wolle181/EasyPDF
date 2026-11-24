@@ -370,7 +370,7 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
                      ActualSizeCommand, ZoomToCommand, ApplyZoomInputCommand, ShowReadingCommand, ShowOrganizeCommand, SwitchModeCommand,
                      SelectAllCommand, ExtractPagesCommand, SplitDocumentCommand, ConcatenateCommand, GoToFirstPageCommand, GoToLastPageCommand,
                      ShowGoToPageCommand, GoToTypedPageCommand, SelectTextToolCommand, PrintCommand, SendByMailCommand, RecognizeTextCommand,
-                     CopyTextCommand, ReduceSizeCommand, ToggleSelectTextToolCommand, RedactCommand, CoverCommand, ToggleCopyAreaToolCommand,
+                     CopyTextCommand, ReduceSizeCommand, SaveAsImageCommand, ToggleSelectTextToolCommand, RedactCommand, CoverCommand, ToggleCopyAreaToolCommand,
                      PasteAreaCommand, ShowSearchCommand, FindNextCommand, FindPreviousCommand,
                  })
             c.NotifyCanExecuteChanged();
@@ -663,6 +663,27 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
         await dialogs.ShowInfoAsync(message, path);
     }
 
+    private PageRasterization _lastRasterization = PageRasterization.Default;
+
+    /// <summary>
+    /// "Save as image": saves the document under a new name with every page as a picture of how it looks, so no text is
+    /// left that could be changed, copied or searched (<see cref="PageRasterizer"/>); the original file stays as it is and
+    /// the window then shows the new file.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanUseDocument))]
+    private async Task SaveAsImageAsync()
+    {
+        var document = OpenDocument;
+        var rasterize = await dialogs.ShowSaveAsImageDialogAsync(_lastRasterization);
+        if (rasterize == null)
+            return;
+        _lastRasterization = rasterize;
+        var path = await dialogs.PickSavePathAsync(Loc.F("RasterFileName", BaseNameOf(document)), FolderOf(document));
+        if (path == null)
+            return;
+        await WriteAsync(document, path, null, Loc.T("BusyRasterizing"), rasterize);
+    }
+
     private static string FormatSize(long bytes) => bytes >= 1024 * 1024
         ? string.Format(System.Globalization.CultureInfo.CurrentUICulture, "{0:0.0} MB", bytes / (1024.0 * 1024))
         : string.Format(System.Globalization.CultureInfo.CurrentUICulture, "{0:0} KB", Math.Ceiling(bytes / 1024.0));
@@ -671,7 +692,8 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
     /// Writes the document to <paramref name="path"/> (optionally with its pictures scaled down) and adds it to the
     /// recent files; returns how many pictures were scaled down, or null if it failed or was cancelled.
     /// </summary>
-    private async Task<int?> WriteAsync(EditableDocument document, string path, ImageReduction? reduction, string busyText)
+    private async Task<int?> WriteAsync(EditableDocument document, string path, ImageReduction? reduction, string busyText,
+        PageRasterization? rasterize = null)
     {
         // Another window reads from that file: it could not be replaced
         if (windows != null && windows.IsFileUsedByOtherWindow(path, this))
@@ -683,7 +705,7 @@ public partial class MainViewModel(AppSettings settings, IDialogService dialogs,
         BeginOperation(busyText);
         try
         {
-            var reduced = await document.SaveAsync(path, new Progress<double>(p => Progress = p), _operation.Token, reduction);
+            var reduced = await document.SaveAsync(path, new Progress<double>(p => Progress = p), _operation.Token, reduction, rasterize);
             settings.AddRecentFile(path);
             RecentFilesChanged?.Invoke();
             return reduced;

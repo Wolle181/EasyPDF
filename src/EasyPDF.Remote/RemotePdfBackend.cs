@@ -51,11 +51,11 @@ public sealed class RemotePdfBackend(RemoteFiles files, ISaveTargets targets) : 
 
     public async Task<(IPdfSource Saved, int ReducedImages)> SaveAsync(IReadOnlyList<PageEntry> pages, IPdfSource baseSource, string path,
         IReadOnlyList<IPdfSource> openSources, IProgress<double>? progress = null, CancellationToken token = default,
-        ImageReduction? reduceImages = null)
+        ImageReduction? reduceImages = null, PageRasterization? rasterize = null)
     {
         progress?.Report(0.1);
         var name = Path.GetFileName(path);
-        var info = await Files.Api.BuildAsync(new BuildRequest(IdOf(baseSource), name, ToRemote(pages), reduceImages), token).ConfigureAwait(false);
+        var info = await Files.Api.BuildAsync(new BuildRequest(IdOf(baseSource), name, ToRemote(pages), reduceImages, rasterize), token).ConfigureAwait(false);
         progress?.Report(0.6);
         var content = await Files.Api.DownloadAsync(info.Id, token).ConfigureAwait(false);
         progress?.Report(0.9);

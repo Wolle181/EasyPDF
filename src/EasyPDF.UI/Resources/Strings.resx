@@ -112,6 +112,19 @@
   <data name="ReduceFileNameMedium" xml:space="preserve"><value>{0}_medium.pdf</value></data>
   <data name="ReduceFileNameSmall" xml:space="preserve"><value>{0}_small.pdf</value></data>
   <data name="BusyReducing" xml:space="preserve"><value>Reducing pictures…</value></data>
+  <data name="BtnSaveAsImage" xml:space="preserve"><value>Save as image…</value></data>
+  <data name="MenuSaveAsImage" xml:space="preserve"><value>Save As Image…</value></data>
+  <data name="RasterTitle" xml:space="preserve"><value>Save as Image</value></data>
+  <data name="RasterIntro" xml:space="preserve"><value>Every page is saved as a picture of how it looks. The text can then no longer be changed, copied or searched: the content is fixed.</value></data>
+  <data name="RasterResolution" xml:space="preserve"><value>Resolution</value></data>
+  <data name="Raster150" xml:space="preserve"><value>150 dpi – smaller file, good for reading on screen</value></data>
+  <data name="Raster200" xml:space="preserve"><value>200 dpi – good for reading and printing</value></data>
+  <data name="Raster300" xml:space="preserve"><value>300 dpi – best print quality, large file</value></data>
+  <data name="RasterGrayscale" xml:space="preserve"><value>Grayscale (much smaller file)</value></data>
+  <data name="RasterNote" xml:space="preserve"><value>The result is saved under a new name; the original file is not changed. Bookmarks, links, form fields, comments and attached files are not taken over; comments, stamps and form values stay visible on the pages.</value></data>
+  <data name="RasterStart" xml:space="preserve"><value>Save as image…</value></data>
+  <data name="RasterFileName" xml:space="preserve"><value>{0}_image.pdf</value></data>
+  <data name="BusyRasterizing" xml:space="preserve"><value>Saving pages as pictures…</value></data>
   <data name="MsgReduced" xml:space="preserve"><value>{0} picture(s) scaled down: {1} → {2} ({3} % smaller).</value></data>
   <data name="MsgReducedNoComparison" xml:space="preserve"><value>{0} picture(s) scaled down; the file now has {1}.</value></data>
   <data name="MsgReducedNothing" xml:space="preserve"><value>No picture could be made smaller: the pictures already have a low resolution or have to stay as they are. The file was saved anyway.</value></data>

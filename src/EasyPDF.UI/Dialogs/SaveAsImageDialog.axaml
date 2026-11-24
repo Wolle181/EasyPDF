@@ -1,0 +1,30 @@
+<dlg:DialogView xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dlg="using:EasyPDF.App.Dialogs"
+        xmlns:loc="using:EasyPDF.App.Localization"
+        x:Class="EasyPDF.App.Dialogs.SaveAsImageDialogView"
+        Title="{loc:Tr RasterTitle}" DialogWidth="480">
+  <StackPanel Margin="20" Spacing="14">
+    <TextBlock Text="{loc:Tr RasterIntro}" TextWrapping="Wrap" Opacity="0.8" />
+    <StackPanel Spacing="6">
+      <TextBlock Text="{loc:Tr RasterResolution}" FontWeight="SemiBold" />
+      <RadioButton x:Name="Dpi150Option" GroupName="Dpi">
+        <TextBlock Text="{loc:Tr Raster150}" TextWrapping="Wrap" />
+      </RadioButton>
+      <RadioButton x:Name="Dpi200Option" GroupName="Dpi">
+        <TextBlock Text="{loc:Tr Raster200}" TextWrapping="Wrap" />
+      </RadioButton>
+      <RadioButton x:Name="Dpi300Option" GroupName="Dpi">
+        <TextBlock Text="{loc:Tr Raster300}" TextWrapping="Wrap" />
+      </RadioButton>
+    </StackPanel>
+    <CheckBox x:Name="GrayscaleBox">
+      <TextBlock Text="{loc:Tr RasterGrayscale}" TextWrapping="Wrap" />
+    </CheckBox>
+    <TextBlock Text="{loc:Tr RasterNote}" TextWrapping="Wrap" Opacity="0.7" FontSize="12" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button x:Name="OkButton" MinWidth="80" HorizontalContentAlignment="Center" IsDefault="True" Click="OnOk" Content="{loc:Tr RasterStart}" />
+      <Button MinWidth="80" HorizontalContentAlignment="Center" IsCancel="True" Click="OnCancel" Content="{loc:Tr Cancel}" />
+    </StackPanel>
+  </StackPanel>
+</dlg:DialogView>

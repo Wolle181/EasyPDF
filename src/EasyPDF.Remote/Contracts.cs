@@ -26,10 +26,11 @@ public sealed record RemoteStamp(int Id, int PixelWidth, int PixelHeight, RectPt
 
 /// <summary>
 /// Writes the pages based on <see cref="BaseFileId"/> (its bookmarks and metadata are kept) as a new file named
-/// <see cref="Name"/>; with <see cref="ReduceImages"/> its pictures are scaled down.
+/// <see cref="Name"/>; with <see cref="ReduceImages"/> its pictures are scaled down, with <see cref="Rasterize"/> its
+/// pages become pictures ("Save as image").
 /// </summary>
 public sealed record BuildRequest(string BaseFileId, string Name, IReadOnlyList<RemotePage> Pages,
-    ImageReduction? ReduceImages = null);
+    ImageReduction? ReduceImages = null, PageRasterization? Rasterize = null);
 
 /// <summary>Writes the pages as a new file without bookmarks.</summary>
 public sealed record ExtractRequest(string Name, IReadOnlyList<RemotePage> Pages);

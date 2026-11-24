@@ -129,6 +129,37 @@ public class RemoteClientTests
     }
 
     [Fact]
+    public async Task SavingAsImageOnTheServerLeavesNoTextAndRefusesOtherResolutions()
+    {
+        await using var server = await TestServerHost.StartAsync();
+        var (backend, targets) = Client(server);
+        var path = await UploadDemoAsync(backend);
+        var source = await backend.OpenAsync(path);
+        await using var document = EditableDocument.FromSource(source);
+        document.Delete(Enumerable.Range(2, document.PageCount - 2));
+        Assert.NotEmpty(await source.ReadWordsAsync(1));
+
+        var previous = PdfBackend.Current;
+        PdfBackend.Current = backend;
+        try
+        {
+            await document.SaveAsync("/save/img/Fixed.pdf", rasterize: new EasyPDF.Core.Documents.PageRasterization(150, true));
+        }
+        finally
+        {
+            PdfBackend.Current = previous;
+        }
+        Assert.True(targets.Written.ContainsKey("/save/img/Fixed.pdf"));
+        Assert.Equal(2, document.PageCount);
+        Assert.Empty(await document.BaseSource.ReadWordsAsync(1));        // the reopened result: pictures only
+
+        var request = new BuildRequest(RemotePdfBackend.IdOf(document.BaseSource), "x.pdf", RemotePdfBackend.ToRemote(document.Pages),
+            Rasterize: new EasyPDF.Core.Documents.PageRasterization(1200, false));
+        var error = await Assert.ThrowsAsync<RemoteApiException>(() => backend.Files.Api.BuildAsync(request, CancellationToken.None));
+        Assert.Equal(ApiErrors.Invalid, error.Code);
+    }
+
+    [Fact]
     public async Task InsertsABlankPageMadeByTheServer()
     {
         await using var server = await TestServerHost.StartAsync();

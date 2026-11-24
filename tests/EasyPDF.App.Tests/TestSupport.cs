@@ -182,6 +182,16 @@ internal sealed class FakeDialogs : IDialogService
         return Task.FromResult(ReduceAnswer);
     }
 
+    /// <summary>Answer of the "Save as image" dialog (null = cancelled) and what it was asked with.</summary>
+    public EasyPDF.Core.Documents.PageRasterization? RasterAnswer;
+    public EasyPDF.Core.Documents.PageRasterization? LastRasterPreset;
+
+    public Task<EasyPDF.Core.Documents.PageRasterization?> ShowSaveAsImageDialogAsync(EasyPDF.Core.Documents.PageRasterization last)
+    {
+        LastRasterPreset = last;
+        return Task.FromResult(RasterAnswer);
+    }
+
     /// <summary>The text put on the clipboard last; null = nothing copied.</summary>
     public string? ClipboardText;
 

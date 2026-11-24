@@ -59,19 +59,23 @@ public static class PdfSaver
     /// <summary>
     /// Saves the page list based on a fresh copy of <paramref name="baseSource"/> (keeps bookmarks, metadata, forms):
     /// pages of other files are imported, removed pages deleted, the rest reordered and rotated.
-    /// With <paramref name="reduceImages"/> its pictures are scaled down (<see cref="ImageReducer"/>).
+    /// With <paramref name="reduceImages"/> its pictures are scaled down (<see cref="ImageReducer"/>), with
+    /// <paramref name="rasterize"/> the finished pages become pictures (<see cref="PageRasterizer"/>, instead of scaling down).
     /// Returns the path of the finished temp file, located in the folder of <paramref name="targetPath"/>, and how many
     /// pictures were scaled down.
     /// </summary>
     public static async Task<(string TempPath, int ReducedImages)> WriteDocumentAsync(IReadOnlyList<PageEntry> pages, IPdfSource baseSource,
-        string targetPath, IProgress<double>? progress = null, CancellationToken token = default, ImageReduction? reduceImages = null)
+        string targetPath, IProgress<double>? progress = null, CancellationToken token = default, ImageReduction? reduceImages = null,
+        PageRasterization? rasterize = null)
     {
+        if (rasterize != null)
+            reduceImages = null; // the page pictures are written at their own resolution
         if (pages.Count == 0)
             throw new InvalidOperationException("A document needs at least one page.");
         RejectStamps(pages);
 
-        // Reducing pictures (after writing) takes the second half of the progress range
-        var reduceShare = reduceImages == null ? 0 : 0.5;
+        // Reducing pictures or rendering the pages (after writing) takes the second half of the progress range
+        var reduceShare = reduceImages == null && rasterize == null ? 0 : 0.5;
         double At(double p) => p * (1 - reduceShare);
         var worker = PdfSource.Local(baseSource).Worker;
         var temp = TempPathFor(targetPath);
@@ -142,6 +146,9 @@ public static class PdfSaver
             // 5. scale down the pictures of the written file
             var reduced = reduceImages == null ? 0 : await ImageReducer.ReduceFileAsync(worker, temp, reduceImages,
                 new RelayProgress(p => progress?.Report(At(1) + reduceShare * p)), token).ConfigureAwait(false);
+            if (rasterize != null)
+                await PageRasterizer.RasterizeFileAsync(worker, temp, rasterize,
+                    new RelayProgress(p => progress?.Report(At(1) + reduceShare * p)), token).ConfigureAwait(false);
             progress?.Report(1);
             return (temp, reduced);
         }

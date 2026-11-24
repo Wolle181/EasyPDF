@@ -339,8 +339,11 @@ public static class Api
         }
         if (request.ReduceImages is { } reduce && (reduce.MaxDpi is < 36 or > 1200 || reduce.JpegQuality is < 10 or > 100))
             return Error(ApiErrors.Invalid, StatusCodes.Status400BadRequest);
+        // Page pictures only in the resolutions the app offers (a huge one would cost the server memory and time)
+        if (request.Rasterize is { } rasterize && Array.IndexOf(PageRasterization.DpiChoices, rasterize.Dpi) < 0)
+            return Error(ApiErrors.Invalid, StatusCodes.Status400BadRequest);
         var target = files.NewPath(owner);
-        var (temp, reduced) = await PdfSaver.WriteDocumentAsync(pages, baseSource, target, null, job.Token, request.ReduceImages);
+        var (temp, reduced) = await PdfSaver.WriteDocumentAsync(pages, baseSource, target, null, job.Token, request.ReduceImages, request.Rasterize);
         File.Move(temp, target, overwrite: true);
         return await RegisterAsync(owner, target, request.Name, files, documents, job.Token, reduced);
     }

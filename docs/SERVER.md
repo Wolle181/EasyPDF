@@ -87,7 +87,7 @@ cancelled when the browser aborts the request.
 | `GET /api/files/{id}/attachments/{i}[?view=true]` | One embedded file as download; with `view=true` an XML file (e-invoice) as indented plain text under `sandbox; default-src 'none'` (`XmlText`, DTDs prohibited) |
 | `GET /api/files/{id}/content[?inline=true]` | The PDF itself, as download or for the browser's viewer (printing); range requests supported; opened with `FileShare.Delete`, so it may expire while it is being sent |
 | `DELETE /api/files/{id}` | Closes and deletes the file |
-| `POST /api/build` | **Save:** the page list (`RemotePage`: file id, source page, rotation, stamps as BGRA pixels, texts, black out/white out boxes, recognized words) and a base file; optionally image reduction (36–1200 dpi, JPEG quality 10–100). Written by `PdfSaver.WriteDocumentAsync` into a new file with a new id; the answer says how many images were reduced |
+| `POST /api/build` | **Save:** the page list (`RemotePage`: file id, source page, rotation, stamps as BGRA pixels, texts, black out/white out boxes, recognized words) and a base file; optionally image reduction (36–1200 dpi, JPEG quality 10–100) or "save as image" (`Rasterize`: 150, 200 or 300 dpi, colour or grey). Written by `PdfSaver.WriteDocumentAsync` into a new file with a new id; the answer says how many images were reduced |
 | `POST /api/extract` | Pages into a new PDF (`PdfSaver.ExtractAsync`) |
 | `POST /api/split` | Writes the parts into a temporary folder in the owner's folder, answers them as one ZIP and removes the folder |
 | `POST /api/blank` | A blank page of the given size (1–14400 pt) as a new PDF |

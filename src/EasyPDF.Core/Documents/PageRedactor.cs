@@ -280,7 +280,7 @@ internal static class PageRedactor
         return data?.ToArray();
     }
 
-    private static unsafe void LoadJpeg(FpdfPageobjectT image, byte[] jpeg)
+    internal static unsafe void LoadJpeg(FpdfPageobjectT image, byte[] jpeg)
     {
         PDFiumCore.Delegates.Func_int___IntPtr_ulong_bytePtr_ulong getBlock = (_, position, buffer, size) =>
         {

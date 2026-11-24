@@ -13,7 +13,7 @@ public static class WebCommands
     public static bool IsAvailable(MainViewModel vm, ICommand command) =>
         command == vm.OpenCommand || command == vm.SaveCommand || command == vm.SaveAsCommand
         || command == vm.ConcatenateCommand || command == vm.ExtractPagesCommand || command == vm.SplitDocumentCommand
-        || command == vm.ReduceSizeCommand
+        || command == vm.ReduceSizeCommand || command == vm.SaveAsImageCommand
         || command == vm.InsertBeforeCommand || command == vm.InsertAfterCommand
         || command == vm.InsertBlankBeforeCommand || command == vm.InsertBlankAfterCommand
         || command == vm.DeletePagesCommand || command == vm.RotatePagesCommand || command == vm.ReplacePagesCommand

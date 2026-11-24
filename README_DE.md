@@ -51,6 +51,8 @@ werden beide pro Marke mit `branding/<id>/make-presentation-videos.cmd`.
   in jedem PDF-Betrachter durchsuchbar und kopierbar werden – offline, die Modelle werden mitgeliefert
 - **Dateigröße verkleinern** (Scans und Bilder mit unnötig hoher Auflösung), **drucken**, **per E-Mail senden** –
   immer mit den aktuellen Änderungen, auch ungespeicherten
+- **Als Bild speichern:** jede Seite wird zu einem Bild davon, wie sie aussieht; der Text lässt sich dann nicht mehr
+  ändern, kopieren oder durchsuchen – für Dokumente, deren Inhalt unverändert bleiben soll
 - **Elektronische Rechnungen (ZUGFeRD, Factur-X, XRechnung):** eine Leiste über den Seiten weist auf das eingebettete
   Rechnungs-XML hin, das sich mit einem Klick im Programm des Systems öffnen oder speichern lässt; **Anhänge…** listet
   alle in die PDF eingebetteten Dateien

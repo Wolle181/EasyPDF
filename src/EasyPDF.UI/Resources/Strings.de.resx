@@ -112,6 +112,19 @@
   <data name="ReduceFileNameMedium" xml:space="preserve"><value>{0}_mittel.pdf</value></data>
   <data name="ReduceFileNameSmall" xml:space="preserve"><value>{0}_klein.pdf</value></data>
   <data name="BusyReducing" xml:space="preserve"><value>PDF wird komprimiert …</value></data>
+  <data name="BtnSaveAsImage" xml:space="preserve"><value>Als Bild speichern…</value></data>
+  <data name="MenuSaveAsImage" xml:space="preserve"><value>Als Bild speichern…</value></data>
+  <data name="RasterTitle" xml:space="preserve"><value>Als Bild speichern</value></data>
+  <data name="RasterIntro" xml:space="preserve"><value>Jede Seite wird als Bild davon gespeichert, wie sie aussieht. Der Text lässt sich dann nicht mehr ändern, kopieren oder durchsuchen: Der Inhalt ist festgeschrieben.</value></data>
+  <data name="RasterResolution" xml:space="preserve"><value>Auflösung</value></data>
+  <data name="Raster150" xml:space="preserve"><value>150 dpi – kleinere Datei, gut zum Lesen am Bildschirm</value></data>
+  <data name="Raster200" xml:space="preserve"><value>200 dpi – gut zum Lesen und Drucken</value></data>
+  <data name="Raster300" xml:space="preserve"><value>300 dpi – beste Druckqualität, große Datei</value></data>
+  <data name="RasterGrayscale" xml:space="preserve"><value>Graustufen (deutlich kleinere Datei)</value></data>
+  <data name="RasterNote" xml:space="preserve"><value>Das Ergebnis wird unter einem neuen Namen gespeichert; die Originaldatei bleibt unverändert. Lesezeichen, Links, Formularfelder, Kommentare und angehängte Dateien werden nicht übernommen; Kommentare, Stempel und Formularinhalte bleiben auf den Seiten sichtbar.</value></data>
+  <data name="RasterStart" xml:space="preserve"><value>Als Bild speichern…</value></data>
+  <data name="RasterFileName" xml:space="preserve"><value>{0}_Bild.pdf</value></data>
+  <data name="BusyRasterizing" xml:space="preserve"><value>Seiten werden als Bilder gespeichert…</value></data>
   <data name="MsgReduced" xml:space="preserve"><value>{0} Bild(er) heruntergerechnet: {1} → {2} ({3} % kleiner).</value></data>
   <data name="MsgReducedNoComparison" xml:space="preserve"><value>{0} Bild(er) heruntergerechnet; die Datei hat jetzt {1}.</value></data>
   <data name="MsgReducedNothing" xml:space="preserve"><value>Kein Bild ließ sich verkleinern: Die Bilder haben schon eine geringe Auflösung oder müssen bleiben, wie sie sind. Die Datei wurde trotzdem gespeichert.</value></data>

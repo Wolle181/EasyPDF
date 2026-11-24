@@ -509,13 +509,14 @@ public sealed class EditableDocument : IAsyncDisposable
     /// Writes the document to <paramref name="path"/> (temp file next to it, then replace) and reopens the result:
     /// afterwards the document consists of that single file, the undo history is cleared and <see cref="IsDirty"/> is false.
     /// If saving fails, the document stays as it was. With <paramref name="reduceImages"/> the pictures are scaled down
-    /// to make the file smaller; returns how many were.
+    /// to make the file smaller; returns how many were. With <paramref name="rasterize"/> the pages are saved as pictures
+    /// (<see cref="PageRasterizer"/>).
     /// </summary>
     public async Task<int> SaveAsync(string path, IProgress<double>? progress = null, CancellationToken token = default,
-        ImageReduction? reduceImages = null)
+        ImageReduction? reduceImages = null, PageRasterization? rasterize = null)
     {
         var callerContext = SynchronizationContext.Current; // the continuations below leave the caller's thread
-        var (fresh, reduced) = await PdfBackend.Current.SaveAsync(_pages, BaseSource, path, _sources, progress, token, reduceImages)
+        var (fresh, reduced) = await PdfBackend.Current.SaveAsync(_pages, BaseSource, path, _sources, progress, token, reduceImages, rasterize)
             .ConfigureAwait(false);
         var old = _sources;
         _sources = [fresh];

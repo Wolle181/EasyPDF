@@ -16,6 +16,7 @@ Start: `dotnet run --project src/EasyPDF.App -- <file.pdf>` or the published bui
 - [ ] Right-click a page in both modes: Insert before/after (file dialog), Rotate, Extract, Delete, mode switch
 - [ ] Rotate dialog: all directions × all/current/selected/range; invalid range disables OK; one undo step
 - [ ] Merge (with and without the current document), Extract, Split
+- [ ] Save As Image (Organize ▸ Output) at 150/200/300 dpi, colour and grey: the pages look as before (also stamps, added text, comments, a rotated page), no text can be selected or found, the original file is unchanged
 - [ ] Reduce File Size with a scanned PDF: all three levels, the message shows old and new size, the smaller file looks the same (text, coloured boxes, pictures in place), bookmarks are kept, the original file is unchanged
 - [ ] Save, Save As, overwrite of the open file; reopen shows correct order/rotation; bookmarks still present
 - [ ] Unsaved-changes prompt on open/close/exit; closing the prompt with [X] cancels

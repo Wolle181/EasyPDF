@@ -153,6 +153,7 @@
                 <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnExtract}" Icon="{StaticResource Icon.Extract}" IconColor="{DynamicResource Icon.Color.Amber}" IconAccent="{StaticResource Icon.Extract.Accent}" Command="{Binding ExtractPagesCommand}" />
                 <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnSplit}" Icon="{StaticResource Icon.Split}" IconColor="{DynamicResource Icon.Color.Amber}" IconAccent="{StaticResource Icon.Split.Accent}" Command="{Binding SplitDocumentCommand}" />
                 <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnReduceSize}" Icon="{StaticResource Icon.ReduceSize}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.ReduceSize.Accent}" Command="{Binding ReduceSizeCommand}" />
+                <rb:RibbonButton IsLarge="True" Label="{loc:Tr BtnSaveAsImage}" Icon="{StaticResource Icon.SaveAsImage}" IconColor="{DynamicResource Icon.Color.Blue}" IconAccent="{StaticResource Icon.SaveAsImage.Accent}" Command="{Binding SaveAsImageCommand}" />
               </rb:RibbonGroupPanel>
             </rb:RibbonGroup>
             <rb:RibbonGroup Caption="{loc:Tr GroupRecognize}">

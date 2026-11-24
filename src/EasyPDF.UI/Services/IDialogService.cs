@@ -142,6 +142,9 @@ public interface IDialogService
     /// <summary>How far to scale down the pictures (<paramref name="last"/> is preselected); null if cancelled.</summary>
     Task<ImageReduction?> ShowReduceSizeDialogAsync(ImageReduction last);
 
+    /// <summary>Resolution and colour for "Save as image"; null = cancelled.</summary>
+    Task<PageRasterization?> ShowSaveAsImageDialogAsync(PageRasterization last);
+
     Task<UnsavedChoice> AskUnsavedChangesAsync(string fileName);
 
     /// <summary>Warns before saving over the original with blacked-out pages; closing the dialog means Cancel.</summary>
